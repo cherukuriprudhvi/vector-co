@@ -1,10 +1,4 @@
 
 
-variables
-{
-}
-
-on start
-{
-  write("6-BMS Master Controller loaded successfully!");
-}
+$can = New-Object -ComObject CANalyzer.Application
+$can.Version
