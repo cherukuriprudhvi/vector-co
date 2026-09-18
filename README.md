@@ -1,39 +1,21 @@
 
 
-variables
+on sysvar System::SystemType
 {
-  int systemType = 0;
-}
-
-/* 1 = EBB
-   2 = EMB
-   3 = 48V
-   4 = EPAS
-*/
-
-on start
-{
-  write("System selector loaded");
-}
-
-void selectSystem(int type)
-{
-  systemType = type;
-
-  if (type == 1)
+  if (@this == 1)
   {
-    write("EBB selected");
+    selectSystem(1);
   }
-  else if (type == 2)
+  else if (@this == 2)
   {
-    write("EMB selected");
+    selectSystem(2);
   }
-  else if (type == 3)
+  else if (@this == 3)
   {
-    write("48V selected");
+    selectSystem(3);
   }
-  else if (type == 4)
+  else if (@this == 4)
   {
-    write("EPAS selected");
+    selectSystem(4);
   }
 }
