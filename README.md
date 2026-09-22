@@ -1,65 +1,30 @@
 
 
-variables
-{
-  msTimer stepTimer;
-  msTimer txTimer;
+# Set your exact working directory path from the image
+cd "C:\12V and 48V A3 UCAP CAN Config\A3 UCAP All Modules Config\A3 UCAP All Modules Config"
 
-  int step = 0;
+# Target file
+\$ConfigFile = "UCAP_All_Module_Config.cfg"
 
-  message EnergyMgmtBodyCtrl_4 ctrlMsg;
-}
+# Read the file contents cleanly
+\(Content = [System.IO.File]::ReadAllText(\)ConfigFile)
 
-on start
-{
-  // OFF
-  ctrlMsg.EMduleMde_D_Rq3 = 0;
-  ctrlMsg.IsolSwtch_B_Cmd3 = 1;   // Close
+Write-Host "Updating your graphics window tab names..." -ForegroundColor Cyan
+\(Content =\)Content.Replace("CAN1_Graphics (2)", "CAN2_Graphics")
+\(Content =\)Content.Replace("CAN1_Graphics (3)", "CAN3_Graphics")
+\(Content =\)Content.Replace("CAN1_Graphics (4)", "CAN4_Graphics")
+\(Content =\)Content.Replace("CAN1_Graphics (5)", "CAN5_Graphics")
+\(Content =\)Content.Replace("CAN1_Graphics (6)", "CAN6_Graphics")
 
-  output(ctrlMsg);
+Write-Host "Updating database channels from DBC1 to matching CAN channels..." -ForegroundColor Cyan
+# Replace the multi-line sequences cleanly for each isolated window block
+\(Content =\)Content.Replace("CAN1`nDBC2", "CAN2`nDBC2")
+\(Content =\)Content.Replace("CAN1`nDBC3", "CAN3`nDBC3")
+\(Content =\)Content.Replace("CAN1`nDBC4", "CAN4`nDBC4")
+\(Content =\)Content.Replace("CAN1`nDBC5", "CAN5`nDBC5")
+\(Content =\)Content.Replace("CAN1`nDBC6", "CAN6`nDBC6")
 
-  setTimer(txTimer, 100);     // cyclic send every 100 ms
-  setTimer(stepTimer, 5000);  // wait 5 sec
-}
+# Save changes cleanly back to the configuration file structure
+[System.IO.File]::WriteAllText(\(ConfigFile,\)Content)
 
-on timer txTimer
-{
-  output(ctrlMsg);
-  setTimer(txTimer, 100);
-}
-
-on timer stepTimer
-{
-  if (step == 0)
-  {
-    // STANDBY
-    ctrlMsg.EMduleMde_D_Rq3 = 1;
-    step = 1;
-    setTimer(stepTimer, 5000);
-  }
-
-  else if (step == 1)
-  {
-    // FLOAT
-    ctrlMsg.EMduleMde_D_Rq3 = 3;
-    step = 2;
-    setTimer(stepTimer, 4000);
-  }
-
-  else if (step == 2)
-  {
-    // Isolation OPEN
-    ctrlMsg.IsolSwtch_B_Cmd3 = 0;
-    step = 3;
-    setTimer(stepTimer, 2000);
-  }
-
-  else if (step == 3)
-  {
-    // Isolation CLOSE
-    ctrlMsg.IsolSwtch_B_Cmd3 = 1;
-    step = 4;
-
-    write("CAN1 EPAS startup sequence complete");
-  }
-}
+Write-Host "Success! Your configuration file has been safely modified." -ForegroundColor Green
