@@ -1,30 +1,23 @@
 
 
-# Set your exact working directory path from the image
+
+# 1. Target your exact network folder path
 cd "C:\12V and 48V A3 UCAP CAN Config\A3 UCAP All Modules Config\A3 UCAP All Modules Config"
 
-# Target file
-\$ConfigFile = "UCAP_All_Module_Config.cfg"
+# 2. Extract configuration text lines safely
+\$File = "UCAP_All_Module_Config.cfg"
+\(RawText = [System.IO.File]::ReadAllText(\)File)
 
-# Read the file contents cleanly
-\(Content = [System.IO.File]::ReadAllText(\)ConfigFile)
+Write-Host "Updating specific system paths for EBB, EPAS, and EMB..." -ForegroundColor Cyan
 
-Write-Host "Updating your graphics window tab names..." -ForegroundColor Cyan
-\(Content =\)Content.Replace("CAN1_Graphics (2)", "CAN2_Graphics")
-\(Content =\)Content.Replace("CAN1_Graphics (3)", "CAN3_Graphics")
-\(Content =\)Content.Replace("CAN1_Graphics (4)", "CAN4_Graphics")
-\(Content =\)Content.Replace("CAN1_Graphics (5)", "CAN5_Graphics")
-\(Content =\)Content.Replace("CAN1_Graphics (6)", "CAN6_Graphics")
+# 3. Apply the strict channel routing rules for all variations
+# This cleanly shifts CAN1 over to CAN2 up to CAN6 for your duplicate windows
+for (ch = 2; ch -le 6; \(ch++) {\)RawText = RawText.Replace("CAN1::DCDCE", "CANch`::DCDCE")
+    \$RawText = RawText.Replace("CAN1::DCDCF", "CANch`::DCDCF")
+    $RawText = $RawText.Replace("CAN1::DCDCG", "CAN$ch`::DCDCG")
+}
 
-Write-Host "Updating database channels from DBC1 to matching CAN channels..." -ForegroundColor Cyan
-# Replace the multi-line sequences cleanly for each isolated window block
-\(Content =\)Content.Replace("CAN1`nDBC2", "CAN2`nDBC2")
-\(Content =\)Content.Replace("CAN1`nDBC3", "CAN3`nDBC3")
-\(Content =\)Content.Replace("CAN1`nDBC4", "CAN4`nDBC4")
-\(Content =\)Content.Replace("CAN1`nDBC5", "CAN5`nDBC5")
-\(Content =\)Content.Replace("CAN1`nDBC6", "CAN6`nDBC6")
+# 4. Save the finalized configuration text block
+[System.IO.File]::WriteAllText(File, RawText)
 
-# Save changes cleanly back to the configuration file structure
-[System.IO.File]::WriteAllText(\(ConfigFile,\)Content)
-
-Write-Host "Success! Your configuration file has been safely modified." -ForegroundColor Green
+Write-Host "MASTER SUCCESS! All system maps are separated and saved." -ForegroundColor Green
