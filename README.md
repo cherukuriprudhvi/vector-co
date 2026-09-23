@@ -2,81 +2,65 @@
 
 variables
 {
-  msTimer stepTimer;
-  msTimer txTimer;
-  int step = 0;
-
-  message DBC1::EnergyMgmtBodyCtrl_1 ctrlMsg;
+  int detectedSystem = 0;
+  // 0 = Unknown
+  // 1 = EBB
+  // 2 = EMB
+  // 3 = 48V EPAS
+  // 4 = EPAS
 }
 
-on start
+on message CAN1.*
 {
-  // OFF + Isolation CLOSED
-  ctrlMsg.EMduleMde_D_Rq = 0;
-  ctrlMsg.IsolSwtch_B_Cmd = 1;
-
-  output(ctrlMsg);
-  setTimer(txTimer, 100);
-  setTimer(stepTimer, 1000);
-
-  write("EBB: OFF");
-}
-
-on timer txTimer
-{
-  output(ctrlMsg);
-  setTimer(txTimer, 100);
-}
-
-on timer stepTimer
-{
-  if (step == 0)
+  // EBB unique RX IDs
+  if (this.id == 273 ||
+      this.id == 304 ||
+      this.id == 544 ||
+      this.id == 560 ||
+      this.id == 1024)
   {
-    // STANDBY for 1 sec
-    ctrlMsg.EMduleMde_D_Rq = 1;
-    step = 1;
-    setTimer(stepTimer, 1000);
-    write("EBB: STANDBY");
+    if (detectedSystem != 1)
+    {
+      detectedSystem = 1;
+      write("CAN1 DETECTED: EBB");
+    }
   }
-  else if (step == 1)
-  {
-    // FLOAT
-    ctrlMsg.EMduleMde_D_Rq = 3;
-    step = 2;
-    setTimer(stepTimer, 1000);
-    write("EBB: FLOAT");
-  }
-  else if (step == 2)
-  {
-    // After 1 sec in FLOAT -> Isolation OPEN
-    ctrlMsg.IsolSwtch_B_Cmd = 0;
-    step = 3;
-    setTimer(stepTimer, 1000);
-    write("EBB: ISOLATION OPEN");
-  }
-  else if (step == 3)
-  {
-    // Isolation CLOSE
-    ctrlMsg.IsolSwtch_B_Cmd = 1;
-    step = 4;
-    setTimer(stepTimer, 2000);
-    write("EBB: ISOLATION CLOSE - FLOAT");
-  }
-  else if (step == 4)
-  {
-    // STANDBY for 1 sec
-    ctrlMsg.EMduleMde_D_Rq = 1;
-    step = 5;
-    setTimer(stepTimer, 1000);
-    write("EBB: STANDBY");
-  }
-  else if (step == 5)
-  {
-    // Final OFF
-    ctrlMsg.EMduleMde_D_Rq = 0;
-    ctrlMsg.IsolSwtch_B_Cmd = 1;
-    step = 6;
 
-    write("EBB: OFF - COMPLETE");
+  // EMB unique RX IDs
+  else if (this.id == 272 ||
+           this.id == 305 ||
+           this.id == 545 ||
+           this.id == 561 ||
+           this.id == 769 ||
+           this.id == 1025)
+  {
+    if (detectedSystem != 2)
+    {
+      detectedSystem = 2;
+      write("CAN1 DETECTED: EMB");
+    }
+  }
+
+  // 48V EPAS unique RX IDs
+  else if (this.id == 256 ||
+           this.id == 306 ||
+           this.id == 770)
+  {
+    if (detectedSystem != 3)
+    {
+      detectedSystem = 3;
+      write("CAN1 DETECTED: 48V EPAS");
+    }
+  }
+
+  // EPAS unique RX IDs
+  else if (this.id == 309 ||
+           this.id == 1026)
+  {
+    if (detectedSystem != 4)
+    {
+      detectedSystem = 4;
+      write("CAN1 DETECTED: EPAS");
+    }
   }
 }
