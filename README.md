@@ -1,37 +1,30 @@
 
+
 variables
 {
   msTimer stepTimer;
   msTimer txTimer;
-
   int step = 0;
 
-  // EBB control message = ID 0x210 / decimal 528
   message DBC1::EnergyMgmtBodyCtrl_1 ctrlMsg;
 }
 
 on start
 {
-  // Start with OFF + Isolation CLOSE
+  // OFF + Isolation CLOSED
   ctrlMsg.EMduleMde_D_Rq = 0;
   ctrlMsg.IsolSwtch_B_Cmd = 1;
 
   output(ctrlMsg);
-
-  // Send control message continuously every 100 ms
   setTimer(txTimer, 100);
+  setTimer(stepTimer, 1000);
 
-  // Stay OFF for 5 seconds
-  setTimer(stepTimer, 5000);
-
-  write("EBB CAN1: OFF");
+  write("EBB: OFF");
 }
 
 on timer txTimer
 {
   output(ctrlMsg);
-
-  // Continue transmitting every 100 ms
   setTimer(txTimer, 100);
 }
 
@@ -39,41 +32,51 @@ on timer stepTimer
 {
   if (step == 0)
   {
-    // OFF -> STANDBY
+    // STANDBY for 1 sec
     ctrlMsg.EMduleMde_D_Rq = 1;
-
     step = 1;
-    setTimer(stepTimer, 5000);
-
-    write("EBB CAN1: STANDBY");
+    setTimer(stepTimer, 1000);
+    write("EBB: STANDBY");
   }
   else if (step == 1)
   {
-    // STANDBY -> FLOAT
+    // FLOAT
     ctrlMsg.EMduleMde_D_Rq = 3;
-
     step = 2;
-    setTimer(stepTimer, 4000);
-
-    write("EBB CAN1: FLOAT");
+    setTimer(stepTimer, 1000);
+    write("EBB: FLOAT");
   }
   else if (step == 2)
   {
-    // Isolation OPEN
+    // After 1 sec in FLOAT -> Isolation OPEN
     ctrlMsg.IsolSwtch_B_Cmd = 0;
-
     step = 3;
-    setTimer(stepTimer, 2000);
-
-    write("EBB CAN1: Isolation OPEN");
+    setTimer(stepTimer, 1000);
+    write("EBB: ISOLATION OPEN");
   }
   else if (step == 3)
   {
     // Isolation CLOSE
     ctrlMsg.IsolSwtch_B_Cmd = 1;
-
     step = 4;
+    setTimer(stepTimer, 2000);
+    write("EBB: ISOLATION CLOSE - FLOAT");
+  }
+  else if (step == 4)
+  {
+    // STANDBY for 1 sec
+    ctrlMsg.EMduleMde_D_Rq = 1;
+    step = 5;
+    setTimer(stepTimer, 1000);
+    write("EBB: STANDBY");
+  }
+  else if (step == 5)
+  {
+    // Final OFF
+    ctrlMsg.EMduleMde_D_Rq = 0;
+    ctrlMsg.IsolSwtch_B_Cmd = 1;
+    step = 6;
 
-    write("EBB CAN1: Startup sequence complete");
+    write("EBB: OFF - COMPLETE");
   }
 }
