@@ -1,20 +1,79 @@
 
+variables
+{
+  msTimer stepTimer;
+  msTimer txTimer;
 
-# Navigate directly to your directory path
-cd "C:\12V and 48V A3 UCAP CAN Config\A3 UCAP All Modules Config\A3 UCAP All Modules Config"
+  int step = 0;
 
-# Define the target configuration file path
-$File = "UCAP_All_Module_Config.cfg"
-$RawText = [System.IO.File]::ReadAllText($File)
+  // EBB control message = ID 0x210 / decimal 528
+  message DBC1::EnergyMgmtBodyCtrl_1 ctrlMsg;
+}
 
-Write-Host "Updating specific system paths for EBB, EPAS, and EMB..." -ForegroundColor Cyan
+on start
+{
+  // Start with OFF + Isolation CLOSE
+  ctrlMsg.EMduleMde_D_Rq = 0;
+  ctrlMsg.IsolSwtch_B_Cmd = 1;
 
-# Replace the internal double-colon signal structures for tabs 2 through 6
-$RawText = $RawText.Replace("CAN1::DCDCE", "CAN2::DCDCE")
-$RawText = $RawText.Replace("CAN1::DCDCF", "CAN2::DCDCF")
-$RawText = $RawText.Replace("CAN1::DCDCG", "CAN2::DCDCG")
+  output(ctrlMsg);
 
-# Save the modifications directly back to your file structure
-[System.IO.File]::WriteAllText($File, $RawText)
+  // Send control message continuously every 100 ms
+  setTimer(txTimer, 100);
 
-Write-Host "SUCCESS! Your internal signal paths are re-routed to Channel 2." -ForegroundColor Green
+  // Stay OFF for 5 seconds
+  setTimer(stepTimer, 5000);
+
+  write("EBB CAN1: OFF");
+}
+
+on timer txTimer
+{
+  output(ctrlMsg);
+
+  // Continue transmitting every 100 ms
+  setTimer(txTimer, 100);
+}
+
+on timer stepTimer
+{
+  if (step == 0)
+  {
+    // OFF -> STANDBY
+    ctrlMsg.EMduleMde_D_Rq = 1;
+
+    step = 1;
+    setTimer(stepTimer, 5000);
+
+    write("EBB CAN1: STANDBY");
+  }
+  else if (step == 1)
+  {
+    // STANDBY -> FLOAT
+    ctrlMsg.EMduleMde_D_Rq = 3;
+
+    step = 2;
+    setTimer(stepTimer, 4000);
+
+    write("EBB CAN1: FLOAT");
+  }
+  else if (step == 2)
+  {
+    // Isolation OPEN
+    ctrlMsg.IsolSwtch_B_Cmd = 0;
+
+    step = 3;
+    setTimer(stepTimer, 2000);
+
+    write("EBB CAN1: Isolation OPEN");
+  }
+  else if (step == 3)
+  {
+    // Isolation CLOSE
+    ctrlMsg.IsolSwtch_B_Cmd = 1;
+
+    step = 4;
+
+    write("EBB CAN1: Startup sequence complete");
+  }
+}
