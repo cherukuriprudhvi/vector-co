@@ -8,7 +8,6 @@ variables
   int system = 0;
   int step = 0;
 
-  // CAN1 / DBC1
   message DBC1::EnergyMgmtBodyCtrl_1 ebb;
   message DBC1::EnergyMgmtBodyCtrl_2 emb;
   message DBC1::EnergyMgmtBodyCtrl_3 v48;
@@ -16,16 +15,16 @@ variables
 }
 
 
-/* =========================================
-   AUTO-DETECT SYSTEM ON CAN1
-   ========================================= */
+/* ================================
+   AUTO DETECTION - CAN1
+   ================================ */
 
 on message CAN1.*
 {
   if (system != 0)
     return;
 
-  // EBB
+  /* EBB */
   if (this.id == 273 ||
       this.id == 304 ||
       this.id == 544 ||
@@ -33,11 +32,12 @@ on message CAN1.*
       this.id == 1024)
   {
     system = 1;
+
     write("CAN1 DETECTED: EBB");
     startControl();
   }
 
-  // EMB
+  /* EMB */
   else if (this.id == 272 ||
            this.id == 305 ||
            this.id == 545 ||
@@ -46,72 +46,81 @@ on message CAN1.*
            this.id == 1025)
   {
     system = 2;
+
     write("CAN1 DETECTED: EMB");
     startControl();
   }
 
-  // 48V EPAS
+  /* 48V EPAS */
   else if (this.id == 256 ||
            this.id == 306 ||
            this.id == 770)
   {
     system = 3;
+
     write("CAN1 DETECTED: 48V EPAS");
     startControl();
   }
 
-  // EPAS
+  /* EPAS */
   else if (this.id == 309 ||
            this.id == 1026)
   {
     system = 4;
+
     write("CAN1 DETECTED: EPAS");
     startControl();
   }
 }
 
 
-/* =========================================
-   START SEQUENCE
-   ========================================= */
+/* ================================
+   START
+   ================================ */
 
 void startControl()
 {
   step = 0;
 
-  // Start in OFF
+  /* Start OFF */
   setMode(0);
 
-  // Keep transmitting control message every 100 ms
+  /* Initial isolation CLOSED */
+  if (system != 3)
+    setIsolation(1);
+
+  /* ONLY this timer sends messages */
   setTimer(txTimer, 100);
 
-  // OFF for 5 seconds
+  /* Stay OFF for 5 sec */
   setTimer(stepTimer, 5000);
 
   write("CAN1: OFF");
 }
 
 
-/* =========================================
-   CYCLIC TRANSMISSION - 100 ms
-   ========================================= */
+/* ================================
+   ONLY TRANSMITTER - EVERY 100 ms
+   ================================ */
 
 on timer txTimer
 {
   sendMsg();
+
   setTimer(txTimer, 100);
 }
 
 
-/* =========================================
-   COMPLETE MODE SEQUENCE
-   ========================================= */
+/* ================================
+   MODE SEQUENCE
+   ================================ */
 
 on timer stepTimer
 {
   if (step == 0)
   {
-    // OFF -> STANDBY
+    /* OFF -> STANDBY */
+
     setMode(1);
 
     step = 1;
@@ -121,31 +130,40 @@ on timer stepTimer
     setTimer(stepTimer, 5000);
   }
 
+
   else if (step == 1)
   {
-    // STANDBY -> FLOAT
+    /* STANDBY -> FLOAT */
+
     setMode(3);
 
     step = 2;
 
     write("CAN1: FLOAT");
 
-    // 48V EPAS has no isolation
+
+    /* 48V EPAS has NO isolation */
+
     if (system == 3)
     {
       step = 4;
+
+      /* Temporary 5 sec FLOAT test */
       setTimer(stepTimer, 5000);
     }
+
     else
     {
-      // Wait 4 sec before isolation
+      /* Wait 4 sec before isolation */
       setTimer(stepTimer, 4000);
     }
   }
 
+
   else if (step == 2)
   {
-    // Isolation OPEN
+    /* Isolation OPEN */
+
     setIsolation(0);
 
     step = 3;
@@ -155,22 +173,26 @@ on timer stepTimer
     setTimer(stepTimer, 2000);
   }
 
+
   else if (step == 3)
   {
-    // Isolation CLOSE
+    /* Isolation CLOSE */
+
     setIsolation(1);
 
     step = 4;
 
     write("CAN1: ISOLATION CLOSE");
 
-    // Stay FLOAT for test
+    /* Temporary 5 sec test */
     setTimer(stepTimer, 5000);
   }
 
+
   else if (step == 4)
   {
-    // FLOAT -> STANDBY
+    /* FLOAT -> STANDBY */
+
     setMode(1);
 
     step = 5;
@@ -180,9 +202,11 @@ on timer stepTimer
     setTimer(stepTimer, 5000);
   }
 
+
   else if (step == 5)
   {
-    // STANDBY -> OFF
+    /* STANDBY -> OFF */
+
     setMode(0);
 
     step = 6;
@@ -193,69 +217,82 @@ on timer stepTimer
 }
 
 
-/* =========================================
-   SET MODE
-   ========================================= */
+/* ================================
+   CHANGE MODE VALUE ONLY
+   NO output() HERE
+   ================================ */
 
 void setMode(int value)
 {
-  // EBB
   if (system == 1)
+  {
     ebb.EMduleMde_D_Rq = value;
+  }
 
-  // EMB
   else if (system == 2)
+  {
     emb.EMduleMde_D_Rq2 = value;
+  }
 
-  // 48V EPAS
   else if (system == 3)
+  {
     v48.UCapMduleMde_D_Rq = value;
+  }
 
-  // EPAS
   else if (system == 4)
+  {
     epas.EMduleMde_D_Rq3 = value;
-
-  sendMsg();
+  }
 }
 
 
-/* =========================================
-   SET ISOLATION
-   ========================================= */
+/* ================================
+   CHANGE ISOLATION VALUE ONLY
+   NO output() HERE
+   ================================ */
 
 void setIsolation(int value)
 {
-  // EBB
   if (system == 1)
+  {
     ebb.IsolSwtch_B_Cmd = value;
+  }
 
-  // EMB
   else if (system == 2)
+  {
     emb.IsolSwtch_B_Cmd2 = value;
+  }
 
-  // EPAS
   else if (system == 4)
+  {
     epas.IsolSwtch_B_Cmd3 = value;
-
-  sendMsg();
+  }
 }
 
 
-/* =========================================
-   SEND ONLY CORRECT CONTROL MESSAGE
-   ========================================= */
+/* ================================
+   SEND CORRECT MESSAGE
+   ================================ */
 
 void sendMsg()
 {
   if (system == 1)
-    output(ebb);       // EBB 528 / 0x210
+  {
+    output(ebb);       // EBB 528
+  }
 
   else if (system == 2)
-    output(emb);       // EMB 529 / 0x211
+  {
+    output(emb);       // EMB 529
+  }
 
   else if (system == 3)
-    output(v48);       // 48V EPAS 530 / 0x212
+  {
+    output(v48);       // 48V EPAS 530
+  }
 
   else if (system == 4)
-    output(epas);      // EPAS 531 / 0x213
+  {
+    output(epas);      // EPAS 531
+  }
 }
