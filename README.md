@@ -2,288 +2,202 @@
 
 variables
 {
-  msTimer stepTimer;
-  msTimer txTimer;
-
-  int system = 0;
-  int step = 0;
-
-  message DBC1::EnergyMgmtBodyCtrl_1 ebbMsg;
-  message DBC1::EnergyMgmtBodyCtrl_2 embMsg;
-  message DBC1::EnergyMgmtBodyCtrl_3 v48Msg;
-  message DBC1::EnergyMgmtBodyCtrl_4 epasMsg;
+  int system1 = 0;
+  int system2 = 0;
+  int system3 = 0;
+  int system4 = 0;
+  int system5 = 0;
+  int system6 = 0;
 }
 
 
-/* ==================================================
-   CAN1 AUTO DETECTION
-   ================================================== */
+/* ================= CAN1 ================= */
 
 on message CAN1.*
 {
-  if (system != 0)
-    return;
+  if (system1 != 0) return;
 
-  /* EBB */
-  if (this.id == 273 ||
-      this.id == 304 ||
-      this.id == 544 ||
-      this.id == 560 ||
-      this.id == 1024)
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
   {
-    system = 1;
+    system1 = 1;
     write("CAN1 DETECTED: EBB");
-    startSequence();
   }
-
-  /* EMB */
-  else if (this.id == 272 ||
-           this.id == 305 ||
-           this.id == 545 ||
-           this.id == 561 ||
-           this.id == 769 ||
-           this.id == 1025)
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
   {
-    system = 2;
+    system1 = 2;
     write("CAN1 DETECTED: EMB");
-    startSequence();
   }
-
-  /* 48V EPAS */
-  else if (this.id == 256 ||
-           this.id == 306 ||
-           this.id == 770)
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
   {
-    system = 3;
+    system1 = 3;
     write("CAN1 DETECTED: 48V EPAS");
-    startSequence();
   }
-
-  /* EPAS */
-  else if (this.id == 309 ||
-           this.id == 1026)
+  else if (this.id == 309 || this.id == 1026)
   {
-    system = 4;
+    system1 = 4;
     write("CAN1 DETECTED: EPAS");
-    startSequence();
   }
 }
 
 
-/* ==================================================
-   START
-   ================================================== */
+/* ================= CAN2 ================= */
 
-void startSequence()
+on message CAN2.*
 {
-  step = 0;
+  if (system2 != 0) return;
 
-  /* OFF */
-  changeMode(0);
-
-  /* Isolation starts CLOSED */
-  if (system != 3)
-    changeIsolation(1);
-
-  /*
-     Same pattern as your original working EBB:
-     transmit selected control message every 100 ms
-  */
-  sendSelectedMessage();
-
-  setTimer(txTimer, 100);
-  setTimer(stepTimer, 5000);
-
-  write("CAN1: OFF");
-}
-
-
-/* ==================================================
-   PERIODIC CONTROL MESSAGE
-   ================================================== */
-
-on timer txTimer
-{
-  sendSelectedMessage();
-
-  setTimer(txTimer, 100);
-}
-
-
-/* ==================================================
-   MODE SEQUENCE
-   ================================================== */
-
-on timer stepTimer
-{
-  /* OFF -> STANDBY */
-  if (step == 0)
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
   {
-    changeMode(1);
-
-    step = 1;
-
-    write("CAN1: STANDBY");
-
-    setTimer(stepTimer, 5000);
+    system2 = 1;
+    write("CAN2 DETECTED: EBB");
   }
-
-
-  /* STANDBY -> FLOAT */
-  else if (step == 1)
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
   {
-    changeMode(3);
-
-    step = 2;
-
-    write("CAN1: FLOAT");
-
-
-    /* 48V EPAS - NO isolation */
-    if (system == 3)
-    {
-      step = 4;
-      setTimer(stepTimer, 5000);
-    }
-    else
-    {
-      /* FLOAT first, then isolation */
-      setTimer(stepTimer, 4000);
-    }
+    system2 = 2;
+    write("CAN2 DETECTED: EMB");
   }
-
-
-  /* ISOLATION OPEN */
-  else if (step == 2)
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
   {
-    changeIsolation(0);
-
-    step = 3;
-
-    write("CAN1: ISOLATION OPEN");
-
-    setTimer(stepTimer, 2000);
+    system2 = 3;
+    write("CAN2 DETECTED: 48V EPAS");
   }
-
-
-  /* ISOLATION CLOSE */
-  else if (step == 3)
+  else if (this.id == 309 || this.id == 1026)
   {
-    changeIsolation(1);
-
-    step = 4;
-
-    write("CAN1: ISOLATION CLOSE");
-
-    setTimer(stepTimer, 5000);
-  }
-
-
-  /* FLOAT -> STANDBY */
-  else if (step == 4)
-  {
-    changeMode(1);
-
-    step = 5;
-
-    write("CAN1: STANDBY");
-
-    setTimer(stepTimer, 5000);
-  }
-
-
-  /* STANDBY -> OFF */
-  else if (step == 5)
-  {
-    changeMode(0);
-
-    step = 6;
-
-    write("CAN1: OFF");
-    write("CAN1: SEQUENCE COMPLETE");
+    system2 = 4;
+    write("CAN2 DETECTED: EPAS");
   }
 }
 
 
-/* ==================================================
-   CHANGE MODE
-   IMPORTANT:
-   NO output() here.
-   Only change the value.
-   ================================================== */
+/* ================= CAN3 ================= */
 
-void changeMode(int value)
+on message CAN3.*
 {
-  if (system == 1)
-  {
-    ebbMsg.EMduleMde_D_Rq = value;
-  }
+  if (system3 != 0) return;
 
-  else if (system == 2)
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
   {
-    embMsg.EMduleMde_D_Rq2 = value;
+    system3 = 1;
+    write("CAN3 DETECTED: EBB");
   }
-
-  else if (system == 3)
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
   {
-    v48Msg.UCapMduleMde_D_Rq = value;
+    system3 = 2;
+    write("CAN3 DETECTED: EMB");
   }
-
-  else if (system == 4)
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
   {
-    epasMsg.EMduleMde_D_Rq3 = value;
+    system3 = 3;
+    write("CAN3 DETECTED: 48V EPAS");
+  }
+  else if (this.id == 309 || this.id == 1026)
+  {
+    system3 = 4;
+    write("CAN3 DETECTED: EPAS");
   }
 }
 
 
-/* ==================================================
-   CHANGE ISOLATION
-   IMPORTANT:
-   NO output() here.
-   ================================================== */
+/* ================= CAN4 ================= */
 
-void changeIsolation(int value)
+on message CAN4.*
 {
-  if (system == 1)
-  {
-    ebbMsg.IsolSwtch_B_Cmd = value;
-  }
+  if (system4 != 0) return;
 
-  else if (system == 2)
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
   {
-    embMsg.IsolSwtch_B_Cmd2 = value;
+    system4 = 1;
+    write("CAN4 DETECTED: EBB");
   }
-
-  else if (system == 4)
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
   {
-    epasMsg.IsolSwtch_B_Cmd3 = value;
+    system4 = 2;
+    write("CAN4 DETECTED: EMB");
+  }
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
+  {
+    system4 = 3;
+    write("CAN4 DETECTED: 48V EPAS");
+  }
+  else if (this.id == 309 || this.id == 1026)
+  {
+    system4 = 4;
+    write("CAN4 DETECTED: EPAS");
   }
 }
 
 
-/* ==================================================
-   ONLY PLACE THAT TRANSMITS CONTROL MESSAGE
-   ================================================== */
+/* ================= CAN5 ================= */
 
-void sendSelectedMessage()
+on message CAN5.*
 {
-  if (system == 1)
-  {
-    output(ebbMsg);       // 528 / 0x210
-  }
+  if (system5 != 0) return;
 
-  else if (system == 2)
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
   {
-    output(embMsg);       // 529 / 0x211
+    system5 = 1;
+    write("CAN5 DETECTED: EBB");
   }
-
-  else if (system == 3)
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
   {
-    output(v48Msg);       // 530 / 0x212
+    system5 = 2;
+    write("CAN5 DETECTED: EMB");
   }
-
-  else if (system == 4)
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
   {
-    output(epasMsg);      // 531 / 0x213
+    system5 = 3;
+    write("CAN5 DETECTED: 48V EPAS");
+  }
+  else if (this.id == 309 || this.id == 1026)
+  {
+    system5 = 4;
+    write("CAN5 DETECTED: EPAS");
+  }
+}
+
+
+/* ================= CAN6 ================= */
+
+on message CAN6.*
+{
+  if (system6 != 0) return;
+
+  if (this.id == 273 || this.id == 304 ||
+      this.id == 544 || this.id == 560 || this.id == 1024)
+  {
+    system6 = 1;
+    write("CAN6 DETECTED: EBB");
+  }
+  else if (this.id == 272 || this.id == 305 ||
+           this.id == 545 || this.id == 561 ||
+           this.id == 769 || this.id == 1025)
+  {
+    system6 = 2;
+    write("CAN6 DETECTED: EMB");
+  }
+  else if (this.id == 256 || this.id == 306 || this.id == 770)
+  {
+    system6 = 3;
+    write("CAN6 DETECTED: 48V EPAS");
+  }
+  else if (this.id == 309 || this.id == 1026)
+  {
+    system6 = 4;
+    write("CAN6 DETECTED: EPAS");
   }
 }
