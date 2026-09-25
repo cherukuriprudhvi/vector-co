@@ -1,62 +1,48 @@
 
-
 /* =========================================================
-   FINAL 5-DAY / 120-HOUR MASTER
+   ACCELERATED 5-CYCLE TEST MASTER
 
-   MANUAL SYSTEM SELECTION:
-   0 = NOTHING CONNECTED
+   SYSTEM:
+   0 = NONE
    1 = EBB
    2 = EMB
    3 = 48V EPAS
    4 = 12V EPAS
 
-   CAN1 -> DBC1
-   CAN2 -> DBC2
-   CAN3 -> DBC3
-   CAN4 -> DBC4
-   CAN5 -> DBC5
-   CAN6 -> DBC6
+   TEST SEQUENCE:
 
-   STARTUP - ONCE ONLY:
-   OFF       1 sec
-   STANDBY   2 sec
+   START ONCE:
+   OFF       = 1 second
+   STANDBY   = 2 seconds
    FLOAT
-   ISOLATION OPEN  1 sec
-   ISOLATION CLOSE
+   Isolation OPEN = 1 second
+   Isolation CLOSE
 
-   EACH 24-HOUR CYCLE:
-   FLOAT     18 hours
-   STANDBY    6 hours
+   EACH TEST CYCLE:
+   FLOAT     = 20 seconds
+   STANDBY   = 10 seconds
 
-   On every transition STANDBY -> FLOAT:
-   FLOAT
-   ISOLATION OPEN 1 sec
-   ISOLATION CLOSE
-   FLOAT 18 hours
+   REPEAT = 5 cycles
 
-   Repeat 5 cycles = 120 hours.
+   After Cycle 5:
+   OFF
+   Wait 2 seconds
+   Stop CANalyzer measurement automatically
 
-   48V EPAS:
-   NO isolation OPEN/CLOSE.
-
-   END:
-   Final 6-hour STANDBY completes
-   -> ALL ACTIVE SYSTEMS OFF
-   -> wait 2 sec transmitting OFF
-   -> stop measurement
+   48V EPAS skips isolation.
    ========================================================= */
 
 
 variables
 {
   /* =====================================================
-     EDIT ONLY THESE SIX VALUES BEFORE THE REAL TEST
+     CHANGE ONLY THESE SIX VALUES
 
-     0=None
-     1=EBB
-     2=EMB
-     3=48V EPAS
-     4=12V EPAS
+     0 = NONE
+     1 = EBB
+     2 = EMB
+     3 = 48V EPAS
+     4 = 12V EPAS
      ===================================================== */
 
   int sys1 = 0;     // CAN1
@@ -67,33 +53,33 @@ variables
   int sys6 = 0;     // CAN6
 
 
-  /* ===== MASTER TIMERS ===== */
+  /* MASTER TIMERS */
 
   msTimer masterTimer;
   msTimer txTimer;
   msTimer finalStopTimer;
 
 
-  /* ===== STATE =====
+  /*
+     MASTER STATES
 
      0 = Initial OFF
      1 = Initial STANDBY
      2 = Initial Isolation OPEN
-     3 = FLOAT 18 hours
-     4 = STANDBY 6 hours
-     5 = Cycle Isolation OPEN
-     6 = FINAL OFF
+     3 = FLOAT
+     4 = STANDBY
+     5 = Next-cycle Isolation OPEN
+     6 = Final OFF
   */
 
   int masterStep = 0;
 
-  /* Completed 24-hour cycles */
   int cycleCount = 0;
 
 
-  /* =====================================================
+  /* ==========================
      CAN1 / DBC1
-     ===================================================== */
+     ========================== */
 
   message DBC1::EnergyMgmtBodyCtrl_1 ebb1;
   message DBC1::EnergyMgmtBodyCtrl_2 emb1;
@@ -101,9 +87,9 @@ variables
   message DBC1::EnergyMgmtBodyCtrl_4 epas1;
 
 
-  /* =====================================================
+  /* ==========================
      CAN2 / DBC2
-     ===================================================== */
+     ========================== */
 
   message DBC2::EnergyMgmtBodyCtrl_1 ebb2;
   message DBC2::EnergyMgmtBodyCtrl_2 emb2;
@@ -111,9 +97,9 @@ variables
   message DBC2::EnergyMgmtBodyCtrl_4 epas2;
 
 
-  /* =====================================================
+  /* ==========================
      CAN3 / DBC3
-     ===================================================== */
+     ========================== */
 
   message DBC3::EnergyMgmtBodyCtrl_1 ebb3;
   message DBC3::EnergyMgmtBodyCtrl_2 emb3;
@@ -121,9 +107,9 @@ variables
   message DBC3::EnergyMgmtBodyCtrl_4 epas3;
 
 
-  /* =====================================================
+  /* ==========================
      CAN4 / DBC4
-     ===================================================== */
+     ========================== */
 
   message DBC4::EnergyMgmtBodyCtrl_1 ebb4;
   message DBC4::EnergyMgmtBodyCtrl_2 emb4;
@@ -131,9 +117,9 @@ variables
   message DBC4::EnergyMgmtBodyCtrl_4 epas4;
 
 
-  /* =====================================================
+  /* ==========================
      CAN5 / DBC5
-     ===================================================== */
+     ========================== */
 
   message DBC5::EnergyMgmtBodyCtrl_1 ebb5;
   message DBC5::EnergyMgmtBodyCtrl_2 emb5;
@@ -141,9 +127,9 @@ variables
   message DBC5::EnergyMgmtBodyCtrl_4 epas5;
 
 
-  /* =====================================================
+  /* ==========================
      CAN6 / DBC6
-     ===================================================== */
+     ========================== */
 
   message DBC6::EnergyMgmtBodyCtrl_1 ebb6;
   message DBC6::EnergyMgmtBodyCtrl_2 emb6;
@@ -162,8 +148,8 @@ on start
   masterStep = 0;
 
   write("==============================================");
-  write("FINAL 5-DAY MASTER STARTED");
-  write("TARGET = 5 x 24 HOURS = 120 HOURS");
+  write("ACCELERATED 5-CYCLE TEST STARTED");
+  write("FLOAT = 20 SEC / STANDBY = 10 SEC");
   write("==============================================");
 
   printSelection(1,sys1);
@@ -174,28 +160,33 @@ on start
   printSelection(6,sys6);
 
 
-  /* Initial state:
-     ALL active systems OFF
-     Isolation CLOSED where applicable */
+  /* Initial OFF */
 
   setAllMode(0);
+
+  /* Make sure isolation begins CLOSED */
+
   closeAllIsolation();
 
   sendAll();
 
   write("ALL ACTIVE SYSTEMS: OFF");
-  write("INITIAL OFF: 1 SECOND");
+  write("OFF FOR 1 SECOND");
 
-  /* Keep control messages transmitting */
+
+  /* Start cyclic transmission every 100 ms */
+
   setTimer(txTimer,100);
 
+
   /* OFF for 1 second */
+
   setTimer(masterTimer,1000);
 }
 
 
 /* =========================================================
-   DISPLAY SYSTEM SELECTION
+   SHOW SELECTED SYSTEMS
    ========================================================= */
 
 void printSelection(int ch, int sys)
@@ -221,9 +212,7 @@ void printSelection(int ch, int sys)
 
 
 /* =========================================================
-   100 ms CYCLIC TRANSMISSION
-
-   Runs for entire 5-day test.
+   CYCLIC TRANSMISSION - 100 ms
    ========================================================= */
 
 on timer txTimer
@@ -240,19 +229,21 @@ on timer txTimer
 
 on timer masterTimer
 {
-  /* -----------------------------------------------------
-     STEP 0
 
-     Initial OFF finished.
-     Enter STANDBY for 2 seconds.
-     ----------------------------------------------------- */
+  /* =====================================================
+     STEP 0
+     OFF complete -> STANDBY
+     ===================================================== */
 
   if(masterStep == 0)
   {
     setAllMode(1);
 
+    sendAll();
+
+    write("----------------------------------------------");
     write("ALL ACTIVE SYSTEMS: STANDBY");
-    write("INITIAL STANDBY: 2 SECONDS");
+    write("STANDBY FOR 2 SECONDS");
 
     masterStep = 1;
 
@@ -260,17 +251,11 @@ on timer masterTimer
   }
 
 
-  /* -----------------------------------------------------
+  /* =====================================================
      STEP 1
-
-     Initial STANDBY finished.
-
-     Enter FLOAT.
-     Open isolation immediately for systems that have it.
-     Keep OPEN for 1 second.
-
-     48V remains FLOAT and skips isolation.
-     ----------------------------------------------------- */
+     STANDBY complete -> FLOAT
+     Isolation OPEN
+     ===================================================== */
 
   else if(masterStep == 1)
   {
@@ -278,8 +263,11 @@ on timer masterTimer
 
     openAllIsolation();
 
+    sendAll();
+
+    write("----------------------------------------------");
     write("ALL ACTIVE SYSTEMS: FLOAT");
-    write("EBB / EMB / 12V EPAS: ISOLATION OPEN");
+    write("ISOLATION OPEN FOR 1 SECOND");
     write("48V EPAS: ISOLATION SKIPPED");
 
     masterStep = 2;
@@ -288,88 +276,89 @@ on timer masterTimer
   }
 
 
-  /* -----------------------------------------------------
+  /* =====================================================
      STEP 2
-
-     Initial isolation has been OPEN for 1 second.
-     CLOSE isolation.
-
-     Start first 18-hour FLOAT period.
-     ----------------------------------------------------- */
+     Close isolation
+     Begin Cycle 1 FLOAT = 20 seconds
+     ===================================================== */
 
   else if(masterStep == 2)
   {
     closeAllIsolation();
 
+    sendAll();
+
+    write("----------------------------------------------");
     write("ISOLATION CLOSE");
-    write("CYCLE 1: FLOAT 18 HOURS STARTED");
+    write("CYCLE 1: FLOAT FOR 20 SECONDS");
 
     masterStep = 3;
 
-    setTimer(masterTimer,64800000);
+    setTimer(masterTimer,20000);
   }
 
 
-  /* -----------------------------------------------------
+  /* =====================================================
      STEP 3
-
-     18-hour FLOAT finished.
-     Enter STANDBY for 6 hours.
-     ----------------------------------------------------- */
+     FLOAT finished -> STANDBY
+     ===================================================== */
 
   else if(masterStep == 3)
   {
     setAllMode(1);
 
-    write("FLOAT 18 HOURS COMPLETE");
-    write("STANDBY 6 HOURS STARTED");
+    sendAll();
+
+    write("----------------------------------------------");
+    write("FLOAT COMPLETE");
+    write("STANDBY FOR 10 SECONDS");
 
     masterStep = 4;
 
-    setTimer(masterTimer,21600000);
+    setTimer(masterTimer,10000);
   }
 
 
-  /* -----------------------------------------------------
+  /* =====================================================
      STEP 4
-
-     6-hour STANDBY finished.
-     One complete 24-hour cycle is now finished.
-     ----------------------------------------------------- */
+     STANDBY finished
+     Complete one cycle
+     ===================================================== */
 
   else if(masterStep == 4)
   {
     cycleCount++;
 
     write("==============================================");
-    write("24-HOUR CYCLE %d COMPLETE",cycleCount);
+    write("CYCLE %d OF 5 COMPLETE",cycleCount);
     write("==============================================");
 
 
-    /* Five complete cycles = 120 hours */
+    /* ===============================================
+       ALL 5 CYCLES COMPLETE
+       =============================================== */
 
     if(cycleCount >= 5)
     {
-      write("ALL 5 CYCLES COMPLETE");
-      write("COMMANDING FINAL OFF");
-
       setAllMode(0);
+
       closeAllIsolation();
 
       sendAll();
 
-      masterStep = 6;
+      write("ALL 5 CYCLES COMPLETE");
+      write("ALL ACTIVE SYSTEMS: OFF");
+      write("FINAL OFF FOR 2 SECONDS");
 
-      /*
-         Keep OFF transmitting for 2 seconds
-         before stopping measurement.
-      */
+      masterStep = 6;
 
       setTimer(finalStopTimer,2000);
     }
 
 
-    /* Otherwise begin next FLOAT cycle */
+    /* ===============================================
+       START NEXT CYCLE
+       =============================================== */
 
     else
     {
@@ -377,7 +366,10 @@ on timer masterTimer
 
       openAllIsolation();
 
-      write("CYCLE %d STARTING",cycleCount + 1);
+      sendAll();
+
+      write("----------------------------------------------");
+      write("STARTING CYCLE %d",cycleCount + 1);
       write("ALL ACTIVE SYSTEMS: FLOAT");
       write("ISOLATION OPEN FOR 1 SECOND");
       write("48V EPAS: ISOLATION SKIPPED");
@@ -389,26 +381,26 @@ on timer masterTimer
   }
 
 
-  /* -----------------------------------------------------
+  /* =====================================================
      STEP 5
-
-     Isolation OPEN for 1 second during transition
-     into the next FLOAT cycle.
-
-     CLOSE isolation and remain FLOAT 18 hours.
-     ----------------------------------------------------- */
+     Isolation has been OPEN for 1 sec.
+     Close it and stay FLOAT for 20 sec.
+     ===================================================== */
 
   else if(masterStep == 5)
   {
     closeAllIsolation();
 
+    sendAll();
+
+    write("----------------------------------------------");
     write("ISOLATION CLOSE");
-    write("CYCLE %d: FLOAT 18 HOURS STARTED",
+    write("CYCLE %d: FLOAT FOR 20 SECONDS",
           cycleCount + 1);
 
     masterStep = 3;
 
-    setTimer(masterTimer,64800000);
+    setTimer(masterTimer,20000);
   }
 }
 
@@ -419,12 +411,8 @@ on timer masterTimer
 
 on timer finalStopTimer
 {
-  /*
-     OFF has been transmitted cyclically for
-     approximately 2 seconds before reaching here.
-  */
-
   setAllMode(0);
+
   closeAllIsolation();
 
   sendAll();
@@ -433,7 +421,8 @@ on timer finalStopTimer
   cancelTimer(masterTimer);
 
   write("==============================================");
-  write("5-DAY TEST COMPLETE");
+  write("ACCELERATED TEST COMPLETE");
+  write("5 OF 5 CYCLES COMPLETE");
   write("ALL ACTIVE SYSTEMS = OFF");
   write("ISOLATION = CLOSED WHERE APPLICABLE");
   write("STOPPING CANALYZER MEASUREMENT");
@@ -444,7 +433,7 @@ on timer finalStopTimer
 
 
 /* =========================================================
-   SET ALL ACTIVE SYSTEMS TO SAME MODE
+   SET MODE FOR ALL CHANNELS
    ========================================================= */
 
 void setAllMode(int v)
@@ -459,8 +448,7 @@ void setAllMode(int v)
 
 
 /* =========================================================
-   ISOLATION OPEN
-   48V IS AUTOMATICALLY SKIPPED
+   OPEN ISOLATION
    ========================================================= */
 
 void openAllIsolation()
@@ -475,8 +463,7 @@ void openAllIsolation()
 
 
 /* =========================================================
-   ISOLATION CLOSE
-   48V IS AUTOMATICALLY SKIPPED
+   CLOSE ISOLATION
    ========================================================= */
 
 void closeAllIsolation()
@@ -491,7 +478,7 @@ void closeAllIsolation()
 
 
 /* =========================================================
-   MODE FUNCTIONS
+   MODE - CAN1
    ========================================================= */
 
 void mode1(int v)
@@ -510,6 +497,10 @@ void mode1(int v)
 }
 
 
+/* =========================================================
+   MODE - CAN2
+   ========================================================= */
+
 void mode2(int v)
 {
   if(sys2==1)
@@ -525,6 +516,10 @@ void mode2(int v)
     epas2.EMduleMde_D_Rq3=v;
 }
 
+
+/* =========================================================
+   MODE - CAN3
+   ========================================================= */
 
 void mode3(int v)
 {
@@ -542,6 +537,10 @@ void mode3(int v)
 }
 
 
+/* =========================================================
+   MODE - CAN4
+   ========================================================= */
+
 void mode4(int v)
 {
   if(sys4==1)
@@ -558,6 +557,10 @@ void mode4(int v)
 }
 
 
+/* =========================================================
+   MODE - CAN5
+   ========================================================= */
+
 void mode5(int v)
 {
   if(sys5==1)
@@ -573,6 +576,10 @@ void mode5(int v)
     epas5.EMduleMde_D_Rq3=v;
 }
 
+
+/* =========================================================
+   MODE - CAN6
+   ========================================================= */
 
 void mode6(int v)
 {
@@ -591,13 +598,9 @@ void mode6(int v)
 
 
 /* =========================================================
-   ISOLATION FUNCTIONS
+   ISOLATION - CAN1
 
-   0 = OPEN
-   1 = CLOSE
-
-   48V EPAS (sys == 3) has no isolation,
-   therefore no action occurs.
+   48V EPAS automatically does nothing.
    ========================================================= */
 
 void isolation1(int v)
@@ -613,6 +616,10 @@ void isolation1(int v)
 }
 
 
+/* =========================================================
+   ISOLATION - CAN2
+   ========================================================= */
+
 void isolation2(int v)
 {
   if(sys2==1)
@@ -625,6 +632,10 @@ void isolation2(int v)
     epas2.IsolSwtch_B_Cmd3=v;
 }
 
+
+/* =========================================================
+   ISOLATION - CAN3
+   ========================================================= */
 
 void isolation3(int v)
 {
@@ -639,6 +650,10 @@ void isolation3(int v)
 }
 
 
+/* =========================================================
+   ISOLATION - CAN4
+   ========================================================= */
+
 void isolation4(int v)
 {
   if(sys4==1)
@@ -652,6 +667,10 @@ void isolation4(int v)
 }
 
 
+/* =========================================================
+   ISOLATION - CAN5
+   ========================================================= */
+
 void isolation5(int v)
 {
   if(sys5==1)
@@ -664,6 +683,10 @@ void isolation5(int v)
     epas5.IsolSwtch_B_Cmd3=v;
 }
 
+
+/* =========================================================
+   ISOLATION - CAN6
+   ========================================================= */
 
 void isolation6(int v)
 {
@@ -694,7 +717,7 @@ void sendAll()
 
 
 /* =========================================================
-   SEND CORRECT CONTROL MESSAGE
+   SEND CAN1
    ========================================================= */
 
 void send1()
@@ -713,6 +736,10 @@ void send1()
 }
 
 
+/* =========================================================
+   SEND CAN2
+   ========================================================= */
+
 void send2()
 {
   if(sys2==1)
@@ -728,6 +755,10 @@ void send2()
     output(epas2);
 }
 
+
+/* =========================================================
+   SEND CAN3
+   ========================================================= */
 
 void send3()
 {
@@ -745,6 +776,10 @@ void send3()
 }
 
 
+/* =========================================================
+   SEND CAN4
+   ========================================================= */
+
 void send4()
 {
   if(sys4==1)
@@ -761,6 +796,10 @@ void send4()
 }
 
 
+/* =========================================================
+   SEND CAN5
+   ========================================================= */
+
 void send5()
 {
   if(sys5==1)
@@ -776,6 +815,10 @@ void send5()
     output(epas5);
 }
 
+
+/* =========================================================
+   SEND CAN6
+   ========================================================= */
 
 void send6()
 {
