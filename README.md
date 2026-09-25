@@ -1,17 +1,15 @@
 
 
 /* =========================================================
-   6-CHANNEL TESTING MASTER
+   FINAL 5-DAY / 120-HOUR MASTER
 
-   MANUAL SYSTEM SELECTION
-
+   MANUAL SYSTEM SELECTION:
    0 = NOTHING CONNECTED
    1 = EBB
    2 = EMB
    3 = 48V EPAS
    4 = 12V EPAS
 
-   CHANNEL DATABASE MAPPING:
    CAN1 -> DBC1
    CAN2 -> DBC2
    CAN3 -> DBC3
@@ -19,25 +17,40 @@
    CAN5 -> DBC5
    CAN6 -> DBC6
 
-   TEST SEQUENCE:
-   OFF       5 sec
-   STANDBY   5 sec
-   FLOAT     4 sec
-   ISO OPEN  2 sec      (not for 48V)
-   ISO CLOSE
-   FLOAT     1 sec
-   STANDBY   1 sec
-   OFF
+   STARTUP - ONCE ONLY:
+   OFF       1 sec
+   STANDBY   2 sec
+   FLOAT
+   ISOLATION OPEN  1 sec
+   ISOLATION CLOSE
 
-   Sequence runs ONE TIME only.
-   Measurement stops after 3 minutes.
+   EACH 24-HOUR CYCLE:
+   FLOAT     18 hours
+   STANDBY    6 hours
+
+   On every transition STANDBY -> FLOAT:
+   FLOAT
+   ISOLATION OPEN 1 sec
+   ISOLATION CLOSE
+   FLOAT 18 hours
+
+   Repeat 5 cycles = 120 hours.
+
+   48V EPAS:
+   NO isolation OPEN/CLOSE.
+
+   END:
+   Final 6-hour STANDBY completes
+   -> ALL ACTIVE SYSTEMS OFF
+   -> wait 2 sec transmitting OFF
+   -> stop measurement
    ========================================================= */
 
 
 variables
 {
   /* =====================================================
-     EDIT ONLY THESE SIX VALUES BEFORE EACH TEST
+     EDIT ONLY THESE SIX VALUES BEFORE THE REAL TEST
 
      0=None
      1=EBB
@@ -46,30 +59,36 @@ variables
      4=12V EPAS
      ===================================================== */
 
-  int sys1 = 0;    // CAN1
-  int sys2 = 0;    // CAN2
-  int sys3 = 0;    // CAN3
-  int sys4 = 0;    // CAN4
-  int sys5 = 0;    // CAN5
-  int sys6 = 0;    // CAN6
+  int sys1 = 0;     // CAN1
+  int sys2 = 0;     // CAN2
+  int sys3 = 0;     // CAN3
+  int sys4 = 0;     // CAN4
+  int sys5 = 0;     // CAN5
+  int sys6 = 0;     // CAN6
 
 
-  /* ===== TIMERS ===== */
+  /* ===== MASTER TIMERS ===== */
 
-  msTimer seq1, seq2, seq3, seq4, seq5, seq6;
-  msTimer tx1,  tx2,  tx3,  tx4,  tx5,  tx6;
+  msTimer masterTimer;
+  msTimer txTimer;
+  msTimer finalStopTimer;
 
-  msTimer testTimer;
 
+  /* ===== STATE =====
 
-  /* ===== SEQUENCE STEPS ===== */
+     0 = Initial OFF
+     1 = Initial STANDBY
+     2 = Initial Isolation OPEN
+     3 = FLOAT 18 hours
+     4 = STANDBY 6 hours
+     5 = Cycle Isolation OPEN
+     6 = FINAL OFF
+  */
 
-  int step1 = 0;
-  int step2 = 0;
-  int step3 = 0;
-  int step4 = 0;
-  int step5 = 0;
-  int step6 = 0;
+  int masterStep = 0;
+
+  /* Completed 24-hour cycles */
+  int cycleCount = 0;
 
 
   /* =====================================================
@@ -139,11 +158,13 @@ variables
 
 on start
 {
-  write("==========================================");
-  write("6 CHANNEL TESTING MASTER START");
-  write("CAN1=%d CAN2=%d CAN3=%d CAN4=%d CAN5=%d CAN6=%d",
-        sys1, sys2, sys3, sys4, sys5, sys6);
-  write("==========================================");
+  cycleCount = 0;
+  masterStep = 0;
+
+  write("==============================================");
+  write("FINAL 5-DAY MASTER STARTED");
+  write("TARGET = 5 x 24 HOURS = 120 HOURS");
+  write("==============================================");
 
   printSelection(1,sys1);
   printSelection(2,sys2);
@@ -152,19 +173,29 @@ on start
   printSelection(5,sys5);
   printSelection(6,sys6);
 
-  if(sys1 != 0) start1();
-  if(sys2 != 0) start2();
-  if(sys3 != 0) start3();
-  if(sys4 != 0) start4();
-  if(sys5 != 0) start5();
-  if(sys6 != 0) start6();
 
-  setTimer(testTimer,180000);
+  /* Initial state:
+     ALL active systems OFF
+     Isolation CLOSED where applicable */
+
+  setAllMode(0);
+  closeAllIsolation();
+
+  sendAll();
+
+  write("ALL ACTIVE SYSTEMS: OFF");
+  write("INITIAL OFF: 1 SECOND");
+
+  /* Keep control messages transmitting */
+  setTimer(txTimer,100);
+
+  /* OFF for 1 second */
+  setTimer(masterTimer,1000);
 }
 
 
 /* =========================================================
-   SHOW SELECTED SYSTEM
+   DISPLAY SYSTEM SELECTION
    ========================================================= */
 
 void printSelection(int ch, int sys)
@@ -173,1076 +204,590 @@ void printSelection(int ch, int sys)
     write("CAN%d: NOT USED",ch);
 
   else if(sys == 1)
-    write("CAN%d: EBB SELECTED",ch);
+    write("CAN%d: EBB",ch);
 
   else if(sys == 2)
-    write("CAN%d: EMB SELECTED",ch);
+    write("CAN%d: EMB",ch);
 
   else if(sys == 3)
-    write("CAN%d: 48V EPAS SELECTED",ch);
+    write("CAN%d: 48V EPAS",ch);
 
   else if(sys == 4)
-    write("CAN%d: 12V EPAS SELECTED",ch);
+    write("CAN%d: 12V EPAS",ch);
 
   else
-    write("CAN%d: INVALID SYSTEM SELECTION",ch);
+    write("CAN%d: INVALID SELECTION",ch);
 }
 
 
 /* =========================================================
-   START EACH ACTIVE CHANNEL
-   Initial OFF = 5 seconds
+   100 ms CYCLIC TRANSMISSION
+
+   Runs for entire 5-day test.
    ========================================================= */
 
-void start1()
+on timer txTimer
 {
-  step1 = 0;
+  sendAll();
 
-  mode1(0);
-
-  if(sys1 != 3)
-    isolation1(1);
-
-  send1();
-
-  setTimer(tx1,100);
-  setTimer(seq1,5000);
-
-  write("CAN1: OFF");
-}
-
-
-void start2()
-{
-  step2 = 0;
-
-  mode2(0);
-
-  if(sys2 != 3)
-    isolation2(1);
-
-  send2();
-
-  setTimer(tx2,100);
-  setTimer(seq2,5000);
-
-  write("CAN2: OFF");
-}
-
-
-void start3()
-{
-  step3 = 0;
-
-  mode3(0);
-
-  if(sys3 != 3)
-    isolation3(1);
-
-  send3();
-
-  setTimer(tx3,100);
-  setTimer(seq3,5000);
-
-  write("CAN3: OFF");
-}
-
-
-void start4()
-{
-  step4 = 0;
-
-  mode4(0);
-
-  if(sys4 != 3)
-    isolation4(1);
-
-  send4();
-
-  setTimer(tx4,100);
-  setTimer(seq4,5000);
-
-  write("CAN4: OFF");
-}
-
-
-void start5()
-{
-  step5 = 0;
-
-  mode5(0);
-
-  if(sys5 != 3)
-    isolation5(1);
-
-  send5();
-
-  setTimer(tx5,100);
-  setTimer(seq5,5000);
-
-  write("CAN5: OFF");
-}
-
-
-void start6()
-{
-  step6 = 0;
-
-  mode6(0);
-
-  if(sys6 != 3)
-    isolation6(1);
-
-  send6();
-
-  setTimer(tx6,100);
-  setTimer(seq6,5000);
-
-  write("CAN6: OFF");
+  setTimer(txTimer,100);
 }
 
 
 /* =========================================================
-   100 ms CONTROL TRANSMISSION
+   MASTER SEQUENCE
    ========================================================= */
 
-on timer tx1
+on timer masterTimer
 {
-  send1();
-  setTimer(tx1,100);
-}
+  /* -----------------------------------------------------
+     STEP 0
 
-on timer tx2
-{
-  send2();
-  setTimer(tx2,100);
-}
+     Initial OFF finished.
+     Enter STANDBY for 2 seconds.
+     ----------------------------------------------------- */
 
-on timer tx3
-{
-  send3();
-  setTimer(tx3,100);
-}
-
-on timer tx4
-{
-  send4();
-  setTimer(tx4,100);
-}
-
-on timer tx5
-{
-  send5();
-  setTimer(tx5,100);
-}
-
-on timer tx6
-{
-  send6();
-  setTimer(tx6,100);
-}
-
-
-/* =========================================================
-   SEQUENCE TIMER EVENTS
-   ========================================================= */
-
-on timer seq1 { sequence1(); }
-on timer seq2 { sequence2(); }
-on timer seq3 { sequence3(); }
-on timer seq4 { sequence4(); }
-on timer seq5 { sequence5(); }
-on timer seq6 { sequence6(); }
-
-
-/* =========================================================
-   CAN1 SEQUENCE
-   ========================================================= */
-
-void sequence1()
-{
-  if(step1 == 0)
+  if(masterStep == 0)
   {
-    mode1(1);
+    setAllMode(1);
 
-    step1 = 1;
+    write("ALL ACTIVE SYSTEMS: STANDBY");
+    write("INITIAL STANDBY: 2 SECONDS");
 
-    write("CAN1: STANDBY");
+    masterStep = 1;
 
-    setTimer(seq1,5000);
+    setTimer(masterTimer,2000);
   }
 
-  else if(step1 == 1)
+
+  /* -----------------------------------------------------
+     STEP 1
+
+     Initial STANDBY finished.
+
+     Enter FLOAT.
+     Open isolation immediately for systems that have it.
+     Keep OPEN for 1 second.
+
+     48V remains FLOAT and skips isolation.
+     ----------------------------------------------------- */
+
+  else if(masterStep == 1)
   {
-    mode1(3);
+    setAllMode(3);
 
-    step1 = 2;
+    openAllIsolation();
 
-    write("CAN1: FLOAT");
+    write("ALL ACTIVE SYSTEMS: FLOAT");
+    write("EBB / EMB / 12V EPAS: ISOLATION OPEN");
+    write("48V EPAS: ISOLATION SKIPPED");
 
-    setTimer(seq1,4000);
+    masterStep = 2;
+
+    setTimer(masterTimer,1000);
   }
 
-  else if(step1 == 2)
+
+  /* -----------------------------------------------------
+     STEP 2
+
+     Initial isolation has been OPEN for 1 second.
+     CLOSE isolation.
+
+     Start first 18-hour FLOAT period.
+     ----------------------------------------------------- */
+
+  else if(masterStep == 2)
   {
-    if(sys1 != 3)
+    closeAllIsolation();
+
+    write("ISOLATION CLOSE");
+    write("CYCLE 1: FLOAT 18 HOURS STARTED");
+
+    masterStep = 3;
+
+    setTimer(masterTimer,64800000);
+  }
+
+
+  /* -----------------------------------------------------
+     STEP 3
+
+     18-hour FLOAT finished.
+     Enter STANDBY for 6 hours.
+     ----------------------------------------------------- */
+
+  else if(masterStep == 3)
+  {
+    setAllMode(1);
+
+    write("FLOAT 18 HOURS COMPLETE");
+    write("STANDBY 6 HOURS STARTED");
+
+    masterStep = 4;
+
+    setTimer(masterTimer,21600000);
+  }
+
+
+  /* -----------------------------------------------------
+     STEP 4
+
+     6-hour STANDBY finished.
+     One complete 24-hour cycle is now finished.
+     ----------------------------------------------------- */
+
+  else if(masterStep == 4)
+  {
+    cycleCount++;
+
+    write("==============================================");
+    write("24-HOUR CYCLE %d COMPLETE",cycleCount);
+    write("==============================================");
+
+
+    /* Five complete cycles = 120 hours */
+
+    if(cycleCount >= 5)
     {
-      isolation1(0);
+      write("ALL 5 CYCLES COMPLETE");
+      write("COMMANDING FINAL OFF");
 
-      write("CAN1: ISOLATION OPEN");
+      setAllMode(0);
+      closeAllIsolation();
 
-      step1 = 3;
+      sendAll();
 
-      setTimer(seq1,2000);
+      masterStep = 6;
+
+      /*
+         Keep OFF transmitting for 2 seconds
+         before stopping measurement.
+      */
+
+      setTimer(finalStopTimer,2000);
     }
+
+
+    /* Otherwise begin next FLOAT cycle */
+
     else
     {
-      write("CAN1: 48V - NO ISOLATION");
+      setAllMode(3);
 
-      step1 = 4;
+      openAllIsolation();
 
-      setTimer(seq1,1000);
+      write("CYCLE %d STARTING",cycleCount + 1);
+      write("ALL ACTIVE SYSTEMS: FLOAT");
+      write("ISOLATION OPEN FOR 1 SECOND");
+      write("48V EPAS: ISOLATION SKIPPED");
+
+      masterStep = 5;
+
+      setTimer(masterTimer,1000);
     }
   }
 
-  else if(step1 == 3)
+
+  /* -----------------------------------------------------
+     STEP 5
+
+     Isolation OPEN for 1 second during transition
+     into the next FLOAT cycle.
+
+     CLOSE isolation and remain FLOAT 18 hours.
+     ----------------------------------------------------- */
+
+  else if(masterStep == 5)
   {
-    isolation1(1);
+    closeAllIsolation();
 
-    write("CAN1: ISOLATION CLOSE");
+    write("ISOLATION CLOSE");
+    write("CYCLE %d: FLOAT 18 HOURS STARTED",
+          cycleCount + 1);
 
-    step1 = 4;
+    masterStep = 3;
 
-    setTimer(seq1,1000);
-  }
-
-  else if(step1 == 4)
-  {
-    mode1(1);
-
-    write("CAN1: STANDBY");
-
-    step1 = 5;
-
-    setTimer(seq1,1000);
-  }
-
-  else if(step1 == 5)
-  {
-    mode1(0);
-
-    write("CAN1: OFF - SEQUENCE COMPLETE");
-
-    step1 = 6;
+    setTimer(masterTimer,64800000);
   }
 }
 
 
 /* =========================================================
-   CAN2 SEQUENCE
+   FINAL AUTOMATIC SHUTDOWN
    ========================================================= */
 
-void sequence2()
+on timer finalStopTimer
 {
-  if(step2 == 0)
-  {
-    mode2(1);
+  /*
+     OFF has been transmitted cyclically for
+     approximately 2 seconds before reaching here.
+  */
 
-    step2 = 1;
+  setAllMode(0);
+  closeAllIsolation();
 
-    write("CAN2: STANDBY");
+  sendAll();
 
-    setTimer(seq2,5000);
-  }
+  cancelTimer(txTimer);
+  cancelTimer(masterTimer);
 
-  else if(step2 == 1)
-  {
-    mode2(3);
+  write("==============================================");
+  write("5-DAY TEST COMPLETE");
+  write("ALL ACTIVE SYSTEMS = OFF");
+  write("ISOLATION = CLOSED WHERE APPLICABLE");
+  write("STOPPING CANALYZER MEASUREMENT");
+  write("==============================================");
 
-    step2 = 2;
-
-    write("CAN2: FLOAT");
-
-    setTimer(seq2,4000);
-  }
-
-  else if(step2 == 2)
-  {
-    if(sys2 != 3)
-    {
-      isolation2(0);
-
-      write("CAN2: ISOLATION OPEN");
-
-      step2 = 3;
-
-      setTimer(seq2,2000);
-    }
-    else
-    {
-      write("CAN2: 48V - NO ISOLATION");
-
-      step2 = 4;
-
-      setTimer(seq2,1000);
-    }
-  }
-
-  else if(step2 == 3)
-  {
-    isolation2(1);
-
-    write("CAN2: ISOLATION CLOSE");
-
-    step2 = 4;
-
-    setTimer(seq2,1000);
-  }
-
-  else if(step2 == 4)
-  {
-    mode2(1);
-
-    write("CAN2: STANDBY");
-
-    step2 = 5;
-
-    setTimer(seq2,1000);
-  }
-
-  else if(step2 == 5)
-  {
-    mode2(0);
-
-    write("CAN2: OFF - SEQUENCE COMPLETE");
-
-    step2 = 6;
-  }
+  stop();
 }
 
 
 /* =========================================================
-   CAN3 SEQUENCE
+   SET ALL ACTIVE SYSTEMS TO SAME MODE
    ========================================================= */
 
-void sequence3()
+void setAllMode(int v)
 {
-  if(step3 == 0)
-  {
-    mode3(1);
-
-    step3 = 1;
-
-    write("CAN3: STANDBY");
-
-    setTimer(seq3,5000);
-  }
-
-  else if(step3 == 1)
-  {
-    mode3(3);
-
-    step3 = 2;
-
-    write("CAN3: FLOAT");
-
-    setTimer(seq3,4000);
-  }
-
-  else if(step3 == 2)
-  {
-    if(sys3 != 3)
-    {
-      isolation3(0);
-
-      write("CAN3: ISOLATION OPEN");
-
-      step3 = 3;
-
-      setTimer(seq3,2000);
-    }
-    else
-    {
-      write("CAN3: 48V - NO ISOLATION");
-
-      step3 = 4;
-
-      setTimer(seq3,1000);
-    }
-  }
-
-  else if(step3 == 3)
-  {
-    isolation3(1);
-
-    write("CAN3: ISOLATION CLOSE");
-
-    step3 = 4;
-
-    setTimer(seq3,1000);
-  }
-
-  else if(step3 == 4)
-  {
-    mode3(1);
-
-    write("CAN3: STANDBY");
-
-    step3 = 5;
-
-    setTimer(seq3,1000);
-  }
-
-  else if(step3 == 5)
-  {
-    mode3(0);
-
-    write("CAN3: OFF - SEQUENCE COMPLETE");
-
-    step3 = 6;
-  }
+  mode1(v);
+  mode2(v);
+  mode3(v);
+  mode4(v);
+  mode5(v);
+  mode6(v);
 }
 
 
 /* =========================================================
-   CAN4 SEQUENCE
+   ISOLATION OPEN
+   48V IS AUTOMATICALLY SKIPPED
    ========================================================= */
 
-void sequence4()
+void openAllIsolation()
 {
-  if(step4 == 0)
-  {
-    mode4(1);
-
-    step4 = 1;
-
-    write("CAN4: STANDBY");
-
-    setTimer(seq4,5000);
-  }
-
-  else if(step4 == 1)
-  {
-    mode4(3);
-
-    step4 = 2;
-
-    write("CAN4: FLOAT");
-
-    setTimer(seq4,4000);
-  }
-
-  else if(step4 == 2)
-  {
-    if(sys4 != 3)
-    {
-      isolation4(0);
-
-      write("CAN4: ISOLATION OPEN");
-
-      step4 = 3;
-
-      setTimer(seq4,2000);
-    }
-    else
-    {
-      write("CAN4: 48V - NO ISOLATION");
-
-      step4 = 4;
-
-      setTimer(seq4,1000);
-    }
-  }
-
-  else if(step4 == 3)
-  {
-    isolation4(1);
-
-    write("CAN4: ISOLATION CLOSE");
-
-    step4 = 4;
-
-    setTimer(seq4,1000);
-  }
-
-  else if(step4 == 4)
-  {
-    mode4(1);
-
-    write("CAN4: STANDBY");
-
-    step4 = 5;
-
-    setTimer(seq4,1000);
-  }
-
-  else if(step4 == 5)
-  {
-    mode4(0);
-
-    write("CAN4: OFF - SEQUENCE COMPLETE");
-
-    step4 = 6;
-  }
+  isolation1(0);
+  isolation2(0);
+  isolation3(0);
+  isolation4(0);
+  isolation5(0);
+  isolation6(0);
 }
 
 
 /* =========================================================
-   CAN5 SEQUENCE
+   ISOLATION CLOSE
+   48V IS AUTOMATICALLY SKIPPED
    ========================================================= */
 
-void sequence5()
+void closeAllIsolation()
 {
-  if(step5 == 0)
-  {
-    mode5(1);
-
-    step5 = 1;
-
-    write("CAN5: STANDBY");
-
-    setTimer(seq5,5000);
-  }
-
-  else if(step5 == 1)
-  {
-    mode5(3);
-
-    step5 = 2;
-
-    write("CAN5: FLOAT");
-
-    setTimer(seq5,4000);
-  }
-
-  else if(step5 == 2)
-  {
-    if(sys5 != 3)
-    {
-      isolation5(0);
-
-      write("CAN5: ISOLATION OPEN");
-
-      step5 = 3;
-
-      setTimer(seq5,2000);
-    }
-    else
-    {
-      write("CAN5: 48V - NO ISOLATION");
-
-      step5 = 4;
-
-      setTimer(seq5,1000);
-    }
-  }
-
-  else if(step5 == 3)
-  {
-    isolation5(1);
-
-    write("CAN5: ISOLATION CLOSE");
-
-    step5 = 4;
-
-    setTimer(seq5,1000);
-  }
-
-  else if(step5 == 4)
-  {
-    mode5(1);
-
-    write("CAN5: STANDBY");
-
-    step5 = 5;
-
-    setTimer(seq5,1000);
-  }
-
-  else if(step5 == 5)
-  {
-    mode5(0);
-
-    write("CAN5: OFF - SEQUENCE COMPLETE");
-
-    step5 = 6;
-  }
+  isolation1(1);
+  isolation2(1);
+  isolation3(1);
+  isolation4(1);
+  isolation5(1);
+  isolation6(1);
 }
 
 
 /* =========================================================
-   CAN6 SEQUENCE
-   ========================================================= */
-
-void sequence6()
-{
-  if(step6 == 0)
-  {
-    mode6(1);
-
-    step6 = 1;
-
-    write("CAN6: STANDBY");
-
-    setTimer(seq6,5000);
-  }
-
-  else if(step6 == 1)
-  {
-    mode6(3);
-
-    step6 = 2;
-
-    write("CAN6: FLOAT");
-
-    setTimer(seq6,4000);
-  }
-
-  else if(step6 == 2)
-  {
-    if(sys6 != 3)
-    {
-      isolation6(0);
-
-      write("CAN6: ISOLATION OPEN");
-
-      step6 = 3;
-
-      setTimer(seq6,2000);
-    }
-    else
-    {
-      write("CAN6: 48V - NO ISOLATION");
-
-      step6 = 4;
-
-      setTimer(seq6,1000);
-    }
-  }
-
-  else if(step6 == 3)
-  {
-    isolation6(1);
-
-    write("CAN6: ISOLATION CLOSE");
-
-    step6 = 4;
-
-    setTimer(seq6,1000);
-  }
-
-  else if(step6 == 4)
-  {
-    mode6(1);
-
-    write("CAN6: STANDBY");
-
-    step6 = 5;
-
-    setTimer(seq6,1000);
-  }
-
-  else if(step6 == 5)
-  {
-    mode6(0);
-
-    write("CAN6: OFF - SEQUENCE COMPLETE");
-
-    step6 = 6;
-  }
-}
-
-
-/* =========================================================
-   MODE SELECTION
-
-   OFF     = 0
-   STANDBY = 1
-   FLOAT   = 3
+   MODE FUNCTIONS
    ========================================================= */
 
 void mode1(int v)
 {
-  if(sys1 == 1)
-    ebb1.EMduleMde_D_Rq = v;
+  if(sys1==1)
+    ebb1.EMduleMde_D_Rq=v;
 
-  else if(sys1 == 2)
-    emb1.EMduleMde_D_Rq2 = v;
+  else if(sys1==2)
+    emb1.EMduleMde_D_Rq2=v;
 
-  else if(sys1 == 3)
-    v481.UCapMduleMde_D_Rq = v;
+  else if(sys1==3)
+    v481.UCapMduleMde_D_Rq=v;
 
-  else if(sys1 == 4)
-    epas1.EMduleMde_D_Rq3 = v;
+  else if(sys1==4)
+    epas1.EMduleMde_D_Rq3=v;
 }
 
 
 void mode2(int v)
 {
-  if(sys2 == 1)
-    ebb2.EMduleMde_D_Rq = v;
+  if(sys2==1)
+    ebb2.EMduleMde_D_Rq=v;
 
-  else if(sys2 == 2)
-    emb2.EMduleMde_D_Rq2 = v;
+  else if(sys2==2)
+    emb2.EMduleMde_D_Rq2=v;
 
-  else if(sys2 == 3)
-    v482.UCapMduleMde_D_Rq = v;
+  else if(sys2==3)
+    v482.UCapMduleMde_D_Rq=v;
 
-  else if(sys2 == 4)
-    epas2.EMduleMde_D_Rq3 = v;
+  else if(sys2==4)
+    epas2.EMduleMde_D_Rq3=v;
 }
 
 
 void mode3(int v)
 {
-  if(sys3 == 1)
-    ebb3.EMduleMde_D_Rq = v;
+  if(sys3==1)
+    ebb3.EMduleMde_D_Rq=v;
 
-  else if(sys3 == 2)
-    emb3.EMduleMde_D_Rq2 = v;
+  else if(sys3==2)
+    emb3.EMduleMde_D_Rq2=v;
 
-  else if(sys3 == 3)
-    v483.UCapMduleMde_D_Rq = v;
+  else if(sys3==3)
+    v483.UCapMduleMde_D_Rq=v;
 
-  else if(sys3 == 4)
-    epas3.EMduleMde_D_Rq3 = v;
+  else if(sys3==4)
+    epas3.EMduleMde_D_Rq3=v;
 }
 
 
 void mode4(int v)
 {
-  if(sys4 == 1)
-    ebb4.EMduleMde_D_Rq = v;
+  if(sys4==1)
+    ebb4.EMduleMde_D_Rq=v;
 
-  else if(sys4 == 2)
-    emb4.EMduleMde_D_Rq2 = v;
+  else if(sys4==2)
+    emb4.EMduleMde_D_Rq2=v;
 
-  else if(sys4 == 3)
-    v484.UCapMduleMde_D_Rq = v;
+  else if(sys4==3)
+    v484.UCapMduleMde_D_Rq=v;
 
-  else if(sys4 == 4)
-    epas4.EMduleMde_D_Rq3 = v;
+  else if(sys4==4)
+    epas4.EMduleMde_D_Rq3=v;
 }
 
 
 void mode5(int v)
 {
-  if(sys5 == 1)
-    ebb5.EMduleMde_D_Rq = v;
+  if(sys5==1)
+    ebb5.EMduleMde_D_Rq=v;
 
-  else if(sys5 == 2)
-    emb5.EMduleMde_D_Rq2 = v;
+  else if(sys5==2)
+    emb5.EMduleMde_D_Rq2=v;
 
-  else if(sys5 == 3)
-    v485.UCapMduleMde_D_Rq = v;
+  else if(sys5==3)
+    v485.UCapMduleMde_D_Rq=v;
 
-  else if(sys5 == 4)
-    epas5.EMduleMde_D_Rq3 = v;
+  else if(sys5==4)
+    epas5.EMduleMde_D_Rq3=v;
 }
 
 
 void mode6(int v)
 {
-  if(sys6 == 1)
-    ebb6.EMduleMde_D_Rq = v;
+  if(sys6==1)
+    ebb6.EMduleMde_D_Rq=v;
 
-  else if(sys6 == 2)
-    emb6.EMduleMde_D_Rq2 = v;
+  else if(sys6==2)
+    emb6.EMduleMde_D_Rq2=v;
 
-  else if(sys6 == 3)
-    v486.UCapMduleMde_D_Rq = v;
+  else if(sys6==3)
+    v486.UCapMduleMde_D_Rq=v;
 
-  else if(sys6 == 4)
-    epas6.EMduleMde_D_Rq3 = v;
+  else if(sys6==4)
+    epas6.EMduleMde_D_Rq3=v;
 }
 
 
 /* =========================================================
-   ISOLATION
+   ISOLATION FUNCTIONS
 
    0 = OPEN
    1 = CLOSE
 
-   48V has NO isolation command.
+   48V EPAS (sys == 3) has no isolation,
+   therefore no action occurs.
    ========================================================= */
 
 void isolation1(int v)
 {
-  if(sys1 == 1)
-    ebb1.IsolSwtch_B_Cmd = v;
+  if(sys1==1)
+    ebb1.IsolSwtch_B_Cmd=v;
 
-  else if(sys1 == 2)
-    emb1.IsolSwtch_B_Cmd2 = v;
+  else if(sys1==2)
+    emb1.IsolSwtch_B_Cmd2=v;
 
-  else if(sys1 == 4)
-    epas1.IsolSwtch_B_Cmd3 = v;
+  else if(sys1==4)
+    epas1.IsolSwtch_B_Cmd3=v;
 }
 
 
 void isolation2(int v)
 {
-  if(sys2 == 1)
-    ebb2.IsolSwtch_B_Cmd = v;
+  if(sys2==1)
+    ebb2.IsolSwtch_B_Cmd=v;
 
-  else if(sys2 == 2)
-    emb2.IsolSwtch_B_Cmd2 = v;
+  else if(sys2==2)
+    emb2.IsolSwtch_B_Cmd2=v;
 
-  else if(sys2 == 4)
-    epas2.IsolSwtch_B_Cmd3 = v;
+  else if(sys2==4)
+    epas2.IsolSwtch_B_Cmd3=v;
 }
 
 
 void isolation3(int v)
 {
-  if(sys3 == 1)
-    ebb3.IsolSwtch_B_Cmd = v;
+  if(sys3==1)
+    ebb3.IsolSwtch_B_Cmd=v;
 
-  else if(sys3 == 2)
-    emb3.IsolSwtch_B_Cmd2 = v;
+  else if(sys3==2)
+    emb3.IsolSwtch_B_Cmd2=v;
 
-  else if(sys3 == 4)
-    epas3.IsolSwtch_B_Cmd3 = v;
+  else if(sys3==4)
+    epas3.IsolSwtch_B_Cmd3=v;
 }
 
 
 void isolation4(int v)
 {
-  if(sys4 == 1)
-    ebb4.IsolSwtch_B_Cmd = v;
+  if(sys4==1)
+    ebb4.IsolSwtch_B_Cmd=v;
 
-  else if(sys4 == 2)
-    emb4.IsolSwtch_B_Cmd2 = v;
+  else if(sys4==2)
+    emb4.IsolSwtch_B_Cmd2=v;
 
-  else if(sys4 == 4)
-    epas4.IsolSwtch_B_Cmd3 = v;
+  else if(sys4==4)
+    epas4.IsolSwtch_B_Cmd3=v;
 }
 
 
 void isolation5(int v)
 {
-  if(sys5 == 1)
-    ebb5.IsolSwtch_B_Cmd = v;
+  if(sys5==1)
+    ebb5.IsolSwtch_B_Cmd=v;
 
-  else if(sys5 == 2)
-    emb5.IsolSwtch_B_Cmd2 = v;
+  else if(sys5==2)
+    emb5.IsolSwtch_B_Cmd2=v;
 
-  else if(sys5 == 4)
-    epas5.IsolSwtch_B_Cmd3 = v;
+  else if(sys5==4)
+    epas5.IsolSwtch_B_Cmd3=v;
 }
 
 
 void isolation6(int v)
 {
-  if(sys6 == 1)
-    ebb6.IsolSwtch_B_Cmd = v;
+  if(sys6==1)
+    ebb6.IsolSwtch_B_Cmd=v;
 
-  else if(sys6 == 2)
-    emb6.IsolSwtch_B_Cmd2 = v;
+  else if(sys6==2)
+    emb6.IsolSwtch_B_Cmd2=v;
 
-  else if(sys6 == 4)
-    epas6.IsolSwtch_B_Cmd3 = v;
+  else if(sys6==4)
+    epas6.IsolSwtch_B_Cmd3=v;
 }
 
 
 /* =========================================================
-   SEND CORRECT MESSAGE FOR EACH CHANNEL
+   SEND ALL ACTIVE CHANNELS
+   ========================================================= */
+
+void sendAll()
+{
+  send1();
+  send2();
+  send3();
+  send4();
+  send5();
+  send6();
+}
+
+
+/* =========================================================
+   SEND CORRECT CONTROL MESSAGE
    ========================================================= */
 
 void send1()
 {
-  if(sys1 == 1)
+  if(sys1==1)
     output(ebb1);
 
-  else if(sys1 == 2)
+  else if(sys1==2)
     output(emb1);
 
-  else if(sys1 == 3)
+  else if(sys1==3)
     output(v481);
 
-  else if(sys1 == 4)
+  else if(sys1==4)
     output(epas1);
 }
 
 
 void send2()
 {
-  if(sys2 == 1)
+  if(sys2==1)
     output(ebb2);
 
-  else if(sys2 == 2)
+  else if(sys2==2)
     output(emb2);
 
-  else if(sys2 == 3)
+  else if(sys2==3)
     output(v482);
 
-  else if(sys2 == 4)
+  else if(sys2==4)
     output(epas2);
 }
 
 
 void send3()
 {
-  if(sys3 == 1)
+  if(sys3==1)
     output(ebb3);
 
-  else if(sys3 == 2)
+  else if(sys3==2)
     output(emb3);
 
-  else if(sys3 == 3)
+  else if(sys3==3)
     output(v483);
 
-  else if(sys3 == 4)
+  else if(sys3==4)
     output(epas3);
 }
 
 
 void send4()
 {
-  if(sys4 == 1)
+  if(sys4==1)
     output(ebb4);
 
-  else if(sys4 == 2)
+  else if(sys4==2)
     output(emb4);
 
-  else if(sys4 == 3)
+  else if(sys4==3)
     output(v484);
 
-  else if(sys4 == 4)
+  else if(sys4==4)
     output(epas4);
 }
 
 
 void send5()
 {
-  if(sys5 == 1)
+  if(sys5==1)
     output(ebb5);
 
-  else if(sys5 == 2)
+  else if(sys5==2)
     output(emb5);
 
-  else if(sys5 == 3)
+  else if(sys5==3)
     output(v485);
 
-  else if(sys5 == 4)
+  else if(sys5==4)
     output(epas5);
 }
 
 
 void send6()
 {
-  if(sys6 == 1)
+  if(sys6==1)
     output(ebb6);
 
-  else if(sys6 == 2)
+  else if(sys6==2)
     output(emb6);
 
-  else if(sys6 == 3)
+  else if(sys6==3)
     output(v486);
 
-  else if(sys6 == 4)
+  else if(sys6==4)
     output(epas6);
-}
-
-
-/* =========================================================
-   3-MINUTE TEST END
-
-   Force all selected systems OFF.
-   Isolation CLOSED where applicable.
-   Then stop measurement.
-   ========================================================= */
-
-on timer testTimer
-{
-  write("==========================================");
-  write("3 MINUTES COMPLETE");
-  write("FINAL OFF");
-  write("==========================================");
-
-
-  if(sys1 != 0)
-  {
-    mode1(0);
-
-    if(sys1 != 3)
-      isolation1(1);
-
-    send1();
-  }
-
-
-  if(sys2 != 0)
-  {
-    mode2(0);
-
-    if(sys2 != 3)
-      isolation2(1);
-
-    send2();
-  }
-
-
-  if(sys3 != 0)
-  {
-    mode3(0);
-
-    if(sys3 != 3)
-      isolation3(1);
-
-    send3();
-  }
-
-
-  if(sys4 != 0)
-  {
-    mode4(0);
-
-    if(sys4 != 3)
-      isolation4(1);
-
-    send4();
-  }
-
-
-  if(sys5 != 0)
-  {
-    mode5(0);
-
-    if(sys5 != 3)
-      isolation5(1);
-
-    send5();
-  }
-
-
-  if(sys6 != 0)
-  {
-    mode6(0);
-
-    if(sys6 != 3)
-      isolation6(1);
-
-    send6();
-  }
-
-
-  cancelTimer(tx1);
-  cancelTimer(tx2);
-  cancelTimer(tx3);
-  cancelTimer(tx4);
-  cancelTimer(tx5);
-  cancelTimer(tx6);
-
-  cancelTimer(seq1);
-  cancelTimer(seq2);
-  cancelTimer(seq3);
-  cancelTimer(seq4);
-  cancelTimer(seq5);
-  cancelTimer(seq6);
-
-
-  write("ALL ACTIVE CHANNELS FINAL OFF");
-  write("TEST COMPLETE");
-
-  stop();
 }
