@@ -1,7 +1,7 @@
 
 
 /* =========================================================
-   6-CHANNEL ACCELERATED MASTER - 2 CYCLES
+   12V EPAS - 2 CYCLE VALIDATION TEST
 
    SYSTEM SELECTION:
    0 = NONE
@@ -10,66 +10,56 @@
    3 = 48V EPAS
    4 = 12V EPAS
 
-   START:
-   OFF       -> 1 second
-   STANDBY   -> 2 seconds
+   IMPORTANT:
+   EPAS Ctrl_4 initialization values are included.
 
-   EACH CYCLE:
+   SEQUENCE:
+   OFF       1 sec
+   STANDBY   2 sec
+
+   CYCLE:
    FLOAT
-   -> WAIT 1 SECOND
-   -> ISOLATION OPEN
-   -> WAIT 1 SECOND
-   -> ISOLATION CLOSE
-   -> REMAIN FLOAT 20 SECONDS
-   -> STANDBY 10 SECONDS
+   wait 1 sec
+   Isolation OPEN
+   wait 1 sec
+   Isolation CLOSE
+   remain FLOAT 20 sec
+   STANDBY 10 sec
 
-   REPEAT = 2 CYCLES
+   Repeat 2 cycles
 
-   AFTER CYCLE 2:
-   OFF -> 1 second
-   STOP CANALYZER MEASUREMENT
-
-   48V EPAS:
-   No isolation command.
+   FINAL:
+   OFF 1 sec
+   Stop measurement
    ========================================================= */
 
 
 variables
 {
-  /* =====================================================
-     CHANGE ONLY THESE VALUES
+  /* ==========================================
+     CHANGE THESE FOR YOUR CONNECTED CHANNELS
 
-     0 = NONE
-     1 = EBB
-     2 = EMB
-     3 = 48V EPAS
-     4 = 12V EPAS
-     ===================================================== */
+     For this validation use 4 for channels
+     containing 12V EPAS.
+     ========================================== */
 
-  int sys1 = 0;     // CAN1
-  int sys2 = 0;     // CAN2
-  int sys3 = 0;     // CAN3
-  int sys4 = 0;     // CAN4
-  int sys5 = 0;     // CAN5
-  int sys6 = 0;     // CAN6
+  int sys1 = 0;
+  int sys2 = 0;
+  int sys3 = 0;
+  int sys4 = 0;
+  int sys5 = 0;
+  int sys6 = 0;
 
-
-  /* TIMERS */
 
   msTimer masterTimer;
   msTimer txTimer;
   msTimer finalStopTimer;
 
-
-  /* STATE */
-
   int masterStep = 0;
   int cycleCount = 0;
 
 
-  /* =====================================================
-     CAN1 / DBC1
-     ===================================================== */
+  /* CAN1 */
 
   message DBC1::EnergyMgmtBodyCtrl_1 ebb1;
   message DBC1::EnergyMgmtBodyCtrl_2 emb1;
@@ -77,9 +67,7 @@ variables
   message DBC1::EnergyMgmtBodyCtrl_4 epas1;
 
 
-  /* =====================================================
-     CAN2 / DBC2
-     ===================================================== */
+  /* CAN2 */
 
   message DBC2::EnergyMgmtBodyCtrl_1 ebb2;
   message DBC2::EnergyMgmtBodyCtrl_2 emb2;
@@ -87,9 +75,7 @@ variables
   message DBC2::EnergyMgmtBodyCtrl_4 epas2;
 
 
-  /* =====================================================
-     CAN3 / DBC3
-     ===================================================== */
+  /* CAN3 */
 
   message DBC3::EnergyMgmtBodyCtrl_1 ebb3;
   message DBC3::EnergyMgmtBodyCtrl_2 emb3;
@@ -97,9 +83,7 @@ variables
   message DBC3::EnergyMgmtBodyCtrl_4 epas3;
 
 
-  /* =====================================================
-     CAN4 / DBC4
-     ===================================================== */
+  /* CAN4 */
 
   message DBC4::EnergyMgmtBodyCtrl_1 ebb4;
   message DBC4::EnergyMgmtBodyCtrl_2 emb4;
@@ -107,9 +91,7 @@ variables
   message DBC4::EnergyMgmtBodyCtrl_4 epas4;
 
 
-  /* =====================================================
-     CAN5 / DBC5
-     ===================================================== */
+  /* CAN5 */
 
   message DBC5::EnergyMgmtBodyCtrl_1 ebb5;
   message DBC5::EnergyMgmtBodyCtrl_2 emb5;
@@ -117,14 +99,76 @@ variables
   message DBC5::EnergyMgmtBodyCtrl_4 epas5;
 
 
-  /* =====================================================
-     CAN6 / DBC6
-     ===================================================== */
+  /* CAN6 */
 
   message DBC6::EnergyMgmtBodyCtrl_1 ebb6;
   message DBC6::EnergyMgmtBodyCtrl_2 emb6;
   message DBC6::EnergyMgmtBodyCtrl_3 v486;
   message DBC6::EnergyMgmtBodyCtrl_4 epas6;
+}
+
+
+/* =========================================================
+   INITIALIZE 12V EPAS CONTROL MESSAGE
+
+   These values came from the working manual Ctrl_4 frame.
+   ========================================================= */
+
+void initEPAS()
+{
+  epas1.EMduleDistrPath_R_Calc3 = 30;
+  epas1.IsolSwtchOpen_U_Thres3  = 40;
+  epas1.DcdcOutUHi_U_HystThres3 = 0;
+  epas1.DcdcOutULo_U_HystThres3 = 0;
+  epas1.DcdcAout_U_Rq3           = 13;
+  epas1.EMduleHystMn_U_Allw3     = 6;
+  epas1.PwBus_U_Rq3              = 13;
+  epas1.EMduleHystMx_U_Allw3     = 0;
+
+  epas2.EMduleDistrPath_R_Calc3 = 30;
+  epas2.IsolSwtchOpen_U_Thres3  = 40;
+  epas2.DcdcOutUHi_U_HystThres3 = 0;
+  epas2.DcdcOutULo_U_HystThres3 = 0;
+  epas2.DcdcAout_U_Rq3           = 13;
+  epas2.EMduleHystMn_U_Allw3     = 6;
+  epas2.PwBus_U_Rq3              = 13;
+  epas2.EMduleHystMx_U_Allw3     = 0;
+
+  epas3.EMduleDistrPath_R_Calc3 = 30;
+  epas3.IsolSwtchOpen_U_Thres3  = 40;
+  epas3.DcdcOutUHi_U_HystThres3 = 0;
+  epas3.DcdcOutULo_U_HystThres3 = 0;
+  epas3.DcdcAout_U_Rq3           = 13;
+  epas3.EMduleHystMn_U_Allw3     = 6;
+  epas3.PwBus_U_Rq3              = 13;
+  epas3.EMduleHystMx_U_Allw3     = 0;
+
+  epas4.EMduleDistrPath_R_Calc3 = 30;
+  epas4.IsolSwtchOpen_U_Thres3  = 40;
+  epas4.DcdcOutUHi_U_HystThres3 = 0;
+  epas4.DcdcOutULo_U_HystThres3 = 0;
+  epas4.DcdcAout_U_Rq3           = 13;
+  epas4.EMduleHystMn_U_Allw3     = 6;
+  epas4.PwBus_U_Rq3              = 13;
+  epas4.EMduleHystMx_U_Allw3     = 0;
+
+  epas5.EMduleDistrPath_R_Calc3 = 30;
+  epas5.IsolSwtchOpen_U_Thres3  = 40;
+  epas5.DcdcOutUHi_U_HystThres3 = 0;
+  epas5.DcdcOutULo_U_HystThres3 = 0;
+  epas5.DcdcAout_U_Rq3           = 13;
+  epas5.EMduleHystMn_U_Allw3     = 6;
+  epas5.PwBus_U_Rq3              = 13;
+  epas5.EMduleHystMx_U_Allw3     = 0;
+
+  epas6.EMduleDistrPath_R_Calc3 = 30;
+  epas6.IsolSwtchOpen_U_Thres3  = 40;
+  epas6.DcdcOutUHi_U_HystThres3 = 0;
+  epas6.DcdcOutULo_U_HystThres3 = 0;
+  epas6.DcdcAout_U_Rq3           = 13;
+  epas6.EMduleHystMn_U_Allw3     = 6;
+  epas6.PwBus_U_Rq3              = 13;
+  epas6.EMduleHystMx_U_Allw3     = 0;
 }
 
 
@@ -137,78 +181,32 @@ on start
   cycleCount = 0;
   masterStep = 0;
 
-  write("==============================================");
-  write("2-CYCLE ACCELERATED TEST STARTED");
-  write("==============================================");
+  /* IMPORTANT */
+  initEPAS();
 
-  printSelection(1,sys1);
-  printSelection(2,sys2);
-  printSelection(3,sys3);
-  printSelection(4,sys4);
-  printSelection(5,sys5);
-  printSelection(6,sys6);
-
-
-  /* Start in OFF */
+  write("========================================");
+  write("2-CYCLE EPAS VALIDATION STARTED");
+  write("========================================");
 
   setAllMode(0);
-
-  /* Isolation starts CLOSED */
-
   closeAllIsolation();
-
   sendAll();
 
-  write("----------------------------------------------");
-  write("ALL ACTIVE SYSTEMS: OFF");
+  write("MODE = OFF");
   write("OFF FOR 1 SECOND");
 
-
-  /* Send control messages every 100 ms */
-
   setTimer(txTimer,100);
-
-
-  /* OFF = 1 second */
-
   setTimer(masterTimer,1000);
 }
 
 
 /* =========================================================
-   DISPLAY SYSTEM SELECTION
-   ========================================================= */
-
-void printSelection(int ch, int sys)
-{
-  if(sys == 0)
-    write("CAN%d: NOT USED",ch);
-
-  else if(sys == 1)
-    write("CAN%d: EBB",ch);
-
-  else if(sys == 2)
-    write("CAN%d: EMB",ch);
-
-  else if(sys == 3)
-    write("CAN%d: 48V EPAS",ch);
-
-  else if(sys == 4)
-    write("CAN%d: 12V EPAS",ch);
-
-  else
-    write("CAN%d: INVALID SELECTION",ch);
-}
-
-
-/* =========================================================
-   100 ms CYCLIC TRANSMISSION
+   TRANSMIT EVERY 100 ms
    ========================================================= */
 
 on timer txTimer
 {
   sendAll();
-
   setTimer(txTimer,100);
 }
 
@@ -219,11 +217,7 @@ on timer txTimer
 
 on timer masterTimer
 {
-
-  /* =====================================================
-     STEP 0
-     OFF -> STANDBY
-     ===================================================== */
+  /* OFF -> STANDBY */
 
   if(masterStep == 0)
   {
@@ -231,24 +225,15 @@ on timer masterTimer
     closeAllIsolation();
     sendAll();
 
-    write("----------------------------------------------");
-    write("ALL ACTIVE SYSTEMS: STANDBY");
+    write("MODE = STANDBY");
     write("STANDBY FOR 2 SECONDS");
 
     masterStep = 1;
-
     setTimer(masterTimer,2000);
   }
 
 
-  /* =====================================================
-     STEP 1
-     STANDBY -> FLOAT
-
-     Isolation stays CLOSED.
-
-     Wait 1 second BEFORE opening isolation.
-     ===================================================== */
+  /* STANDBY -> FLOAT */
 
   else if(masterStep == 1)
   {
@@ -256,69 +241,49 @@ on timer masterTimer
     closeAllIsolation();
     sendAll();
 
-    write("----------------------------------------------");
+    write("----------------------------------------");
     write("CYCLE %d OF 2",cycleCount + 1);
     write("MODE = FLOAT");
-    write("WAIT 1 SECOND BEFORE ISOLATION OPEN");
+    write("ISOLATION STILL CLOSED");
+    write("WAIT 1 SECOND");
 
     masterStep = 2;
-
     setTimer(masterTimer,1000);
   }
 
 
-  /* =====================================================
-     STEP 2
-     FLOAT has been active 1 second.
-
-     Open isolation.
-     ===================================================== */
+  /* FLOAT 1 sec -> OPEN */
 
   else if(masterStep == 2)
   {
     openAllIsolation();
     sendAll();
 
-    write("ISOLATION OPEN");
-    write("OPEN FOR 1 SECOND");
-    write("48V EPAS: ISOLATION SKIPPED");
+    write("ISOLATION = OPEN");
+    write("WAIT 1 SECOND");
 
     masterStep = 3;
-
     setTimer(masterTimer,1000);
   }
 
 
-  /* =====================================================
-     STEP 3
-     Isolation OPEN finished.
-
-     CLOSE isolation.
-
-     Mode stays FLOAT.
-     ===================================================== */
+  /* OPEN 1 sec -> CLOSE */
 
   else if(masterStep == 3)
   {
     closeAllIsolation();
     sendAll();
 
-    write("ISOLATION CLOSE");
+    write("ISOLATION = CLOSE");
     write("MODE REMAINS FLOAT");
     write("FLOAT FOR 20 SECONDS");
 
     masterStep = 4;
-
     setTimer(masterTimer,20000);
   }
 
 
-  /* =====================================================
-     STEP 4
-     FLOAT period complete.
-
-     Go to STANDBY for 10 seconds.
-     ===================================================== */
+  /* FLOAT -> STANDBY */
 
   else if(masterStep == 4)
   {
@@ -326,36 +291,26 @@ on timer masterTimer
     closeAllIsolation();
     sendAll();
 
-    write("----------------------------------------------");
-    write("FLOAT COMPLETE");
     write("MODE = STANDBY");
     write("STANDBY FOR 10 SECONDS");
 
     masterStep = 5;
-
     setTimer(masterTimer,10000);
   }
 
 
-  /* =====================================================
-     STEP 5
-     STANDBY finished.
-
-     One cycle complete.
-     ===================================================== */
+  /* CYCLE COMPLETE */
 
   else if(masterStep == 5)
   {
     cycleCount++;
 
-    write("==============================================");
+    write("========================================");
     write("CYCLE %d OF 2 COMPLETE",cycleCount);
-    write("==============================================");
+    write("========================================");
 
 
-    /* =================================================
-       BOTH CYCLES COMPLETE
-       ================================================= */
+    /* BOTH CYCLES FINISHED */
 
     if(cycleCount >= 2)
     {
@@ -363,41 +318,28 @@ on timer masterTimer
       closeAllIsolation();
       sendAll();
 
-      write("----------------------------------------------");
-      write("2 OF 2 CYCLES COMPLETE");
-      write("ALL ACTIVE SYSTEMS: OFF");
+      write("MODE = OFF");
       write("FINAL OFF FOR 1 SECOND");
-
-      masterStep = 6;
 
       setTimer(finalStopTimer,1000);
     }
 
 
-    /* =================================================
-       START CYCLE 2
-       ================================================= */
+    /* START SECOND CYCLE */
 
     else
     {
       setAllMode(3);
-
-      /*
-         IMPORTANT:
-         Isolation remains CLOSED when FLOAT starts.
-      */
-
       closeAllIsolation();
-
       sendAll();
 
-      write("----------------------------------------------");
+      write("----------------------------------------");
       write("CYCLE %d OF 2",cycleCount + 1);
       write("MODE = FLOAT");
-      write("WAIT 1 SECOND BEFORE ISOLATION OPEN");
+      write("ISOLATION STILL CLOSED");
+      write("WAIT 1 SECOND");
 
       masterStep = 2;
-
       setTimer(masterTimer,1000);
     }
   }
@@ -405,39 +347,30 @@ on timer masterTimer
 
 
 /* =========================================================
-   FINAL AUTOMATIC STOP
+   FINAL STOP
    ========================================================= */
 
 on timer finalStopTimer
 {
-  /* Make sure final state is OFF */
-
   setAllMode(0);
   closeAllIsolation();
   sendAll();
 
-
-  /* Stop timers */
-
   cancelTimer(txTimer);
   cancelTimer(masterTimer);
 
-
-  write("==============================================");
+  write("========================================");
   write("TEST COMPLETE");
-  write("2 OF 2 CYCLES COMPLETE");
-  write("ALL ACTIVE SYSTEMS = OFF");
-  write("ISOLATION = CLOSED WHERE APPLICABLE");
-  write("STOPPING CANALYZER MEASUREMENT");
-  write("==============================================");
-
+  write("ALL ACTIVE SYSTEMS OFF");
+  write("STOPPING MEASUREMENT");
+  write("========================================");
 
   stop();
 }
 
 
 /* =========================================================
-   SET MODE ON ALL ACTIVE CHANNELS
+   ALL MODES
    ========================================================= */
 
 void setAllMode(int v)
@@ -452,7 +385,7 @@ void setAllMode(int v)
 
 
 /* =========================================================
-   OPEN ISOLATION
+   ALL ISOLATION OPEN
    ========================================================= */
 
 void openAllIsolation()
@@ -467,7 +400,7 @@ void openAllIsolation()
 
 
 /* =========================================================
-   CLOSE ISOLATION
+   ALL ISOLATION CLOSE
    ========================================================= */
 
 void closeAllIsolation()
@@ -482,230 +415,109 @@ void closeAllIsolation()
 
 
 /* =========================================================
-   MODE - CAN1
+   MODE FUNCTIONS
    ========================================================= */
 
 void mode1(int v)
 {
-  if(sys1 == 1)
-    ebb1.EMduleMde_D_Rq = v;
-
-  else if(sys1 == 2)
-    emb1.EMduleMde_D_Rq2 = v;
-
-  else if(sys1 == 3)
-    v481.UCapMduleMde_D_Rq = v;
-
-  else if(sys1 == 4)
-    epas1.EMduleMde_D_Rq3 = v;
+  if(sys1==1) ebb1.EMduleMde_D_Rq=v;
+  else if(sys1==2) emb1.EMduleMde_D_Rq2=v;
+  else if(sys1==3) v481.UCapMduleMde_D_Rq=v;
+  else if(sys1==4) epas1.EMduleMde_D_Rq3=v;
 }
-
-
-/* =========================================================
-   MODE - CAN2
-   ========================================================= */
 
 void mode2(int v)
 {
-  if(sys2 == 1)
-    ebb2.EMduleMde_D_Rq = v;
-
-  else if(sys2 == 2)
-    emb2.EMduleMde_D_Rq2 = v;
-
-  else if(sys2 == 3)
-    v482.UCapMduleMde_D_Rq = v;
-
-  else if(sys2 == 4)
-    epas2.EMduleMde_D_Rq3 = v;
+  if(sys2==1) ebb2.EMduleMde_D_Rq=v;
+  else if(sys2==2) emb2.EMduleMde_D_Rq2=v;
+  else if(sys2==3) v482.UCapMduleMde_D_Rq=v;
+  else if(sys2==4) epas2.EMduleMde_D_Rq3=v;
 }
-
-
-/* =========================================================
-   MODE - CAN3
-   ========================================================= */
 
 void mode3(int v)
 {
-  if(sys3 == 1)
-    ebb3.EMduleMde_D_Rq = v;
-
-  else if(sys3 == 2)
-    emb3.EMduleMde_D_Rq2 = v;
-
-  else if(sys3 == 3)
-    v483.UCapMduleMde_D_Rq = v;
-
-  else if(sys3 == 4)
-    epas3.EMduleMde_D_Rq3 = v;
+  if(sys3==1) ebb3.EMduleMde_D_Rq=v;
+  else if(sys3==2) emb3.EMduleMde_D_Rq2=v;
+  else if(sys3==3) v483.UCapMduleMde_D_Rq=v;
+  else if(sys3==4) epas3.EMduleMde_D_Rq3=v;
 }
-
-
-/* =========================================================
-   MODE - CAN4
-   ========================================================= */
 
 void mode4(int v)
 {
-  if(sys4 == 1)
-    ebb4.EMduleMde_D_Rq = v;
-
-  else if(sys4 == 2)
-    emb4.EMduleMde_D_Rq2 = v;
-
-  else if(sys4 == 3)
-    v484.UCapMduleMde_D_Rq = v;
-
-  else if(sys4 == 4)
-    epas4.EMduleMde_D_Rq3 = v;
+  if(sys4==1) ebb4.EMduleMde_D_Rq=v;
+  else if(sys4==2) emb4.EMduleMde_D_Rq2=v;
+  else if(sys4==3) v484.UCapMduleMde_D_Rq=v;
+  else if(sys4==4) epas4.EMduleMde_D_Rq3=v;
 }
-
-
-/* =========================================================
-   MODE - CAN5
-   ========================================================= */
 
 void mode5(int v)
 {
-  if(sys5 == 1)
-    ebb5.EMduleMde_D_Rq = v;
-
-  else if(sys5 == 2)
-    emb5.EMduleMde_D_Rq2 = v;
-
-  else if(sys5 == 3)
-    v485.UCapMduleMde_D_Rq = v;
-
-  else if(sys5 == 4)
-    epas5.EMduleMde_D_Rq3 = v;
+  if(sys5==1) ebb5.EMduleMde_D_Rq=v;
+  else if(sys5==2) emb5.EMduleMde_D_Rq2=v;
+  else if(sys5==3) v485.UCapMduleMde_D_Rq=v;
+  else if(sys5==4) epas5.EMduleMde_D_Rq3=v;
 }
-
-
-/* =========================================================
-   MODE - CAN6
-   ========================================================= */
 
 void mode6(int v)
 {
-  if(sys6 == 1)
-    ebb6.EMduleMde_D_Rq = v;
-
-  else if(sys6 == 2)
-    emb6.EMduleMde_D_Rq2 = v;
-
-  else if(sys6 == 3)
-    v486.UCapMduleMde_D_Rq = v;
-
-  else if(sys6 == 4)
-    epas6.EMduleMde_D_Rq3 = v;
+  if(sys6==1) ebb6.EMduleMde_D_Rq=v;
+  else if(sys6==2) emb6.EMduleMde_D_Rq2=v;
+  else if(sys6==3) v486.UCapMduleMde_D_Rq=v;
+  else if(sys6==4) epas6.EMduleMde_D_Rq3=v;
 }
 
 
 /* =========================================================
-   ISOLATION - CAN1
-   48V EPAS automatically skips this.
+   ISOLATION FUNCTIONS
+   0 = OPEN
+   1 = CLOSE
    ========================================================= */
 
 void isolation1(int v)
 {
-  if(sys1 == 1)
-    ebb1.IsolSwtch_B_Cmd = v;
-
-  else if(sys1 == 2)
-    emb1.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys1 == 4)
-    epas1.IsolSwtch_B_Cmd3 = v;
+  if(sys1==1) ebb1.IsolSwtch_B_Cmd=v;
+  else if(sys1==2) emb1.IsolSwtch_B_Cmd2=v;
+  else if(sys1==4) epas1.IsolSwtch_B_Cmd3=v;
 }
-
-
-/* =========================================================
-   ISOLATION - CAN2
-   ========================================================= */
 
 void isolation2(int v)
 {
-  if(sys2 == 1)
-    ebb2.IsolSwtch_B_Cmd = v;
-
-  else if(sys2 == 2)
-    emb2.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys2 == 4)
-    epas2.IsolSwtch_B_Cmd3 = v;
+  if(sys2==1) ebb2.IsolSwtch_B_Cmd=v;
+  else if(sys2==2) emb2.IsolSwtch_B_Cmd2=v;
+  else if(sys2==4) epas2.IsolSwtch_B_Cmd3=v;
 }
-
-
-/* =========================================================
-   ISOLATION - CAN3
-   ========================================================= */
 
 void isolation3(int v)
 {
-  if(sys3 == 1)
-    ebb3.IsolSwtch_B_Cmd = v;
-
-  else if(sys3 == 2)
-    emb3.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys3 == 4)
-    epas3.IsolSwtch_B_Cmd3 = v;
+  if(sys3==1) ebb3.IsolSwtch_B_Cmd=v;
+  else if(sys3==2) emb3.IsolSwtch_B_Cmd2=v;
+  else if(sys3==4) epas3.IsolSwtch_B_Cmd3=v;
 }
-
-
-/* =========================================================
-   ISOLATION - CAN4
-   ========================================================= */
 
 void isolation4(int v)
 {
-  if(sys4 == 1)
-    ebb4.IsolSwtch_B_Cmd = v;
-
-  else if(sys4 == 2)
-    emb4.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys4 == 4)
-    epas4.IsolSwtch_B_Cmd3 = v;
+  if(sys4==1) ebb4.IsolSwtch_B_Cmd=v;
+  else if(sys4==2) emb4.IsolSwtch_B_Cmd2=v;
+  else if(sys4==4) epas4.IsolSwtch_B_Cmd3=v;
 }
-
-
-/* =========================================================
-   ISOLATION - CAN5
-   ========================================================= */
 
 void isolation5(int v)
 {
-  if(sys5 == 1)
-    ebb5.IsolSwtch_B_Cmd = v;
-
-  else if(sys5 == 2)
-    emb5.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys5 == 4)
-    epas5.IsolSwtch_B_Cmd3 = v;
+  if(sys5==1) ebb5.IsolSwtch_B_Cmd=v;
+  else if(sys5==2) emb5.IsolSwtch_B_Cmd2=v;
+  else if(sys5==4) epas5.IsolSwtch_B_Cmd3=v;
 }
-
-
-/* =========================================================
-   ISOLATION - CAN6
-   ========================================================= */
 
 void isolation6(int v)
 {
-  if(sys6 == 1)
-    ebb6.IsolSwtch_B_Cmd = v;
-
-  else if(sys6 == 2)
-    emb6.IsolSwtch_B_Cmd2 = v;
-
-  else if(sys6 == 4)
-    epas6.IsolSwtch_B_Cmd3 = v;
+  if(sys6==1) ebb6.IsolSwtch_B_Cmd=v;
+  else if(sys6==2) emb6.IsolSwtch_B_Cmd2=v;
+  else if(sys6==4) epas6.IsolSwtch_B_Cmd3=v;
 }
 
 
 /* =========================================================
-   SEND ALL ACTIVE CHANNELS
+   SEND ALL
    ========================================================= */
 
 void sendAll()
@@ -720,120 +532,53 @@ void sendAll()
 
 
 /* =========================================================
-   SEND CAN1
+   SEND FUNCTIONS
    ========================================================= */
 
 void send1()
 {
-  if(sys1 == 1)
-    output(ebb1);
-
-  else if(sys1 == 2)
-    output(emb1);
-
-  else if(sys1 == 3)
-    output(v481);
-
-  else if(sys1 == 4)
-    output(epas1);
+  if(sys1==1) output(ebb1);
+  else if(sys1==2) output(emb1);
+  else if(sys1==3) output(v481);
+  else if(sys1==4) output(epas1);
 }
-
-
-/* =========================================================
-   SEND CAN2
-   ========================================================= */
 
 void send2()
 {
-  if(sys2 == 1)
-    output(ebb2);
-
-  else if(sys2 == 2)
-    output(emb2);
-
-  else if(sys2 == 3)
-    output(v482);
-
-  else if(sys2 == 4)
-    output(epas2);
+  if(sys2==1) output(ebb2);
+  else if(sys2==2) output(emb2);
+  else if(sys2==3) output(v482);
+  else if(sys2==4) output(epas2);
 }
-
-
-/* =========================================================
-   SEND CAN3
-   ========================================================= */
 
 void send3()
 {
-  if(sys3 == 1)
-    output(ebb3);
-
-  else if(sys3 == 2)
-    output(emb3);
-
-  else if(sys3 == 3)
-    output(v483);
-
-  else if(sys3 == 4)
-    output(epas3);
+  if(sys3==1) output(ebb3);
+  else if(sys3==2) output(emb3);
+  else if(sys3==3) output(v483);
+  else if(sys3==4) output(epas3);
 }
-
-
-/* =========================================================
-   SEND CAN4
-   ========================================================= */
 
 void send4()
 {
-  if(sys4 == 1)
-    output(ebb4);
-
-  else if(sys4 == 2)
-    output(emb4);
-
-  else if(sys4 == 3)
-    output(v484);
-
-  else if(sys4 == 4)
-    output(epas4);
+  if(sys4==1) output(ebb4);
+  else if(sys4==2) output(emb4);
+  else if(sys4==3) output(v484);
+  else if(sys4==4) output(epas4);
 }
-
-
-/* =========================================================
-   SEND CAN5
-   ========================================================= */
 
 void send5()
 {
-  if(sys5 == 1)
-    output(ebb5);
-
-  else if(sys5 == 2)
-    output(emb5);
-
-  else if(sys5 == 3)
-    output(v485);
-
-  else if(sys5 == 4)
-    output(epas5);
+  if(sys5==1) output(ebb5);
+  else if(sys5==2) output(emb5);
+  else if(sys5==3) output(v485);
+  else if(sys5==4) output(epas5);
 }
-
-
-/* =========================================================
-   SEND CAN6
-   ========================================================= */
 
 void send6()
 {
-  if(sys6 == 1)
-    output(ebb6);
-
-  else if(sys6 == 2)
-    output(emb6);
-
-  else if(sys6 == 3)
-    output(v486);
-
-  else if(sys6 == 4)
-    output(epas6);
+  if(sys6==1) output(ebb6);
+  else if(sys6==2) output(emb6);
+  else if(sys6==3) output(v486);
+  else if(sys6==4) output(epas6);
 }
