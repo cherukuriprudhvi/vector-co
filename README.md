@@ -1,36 +1,35 @@
 
 
 /* =========================================================
-   CAN1 - 12V EPAS VALIDATION
-
-   Working manual IG reference:
-   FLOAT + CLOSE
-   Data = 126 168 0 13 52 192 0 0
-          7E  A8 00 0D 34 C0 00 00
+   CAN1 - 12V EPAS TEST
+   Sends BOTH:
+     0x213 EnergyMgmtBodyCtrl_4
+     0x203 EnergyMgmtBodyInfo_4
 
    Sequence:
-   OFF       1 sec
-   STANDBY   2 sec
+   OFF      1 sec
+   STANDBY  2 sec
 
    FLOAT
    wait 1 sec
    Isolation OPEN
    wait 1 sec
    Isolation CLOSE
-   FLOAT     20 sec
-   STANDBY   10 sec
+   FLOAT 20 sec
+   STANDBY 10 sec
 
    Repeat 2 cycles
-
-   Then:
-   OFF 1 sec
-   Stop measurement
+   Then OFF and STOP
    ========================================================= */
 
 
 variables
 {
+  /* Control message = 0x213 / 531 */
   message DBC1::EnergyMgmtBodyCtrl_4 epas1;
+
+  /* Info message = 0x203 / 515 */
+  message DBC1::EnergyMgmtBodyInfo_4 epasInfo1;
 
   msTimer masterTimer;
   msTimer txTimer;
@@ -42,8 +41,8 @@ variables
 
 
 /* =========================================================
-   INITIALIZE EPAS MESSAGE
-   RAW VALUES FROM WORKING MANUAL IG FRAME
+   INITIALIZE CTRL_4
+   RAW VALUES FROM WORKING MANUAL IG
    ========================================================= */
 
 void initEPAS()
@@ -54,16 +53,34 @@ void initEPAS()
   epas1.DcdcOutUHi_U_HystThres3 = 0;
   epas1.DcdcOutULo_U_HystThres3 = 0;
 
-  epas1.DcdcAout_U_Rq3       = 13;
-  epas1.EMduleHystMn_U_Allw3 = 6;
-  epas1.PwBus_U_Rq3          = 13;
-  epas1.EMduleHystMx_U_Allw3 = 0;
+  epas1.DcdcAout_U_Rq3           = 13;
+  epas1.EMduleHystMn_U_Allw3     = 6;
+  epas1.PwBus_U_Rq3              = 13;
+  epas1.EMduleHystMx_U_Allw3     = 0;
 }
 
 
 /* =========================================================
-   SET MODE
+   INITIALIZE INFO_4
+   Working IG:
+   00 00 00 00 00 00 A2 80
+   ========================================================= */
 
+void initEPASInfo()
+{
+  epasInfo1.byte(0) = 0;
+  epasInfo1.byte(1) = 0;
+  epasInfo1.byte(2) = 0;
+  epasInfo1.byte(3) = 0;
+  epasInfo1.byte(4) = 0;
+  epasInfo1.byte(5) = 0;
+  epasInfo1.byte(6) = 162;
+  epasInfo1.byte(7) = 128;
+}
+
+
+/* =========================================================
+   MODE
    0 = OFF
    1 = STANDBY
    3 = FLOAT
@@ -77,7 +94,6 @@ void setMode(int mode)
 
 /* =========================================================
    ISOLATION
-
    0 = OPEN
    1 = CLOSE
    ========================================================= */
@@ -89,12 +105,13 @@ void setIsolation(int value)
 
 
 /* =========================================================
-   SEND
+   SEND BOTH MESSAGES
    ========================================================= */
 
 void sendEPAS()
 {
   output(epas1);
+  output(epasInfo1);
 }
 
 
@@ -107,10 +124,10 @@ on start
   masterStep = 0;
   cycleCount = 0;
 
-  /* Load same default values as working IG */
   initEPAS();
+  initEPASInfo();
 
-  /* Start OFF + Isolation CLOSE */
+  /* Initial condition */
   setMode(0);
   setIsolation(1);
 
@@ -118,15 +135,16 @@ on start
 
   write("======================================");
   write("CAN1 12V EPAS TEST START");
+  write("CTRL_4 + INFO_4 ACTIVE");
   write("MODE = OFF");
   write("ISOLATION = CLOSE");
   write("======================================");
 
-  /* Keep transmitting every 100 ms */
-  setTimer(txTimer, 100);
+  /* Send both messages every 100 ms */
+  setTimer(txTimer,100);
 
   /* OFF for 1 second */
-  setTimer(masterTimer, 1000);
+  setTimer(masterTimer,1000);
 }
 
 
@@ -138,20 +156,20 @@ on timer txTimer
 {
   sendEPAS();
 
-  setTimer(txTimer, 100);
+  setTimer(txTimer,100);
 }
 
 
 /* =========================================================
-   TEST SEQUENCE
+   MASTER TEST SEQUENCE
    ========================================================= */
 
 on timer masterTimer
 {
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 0
      OFF -> STANDBY
-     ------------------------------------------------------- */
+     ============================================= */
 
   if(masterStep == 0)
   {
@@ -161,18 +179,19 @@ on timer masterTimer
     sendEPAS();
 
     write("MODE = STANDBY");
+    write("ISOLATION = CLOSE");
     write("WAIT 2 SEC");
 
     masterStep = 1;
 
-    setTimer(masterTimer, 2000);
+    setTimer(masterTimer,2000);
   }
 
 
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 1
      STANDBY -> FLOAT
-     ------------------------------------------------------- */
+     ============================================= */
 
   else if(masterStep == 1)
   {
@@ -182,26 +201,26 @@ on timer masterTimer
     sendEPAS();
 
     write("--------------------------------------");
-    write("CYCLE %d OF 2", cycleCount + 1);
+    write("CYCLE %d OF 2",cycleCount + 1);
     write("MODE = FLOAT");
     write("ISOLATION = CLOSE");
     write("WAIT 1 SEC BEFORE OPEN");
 
     masterStep = 2;
 
-    setTimer(masterTimer, 1000);
+    setTimer(masterTimer,1000);
   }
 
 
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 2
-     OPEN ISOLATION
-     MODE REMAINS FLOAT
-     ------------------------------------------------------- */
+     FLOAT remains FLOAT
+     Isolation OPEN
+     ============================================= */
 
   else if(masterStep == 2)
   {
-    /* DO NOT CHANGE MODE */
+    /* MODE IS NOT CHANGED */
 
     setIsolation(0);
 
@@ -213,19 +232,19 @@ on timer masterTimer
 
     masterStep = 3;
 
-    setTimer(masterTimer, 1000);
+    setTimer(masterTimer,1000);
   }
 
 
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 3
-     CLOSE ISOLATION
-     MODE STILL FLOAT
-     ------------------------------------------------------- */
+     Isolation CLOSE
+     FLOAT remains FLOAT
+     ============================================= */
 
   else if(masterStep == 3)
   {
-    /* DO NOT CHANGE MODE */
+    /* MODE IS NOT CHANGED */
 
     setIsolation(1);
 
@@ -237,14 +256,14 @@ on timer masterTimer
 
     masterStep = 4;
 
-    setTimer(masterTimer, 20000);
+    setTimer(masterTimer,20000);
   }
 
 
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 4
      FLOAT -> STANDBY
-     ------------------------------------------------------- */
+     ============================================= */
 
   else if(masterStep == 4)
   {
@@ -254,28 +273,31 @@ on timer masterTimer
     sendEPAS();
 
     write("MODE = STANDBY");
+    write("ISOLATION = CLOSE");
     write("WAIT 10 SEC");
 
     masterStep = 5;
 
-    setTimer(masterTimer, 10000);
+    setTimer(masterTimer,10000);
   }
 
 
-  /* -------------------------------------------------------
+  /* =============================================
      STEP 5
-     CYCLE FINISHED
-     ------------------------------------------------------- */
+     CYCLE COMPLETE
+     ============================================= */
 
   else if(masterStep == 5)
   {
     cycleCount++;
 
     write("--------------------------------------");
-    write("CYCLE %d COMPLETE", cycleCount);
+    write("CYCLE %d COMPLETE",cycleCount);
 
 
-    /* TWO CYCLES COMPLETE */
+    /* ===========================================
+       BOTH CYCLES FINISHED
+       =========================================== */
 
     if(cycleCount >= 2)
     {
@@ -291,11 +313,13 @@ on timer masterTimer
       write("WAIT 1 SEC THEN STOP");
       write("======================================");
 
-      setTimer(finalStopTimer, 1000);
+      setTimer(finalStopTimer,1000);
     }
 
 
-    /* START NEXT CYCLE */
+    /* ===========================================
+       START SECOND CYCLE
+       =========================================== */
 
     else
     {
@@ -305,14 +329,14 @@ on timer masterTimer
       sendEPAS();
 
       write("--------------------------------------");
-      write("CYCLE %d OF 2", cycleCount + 1);
+      write("CYCLE %d OF 2",cycleCount + 1);
       write("MODE = FLOAT");
       write("ISOLATION = CLOSE");
       write("WAIT 1 SEC BEFORE OPEN");
 
       masterStep = 2;
 
-      setTimer(masterTimer, 1000);
+      setTimer(masterTimer,1000);
     }
   }
 }
