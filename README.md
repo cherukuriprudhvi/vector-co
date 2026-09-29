@@ -1,117 +1,89 @@
 
 
-/* =========================================================
-   CAN1 - 12V EPAS TEST
-   Sends BOTH:
-     0x213 EnergyMgmtBodyCtrl_4
-     0x203 EnergyMgmtBodyInfo_4
-
-   Sequence:
-   OFF      1 sec
-   STANDBY  2 sec
-
-   FLOAT
-   wait 1 sec
-   Isolation OPEN
-   wait 1 sec
-   Isolation CLOSE
-   FLOAT 20 sec
-   STANDBY 10 sec
-
-   Repeat 2 cycles
-   Then OFF and STOP
-   ========================================================= */
-
-
 variables
 {
-  /* Control message = 0x213 / 531 */
-  message DBC1::EnergyMgmtBodyCtrl_4 epas1;
+  /* ================= EMB - CAN3 / DBC3 ================= */
 
-  /* Info message = 0x203 / 515 */
-  message DBC1::EnergyMgmtBodyInfo_4 epasInfo1;
+  message DBC3::BCM_AutoSar_Network_Mgmt       bcm;
+  message DBC3::BodyInfo_3                     body;
+  message DBC3::DCDCE_AutoSar_Network_Mgmt     dcdce;
+  message DBC3::DCDCF_AutoSar_Network_Mgmt     dcdcf;
+  message DBC3::EnergyMgmtBodyCtrl_2            ctrl;
+  message DBC3::EnergyMgmtBodyInfo_2            info;
 
-  msTimer masterTimer;
-  msTimer txTimer;
-  msTimer finalStopTimer;
+  msTimer timer100;
+  msTimer timer500;
+  msTimer timer1000;
+  msTimer seqTimer;
 
-  int masterStep = 0;
-  int cycleCount = 0;
+  int step = 0;
 }
 
 
 /* =========================================================
-   INITIALIZE CTRL_4
-   RAW VALUES FROM WORKING MANUAL IG
+   SET EXACT EMB VALUES FROM YOUR IG
    ========================================================= */
 
-void initEPAS()
+void initEMB()
 {
-  epas1.EMduleDistrPath_R_Calc3 = 30;
-  epas1.IsolSwtchOpen_U_Thres3  = 40;
-
-  epas1.DcdcOutUHi_U_HystThres3 = 0;
-  epas1.DcdcOutULo_U_HystThres3 = 0;
-
-  epas1.DcdcAout_U_Rq3           = 13;
-  epas1.EMduleHystMn_U_Allw3     = 6;
-  epas1.PwBus_U_Rq3              = 13;
-  epas1.EMduleHystMx_U_Allw3     = 0;
-}
+  /* BCM */
+  bcm.BCM_AutoSarNMNodeId     = 129;
+  bcm.BCM_AutoSarNMControl    = 0;
+  bcm.BCM_AutoSarNMReserved1  = 255;
+  bcm.BCM_AutoSarNMReserved2  = 255;
+  bcm.BCM_GWOnBoardTester     = 255;
+  bcm.BCM_GWNMProxy           = 255;
+  bcm.BCM_AutoSarNMReserved3  = 255;
+  bcm.BCM_AutoSarNMReserved4  = 255;
 
 
-/* =========================================================
-   INITIALIZE INFO_4
-   Working IG:
-   00 00 00 00 00 00 A2 80
-   ========================================================= */
-
-void initEPASInfo()
-{
-  epasInfo1.byte(0) = 0;
-  epasInfo1.byte(1) = 0;
-  epasInfo1.byte(2) = 0;
-  epasInfo1.byte(3) = 0;
-  epasInfo1.byte(4) = 0;
-  epasInfo1.byte(5) = 0;
-  epasInfo1.byte(6) = 162;
-  epasInfo1.byte(7) = 128;
-}
+  /* DCDCE */
+  dcdce.DCDCE_AutoSarNMControl   = 0;
+  dcdce.DCDCE_AutoSarNMNodeId    = 129;
+  dcdce.DCDCE_AutoSarNMReserved1 = 255;
+  dcdce.DCDCE_AutoSarNMReserved2 = 255;
+  dcdce.DCDCE_GWOnBoardTester    = 255;
+  dcdce.DCDCE_GWNMProxy          = 255;
+  dcdce.DCDCE_AutoSarNMReserved3 = 255;
+  dcdce.DCDCE_AutoSarNMReserved4 = 255;
 
 
-/* =========================================================
-   MODE
-   0 = OFF
-   1 = STANDBY
-   3 = FLOAT
-   ========================================================= */
-
-void setMode(int mode)
-{
-  epas1.EMduleMde_D_Rq3 = mode;
-}
+  /* DCDCF */
+  dcdcf.DCDCF_AutoSarNMControl   = 0;
+  dcdcf.DCDCF_AutoSarNMNodeId    = 129;
+  dcdcf.DCDCF_AutoSarNMReserved1 = 255;
+  dcdcf.DCDCF_AutoSarNMReserved2 = 255;
+  dcdcf.DCDCF_GWOnBoardTester    = 255;
+  dcdcf.DCDCF_GWNMProxy          = 255;
+  dcdcf.DCDCF_AutoSarNMReserved3 = 255;
+  dcdcf.DCDCF_AutoSarNMReserved4 = 255;
 
 
-/* =========================================================
-   ISOLATION
-   0 = OPEN
-   1 = CLOSE
-   ========================================================= */
+  /* EMB CONTROL */
+  ctrl.EMduleDistrPath_R_Calc2   = 30;
+  ctrl.EMduleMde_D_Rq2           = 0;     // OFF
+  ctrl.IsolSwtchOpen_U_Thres2    = 40;
+  ctrl.IsolSwtch_B_Cmd2          = 1;     // CLOSE
 
-void setIsolation(int value)
-{
-  epas1.IsolSwtch_B_Cmd3 = value;
-}
+  ctrl.DcdcOutULo_U_HystThres2   = 0;
+  ctrl.DcdcAout_U_Rq2            = 13;
+  ctrl.DcdcOutUHi_U_HystThres2   = 0;
+  ctrl.PwBus_U_Rq2               = 13;
+  ctrl.EMduleHystMx_U_Allw2      = 0;
+  ctrl.EMduleHystMn_U_Allw2      = 6;
 
 
-/* =========================================================
-   SEND BOTH MESSAGES
-   ========================================================= */
-
-void sendEPAS()
-{
-  output(epas1);
-  output(epasInfo1);
+  /* EMB INFO */
+  info.EMduleRgen_I_Actl2        = 0;
+  info.EMduleBst_I_Actl2         = 0;
+  info.EMduleRgen_IRate_Rsrv2    = 0;
+  info.DcdcOutULo1_IRate_Actl2   = 0;
+  info.EMduleBst_IRate_Rsrv2     = 0;
+  info.DcdcOutULo2_IRate_Actl2   = 0;
+  info.DcdcOutUHi2_IRate_Actl2   = 0;
+  info.DcdcOutUHi1_IRate_Actl2   = 0;
+  info.EMduleChrg_I_Mx2          = 20;
+  info.EMduleDchrg_I_Mx2         = 20;
 }
 
 
@@ -121,247 +93,139 @@ void sendEPAS()
 
 on start
 {
-  masterStep = 0;
-  cycleCount = 0;
+  initEMB();
 
-  initEPAS();
-  initEPASInfo();
+  ctrl.EMduleMde_D_Rq2  = 0;
+  ctrl.IsolSwtch_B_Cmd2 = 1;
 
-  /* Initial condition */
-  setMode(0);
-  setIsolation(1);
+  step = 0;
 
-  sendEPAS();
-
-  write("======================================");
-  write("CAN1 12V EPAS TEST START");
-  write("CTRL_4 + INFO_4 ACTIVE");
-  write("MODE = OFF");
-  write("ISOLATION = CLOSE");
-  write("======================================");
-
-  /* Send both messages every 100 ms */
-  setTimer(txTimer,100);
+  setTimer(timer100,100);
+  setTimer(timer500,500);
+  setTimer(timer1000,1000);
 
   /* OFF for 1 second */
-  setTimer(masterTimer,1000);
+  setTimer(seqTimer,1000);
+
+  write("EMB TEST START -> OFF");
 }
 
 
 /* =========================================================
-   PERIODIC TRANSMISSION
+   ORIGINAL IG MESSAGE PERIODS
    ========================================================= */
 
-on timer txTimer
+/* Ctrl + Info = 100 ms */
+on timer timer100
 {
-  sendEPAS();
+  output(ctrl);
+  output(info);
 
-  setTimer(txTimer,100);
+  setTimer(timer100,100);
+}
+
+
+/* BodyInfo = 500 ms */
+on timer timer500
+{
+  output(body);
+
+  setTimer(timer500,500);
+}
+
+
+/* BCM + DCDCE + DCDCF = 1000 ms */
+on timer timer1000
+{
+  output(bcm);
+  output(dcdce);
+  output(dcdcf);
+
+  setTimer(timer1000,1000);
 }
 
 
 /* =========================================================
-   MASTER TEST SEQUENCE
+   TEST SEQUENCE
    ========================================================= */
 
-on timer masterTimer
+on timer seqTimer
 {
-  /* =============================================
-     STEP 0
-     OFF -> STANDBY
-     ============================================= */
-
-  if(masterStep == 0)
+  switch(step)
   {
-    setMode(1);
-    setIsolation(1);
+    case 0:
 
-    sendEPAS();
+      /* OFF finished -> STANDBY */
+      ctrl.EMduleMde_D_Rq2 = 1;
+      ctrl.IsolSwtch_B_Cmd2 = 1;
 
-    write("MODE = STANDBY");
-    write("ISOLATION = CLOSE");
-    write("WAIT 2 SEC");
+      write("EMB -> STANDBY");
 
-    masterStep = 1;
+      step = 1;
+      setTimer(seqTimer,1000);
+      break;
 
-    setTimer(masterTimer,2000);
+
+    case 1:
+
+      /* STANDBY -> FLOAT */
+      ctrl.EMduleMde_D_Rq2 = 3;
+      ctrl.IsolSwtch_B_Cmd2 = 1;
+
+      write("EMB -> FLOAT");
+
+      step = 2;
+      setTimer(seqTimer,1000);
+      break;
+
+
+    case 2:
+
+      /* FLOAT 1 sec -> isolation OPEN */
+      ctrl.IsolSwtch_B_Cmd2 = 0;
+
+      write("EMB -> ISOLATION OPEN");
+
+      step = 3;
+      setTimer(seqTimer,1000);
+      break;
+
+
+    case 3:
+
+      /* CLOSE isolation */
+      ctrl.IsolSwtch_B_Cmd2 = 1;
+
+      write("EMB -> ISOLATION CLOSE");
+      write("EMB -> FLOAT HOLD 90 SEC");
+
+      step = 4;
+      setTimer(seqTimer,90000);
+      break;
+
+
+    case 4:
+
+      /* After 90 sec FLOAT -> STANDBY */
+      ctrl.EMduleMde_D_Rq2 = 1;
+      ctrl.IsolSwtch_B_Cmd2 = 1;
+
+      write("EMB -> STANDBY");
+
+      step = 5;
+      setTimer(seqTimer,1000);
+      break;
+
+
+    case 5:
+
+      /* STANDBY -> OFF */
+      ctrl.EMduleMde_D_Rq2 = 0;
+      ctrl.IsolSwtch_B_Cmd2 = 1;
+
+      write("EMB -> OFF");
+
+      step = 6;
+      break;
   }
-
-
-  /* =============================================
-     STEP 1
-     STANDBY -> FLOAT
-     ============================================= */
-
-  else if(masterStep == 1)
-  {
-    setMode(3);
-    setIsolation(1);
-
-    sendEPAS();
-
-    write("--------------------------------------");
-    write("CYCLE %d OF 2",cycleCount + 1);
-    write("MODE = FLOAT");
-    write("ISOLATION = CLOSE");
-    write("WAIT 1 SEC BEFORE OPEN");
-
-    masterStep = 2;
-
-    setTimer(masterTimer,1000);
-  }
-
-
-  /* =============================================
-     STEP 2
-     FLOAT remains FLOAT
-     Isolation OPEN
-     ============================================= */
-
-  else if(masterStep == 2)
-  {
-    /* MODE IS NOT CHANGED */
-
-    setIsolation(0);
-
-    sendEPAS();
-
-    write("MODE = FLOAT");
-    write("ISOLATION = OPEN");
-    write("WAIT 1 SEC");
-
-    masterStep = 3;
-
-    setTimer(masterTimer,1000);
-  }
-
-
-  /* =============================================
-     STEP 3
-     Isolation CLOSE
-     FLOAT remains FLOAT
-     ============================================= */
-
-  else if(masterStep == 3)
-  {
-    /* MODE IS NOT CHANGED */
-
-    setIsolation(1);
-
-    sendEPAS();
-
-    write("MODE = FLOAT");
-    write("ISOLATION = CLOSE");
-    write("FLOAT FOR 20 SEC");
-
-    masterStep = 4;
-
-    setTimer(masterTimer,20000);
-  }
-
-
-  /* =============================================
-     STEP 4
-     FLOAT -> STANDBY
-     ============================================= */
-
-  else if(masterStep == 4)
-  {
-    setMode(1);
-    setIsolation(1);
-
-    sendEPAS();
-
-    write("MODE = STANDBY");
-    write("ISOLATION = CLOSE");
-    write("WAIT 10 SEC");
-
-    masterStep = 5;
-
-    setTimer(masterTimer,10000);
-  }
-
-
-  /* =============================================
-     STEP 5
-     CYCLE COMPLETE
-     ============================================= */
-
-  else if(masterStep == 5)
-  {
-    cycleCount++;
-
-    write("--------------------------------------");
-    write("CYCLE %d COMPLETE",cycleCount);
-
-
-    /* ===========================================
-       BOTH CYCLES FINISHED
-       =========================================== */
-
-    if(cycleCount >= 2)
-    {
-      setMode(0);
-      setIsolation(1);
-
-      sendEPAS();
-
-      write("======================================");
-      write("2 CYCLES COMPLETE");
-      write("MODE = OFF");
-      write("ISOLATION = CLOSE");
-      write("WAIT 1 SEC THEN STOP");
-      write("======================================");
-
-      setTimer(finalStopTimer,1000);
-    }
-
-
-    /* ===========================================
-       START SECOND CYCLE
-       =========================================== */
-
-    else
-    {
-      setMode(3);
-      setIsolation(1);
-
-      sendEPAS();
-
-      write("--------------------------------------");
-      write("CYCLE %d OF 2",cycleCount + 1);
-      write("MODE = FLOAT");
-      write("ISOLATION = CLOSE");
-      write("WAIT 1 SEC BEFORE OPEN");
-
-      masterStep = 2;
-
-      setTimer(masterTimer,1000);
-    }
-  }
-}
-
-
-/* =========================================================
-   FINAL STOP
-   ========================================================= */
-
-on timer finalStopTimer
-{
-  setMode(0);
-  setIsolation(1);
-
-  sendEPAS();
-
-  cancelTimer(txTimer);
-  cancelTimer(masterTimer);
-
-  write("======================================");
-  write("TEST COMPLETE");
-  write("FINAL MODE = OFF");
-  write("FINAL ISOLATION = CLOSE");
-  write("STOPPING MEASUREMENT");
-  write("======================================");
-
-  stop();
 }
