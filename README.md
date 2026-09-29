@@ -1,7 +1,6 @@
 
 
 /*@!Encoding:1252*/
-
 variables
 {
   /* =========================================================
@@ -13,12 +12,12 @@ variables
      4 = 12V EPAS
      ========================================================= */
 
-  int sys1 = 4;     // CAN1 = EPAS
-  int sys2 = 4;     // CAN2 = EPAS
-  int sys3 = 2;     // CAN3 = EMB
-  int sys4 = 1;     // CAN4 = EBB
-  int sys5 = 3;     // CAN5 = 48V EPAS
-  int sys6 = 1;     // CAN6 = EBB
+  int sys1 = 4;
+  int sys2 = 4;
+  int sys3 = 2;
+  int sys4 = 1;
+  int sys5 = 3;
+  int sys6 = 1;
 
   msTimer t100;
   msTimer t500;
@@ -162,50 +161,99 @@ variables
 
 
 /* ============================================================
-   INITIALIZE
+   INITIALIZE STATIC VALUES
    ============================================================ */
 
 void initMessages()
 {
-  /* ================= BCM ================= */
+  /* ---------- BCM ---------- */
 
-  bcm1.byte(0)=129; bcm1.byte(1)=0;
-  bcm1.byte(2)=255; bcm1.byte(3)=255;
-  bcm1.byte(4)=255; bcm1.byte(5)=255;
-  bcm1.byte(6)=255; bcm1.byte(7)=255;
+  bcm1.BCM_AutoSarNMNodeId = 129;
+  bcm1.BCM_AutoSarNMControl = 0;
+  bcm1.BCM_AutoSarNMReserved1 = 255;
+  bcm1.BCM_AutoSarNMReserved2 = 255;
+  bcm1.BCM_GWOnBoardTester = 255;
+  bcm1.BCM_GWNMProxy = 255;
+  bcm1.BCM_AutoSarNMReserved3 = 255;
+  bcm1.BCM_AutoSarNMReserved4 = 255;
 
-  bcm2.byte(0)=129; bcm2.byte(1)=0;
-  bcm2.byte(2)=255; bcm2.byte(3)=255;
-  bcm2.byte(4)=255; bcm2.byte(5)=255;
-  bcm2.byte(6)=255; bcm2.byte(7)=255;
+  bcm2.BCM_AutoSarNMNodeId = 129;
+  bcm2.BCM_AutoSarNMControl = 0;
+  bcm2.BCM_AutoSarNMReserved1 = 255;
+  bcm2.BCM_AutoSarNMReserved2 = 255;
+  bcm2.BCM_GWOnBoardTester = 255;
+  bcm2.BCM_GWNMProxy = 255;
+  bcm2.BCM_AutoSarNMReserved3 = 255;
+  bcm2.BCM_AutoSarNMReserved4 = 255;
 
-  bcm3.byte(0)=129; bcm3.byte(1)=0;
-  bcm3.byte(2)=255; bcm3.byte(3)=255;
-  bcm3.byte(4)=255; bcm3.byte(5)=255;
-  bcm3.byte(6)=255; bcm3.byte(7)=255;
+  bcm3.BCM_AutoSarNMNodeId = 129;
+  bcm3.BCM_AutoSarNMControl = 0;
+  bcm3.BCM_AutoSarNMReserved1 = 255;
+  bcm3.BCM_AutoSarNMReserved2 = 255;
+  bcm3.BCM_GWOnBoardTester = 255;
+  bcm3.BCM_GWNMProxy = 255;
+  bcm3.BCM_AutoSarNMReserved3 = 255;
+  bcm3.BCM_AutoSarNMReserved4 = 255;
 
-  bcm4.byte(0)=129; bcm4.byte(1)=0;
-  bcm4.byte(2)=255; bcm4.byte(3)=255;
-  bcm4.byte(4)=255; bcm4.byte(5)=255;
-  bcm4.byte(6)=255; bcm4.byte(7)=255;
+  bcm4.BCM_AutoSarNMNodeId = 129;
+  bcm4.BCM_AutoSarNMControl = 0;
+  bcm4.BCM_AutoSarNMReserved1 = 255;
+  bcm4.BCM_AutoSarNMReserved2 = 255;
+  bcm4.BCM_GWOnBoardTester = 255;
+  bcm4.BCM_GWNMProxy = 255;
+  bcm4.BCM_AutoSarNMReserved3 = 255;
+  bcm4.BCM_AutoSarNMReserved4 = 255;
 
-  bcm5.byte(0)=129; bcm5.byte(1)=0;
-  bcm5.byte(2)=255; bcm5.byte(3)=255;
-  bcm5.byte(4)=255; bcm5.byte(5)=255;
-  bcm5.byte(6)=255; bcm5.byte(7)=255;
+  bcm5.BCM_AutoSarNMNodeId = 129;
+  bcm5.BCM_AutoSarNMControl = 0;
+  bcm5.BCM_AutoSarNMReserved1 = 255;
+  bcm5.BCM_AutoSarNMReserved2 = 255;
+  bcm5.BCM_GWOnBoardTester = 255;
+  bcm5.BCM_GWNMProxy = 255;
+  bcm5.BCM_AutoSarNMReserved3 = 255;
+  bcm5.BCM_AutoSarNMReserved4 = 255;
 
-  bcm6.byte(0)=129; bcm6.byte(1)=0;
-  bcm6.byte(2)=255; bcm6.byte(3)=255;
-  bcm6.byte(4)=255; bcm6.byte(5)=255;
-  bcm6.byte(6)=255; bcm6.byte(7)=255;
+  bcm6.BCM_AutoSarNMNodeId = 129;
+  bcm6.BCM_AutoSarNMControl = 0;
+  bcm6.BCM_AutoSarNMReserved1 = 255;
+  bcm6.BCM_AutoSarNMReserved2 = 255;
+  bcm6.BCM_GWOnBoardTester = 255;
+  bcm6.BCM_GWNMProxy = 255;
+  bcm6.BCM_AutoSarNMReserved3 = 255;
+  bcm6.BCM_AutoSarNMReserved4 = 255;
 
 
-  /* ================= DCDCE ================= */
+  /* ---------- NM CAN1 ---------- */
 
-  dcdce1.byte(0)=0; dcdce1.byte(1)=129;
-  dcdce1.byte(2)=255; dcdce1.byte(3)=255;
-  dcdce1.byte(4)=255; dcdce1.byte(5)=255;
-  dcdce1.byte(6)=255; dcdce1.byte(7)=255;
+  dcdce1.DCDCE_AutoSarNMControl=0;
+  dcdce1.DCDCE_AutoSarNMNodeId=129;
+  dcdce1.DCDCE_AutoSarNMReserved1=255;
+  dcdce1.DCDCE_AutoSarNMReserved2=255;
+  dcdce1.DCDCE_GWOnBoardTester=255;
+  dcdce1.DCDCE_GWNMProxy=255;
+  dcdce1.DCDCE_AutoSarNMReserved3=255;
+  dcdce1.DCDCE_AutoSarNMReserved4=255;
+
+  dcdcf1.DCDCF_AutoSarNMControl=0;
+  dcdcf1.DCDCF_AutoSarNMNodeId=129;
+  dcdcf1.DCDCF_AutoSarNMReserved1=255;
+  dcdcf1.DCDCF_AutoSarNMReserved2=255;
+  dcdcf1.DCDCF_GWOnBoardTester=255;
+  dcdcf1.DCDCF_GWNMProxy=255;
+  dcdcf1.DCDCF_AutoSarNMReserved3=255;
+  dcdcf1.DCDCF_AutoSarNMReserved4=255;
+
+  dcdcg1.DCDCG_AutoSarNMControl=0;
+  dcdcg1.DCDCG_AutoSarNMNodeId=129;
+  dcdcg1.DCDCG_AutoSarNMReserved1=255;
+  dcdcg1.DCDCG_AutoSarNMReserved2=255;
+  dcdcg1.DCDCG_GWOnBoardTester=255;
+  dcdcg1.DCDCG_GWNMProxy=255;
+  dcdcg1.DCDCG_AutoSarNMReserved3=255;
+  dcdcg1.DCDCG_AutoSarNMReserved4=255;
+
+
+  /* ---------- NM CAN2-CAN6 ---------- */
 
   dcdce2.byte(0)=0; dcdce2.byte(1)=129;
   dcdce2.byte(2)=255; dcdce2.byte(3)=255;
@@ -233,13 +281,6 @@ void initMessages()
   dcdce6.byte(6)=255; dcdce6.byte(7)=255;
 
 
-  /* ================= DCDCF ================= */
-
-  dcdcf1.byte(0)=0; dcdcf1.byte(1)=129;
-  dcdcf1.byte(2)=255; dcdcf1.byte(3)=255;
-  dcdcf1.byte(4)=255; dcdcf1.byte(5)=255;
-  dcdcf1.byte(6)=255; dcdcf1.byte(7)=255;
-
   dcdcf2.byte(0)=0; dcdcf2.byte(1)=129;
   dcdcf2.byte(2)=255; dcdcf2.byte(3)=255;
   dcdcf2.byte(4)=255; dcdcf2.byte(5)=255;
@@ -265,13 +306,6 @@ void initMessages()
   dcdcf6.byte(4)=255; dcdcf6.byte(5)=255;
   dcdcf6.byte(6)=255; dcdcf6.byte(7)=255;
 
-
-  /* ================= DCDCG ================= */
-
-  dcdcg1.byte(0)=0; dcdcg1.byte(1)=129;
-  dcdcg1.byte(2)=255; dcdcg1.byte(3)=255;
-  dcdcg1.byte(4)=255; dcdcg1.byte(5)=255;
-  dcdcg1.byte(6)=255; dcdcg1.byte(7)=255;
 
   dcdcg2.byte(0)=0; dcdcg2.byte(1)=129;
   dcdcg2.byte(2)=255; dcdcg2.byte(3)=255;
@@ -299,7 +333,7 @@ void initMessages()
   dcdcg6.byte(6)=255; dcdcg6.byte(7)=255;
 
 
-  /* ================= CTRL DEFAULTS ================= */
+  /* ---------- CONTROL DEFAULTS ---------- */
 
   ebbCtrl1.byte(0)=30; ebbCtrl1.byte(1)=168;
   ebbCtrl1.byte(2)=0; ebbCtrl1.byte(3)=13;
@@ -316,17 +350,10 @@ void initMessages()
   epasCtrl1.byte(4)=52; epasCtrl1.byte(5)=192;
   epasCtrl1.byte(6)=0; epasCtrl1.byte(7)=0;
 
-
-  /* 48V - KEEP WORKING VALUES */
-
-  v48Ctrl1.byte(0)=254;
-  v48Ctrl1.byte(1)=254;
-  v48Ctrl1.byte(2)=254;
-  v48Ctrl1.byte(3)=30;
-  v48Ctrl1.byte(4)=0;
-  v48Ctrl1.byte(5)=0;
-  v48Ctrl1.byte(6)=0;
-  v48Ctrl1.byte(7)=0;
+  v48Ctrl1.byte(0)=254; v48Ctrl1.byte(1)=254;
+  v48Ctrl1.byte(2)=254; v48Ctrl1.byte(3)=30;
+  v48Ctrl1.byte(4)=0; v48Ctrl1.byte(5)=0;
+  v48Ctrl1.byte(6)=0; v48Ctrl1.byte(7)=0;
 
 
   ebbCtrl2 = ebbCtrl1;
@@ -354,7 +381,7 @@ void initMessages()
   v48Ctrl6 = v48Ctrl1;
 
 
-  /* ================= INFO DEFAULTS ================= */
+  /* ---------- INFO DEFAULTS ---------- */
 
   ebbInfo1.byte(0)=0; ebbInfo1.byte(1)=0;
   ebbInfo1.byte(2)=0; ebbInfo1.byte(3)=0;
@@ -371,17 +398,11 @@ void initMessages()
   epasInfo1.byte(4)=0; epasInfo1.byte(5)=0;
   epasInfo1.byte(6)=162; epasInfo1.byte(7)=128;
 
-
-  /* 48V INFO - KEEP RAW 8 */
-
-  v48Info1.byte(0)=8;
-  v48Info1.byte(1)=254;
-  v48Info1.byte(2)=254;
-  v48Info1.byte(3)=0;
-  v48Info1.byte(4)=0;
-  v48Info1.byte(5)=0;
-  v48Info1.byte(6)=0;
-  v48Info1.byte(7)=0;
+  /* IMPORTANT: 48V BYTE 0 STAYS 8 */
+  v48Info1.byte(0)=8; v48Info1.byte(1)=254;
+  v48Info1.byte(2)=254; v48Info1.byte(3)=0;
+  v48Info1.byte(4)=0; v48Info1.byte(5)=0;
+  v48Info1.byte(6)=0; v48Info1.byte(7)=0;
 
 
   ebbInfo2 = ebbInfo1;
@@ -409,11 +430,7 @@ void initMessages()
   v48Info6 = v48Info1;
 
 
-  /* =========================================================
-     BODY INFO - ALL ACTIVE SYSTEMS
-     Parklamp = ON
-     Ignition = RUN
-     ========================================================= */
+  /* ---------- BODY INFO ---------- */
 
   if(sys1!=0)
   {
@@ -455,185 +472,470 @@ void initMessages()
 
 /* ============================================================
    MODE
+   0 = OFF
+   1 = STANDBY
+   3 = FLOAT
    ============================================================ */
 
 void setMode(int mode)
 {
-  if(sys1==1) ebbCtrl1.EMduleMde_D_Rq=mode;
-  else if(sys1==2) embCtrl1.EMduleMde_D_Rq2=mode;
-  else if(sys1==3) v48Ctrl1.UCapMduleMde_D_Rq=mode;
-  else if(sys1==4) epasCtrl1.EMduleMde_D_Rq3=mode;
+  if(sys1==1)
+    ebbCtrl1.EMduleMde_D_Rq=mode;
+  else if(sys1==2)
+    embCtrl1.EMduleMde_D_Rq2=mode;
+  else if(sys1==3)
+    v48Ctrl1.UCapMduleMde_D_Rq=mode;
+  else if(sys1==4)
+    epasCtrl1.EMduleMde_D_Rq3=mode;
 
-  if(sys2==1) ebbCtrl2.EMduleMde_D_Rq=mode;
-  else if(sys2==2) embCtrl2.EMduleMde_D_Rq2=mode;
-  else if(sys2==3) v48Ctrl2.UCapMduleMde_D_Rq=mode;
-  else if(sys2==4) epasCtrl2.EMduleMde_D_Rq3=mode;
 
-  if(sys3==1) ebbCtrl3.EMduleMde_D_Rq=mode;
-  else if(sys3==2) embCtrl3.EMduleMde_D_Rq2=mode;
-  else if(sys3==3) v48Ctrl3.UCapMduleMde_D_Rq=mode;
-  else if(sys3==4) epasCtrl3.EMduleMde_D_Rq3=mode;
+  if(sys2==1)
+    ebbCtrl2.EMduleMde_D_Rq=mode;
+  else if(sys2==2)
+    embCtrl2.EMduleMde_D_Rq2=mode;
+  else if(sys2==3)
+    v48Ctrl2.UCapMduleMde_D_Rq=mode;
+  else if(sys2==4)
+    epasCtrl2.EMduleMde_D_Rq3=mode;
 
-  if(sys4==1) ebbCtrl4.EMduleMde_D_Rq=mode;
-  else if(sys4==2) embCtrl4.EMduleMde_D_Rq2=mode;
-  else if(sys4==3) v48Ctrl4.UCapMduleMde_D_Rq=mode;
-  else if(sys4==4) epasCtrl4.EMduleMde_D_Rq3=mode;
 
-  if(sys5==1) ebbCtrl5.EMduleMde_D_Rq=mode;
-  else if(sys5==2) embCtrl5.EMduleMde_D_Rq2=mode;
-  else if(sys5==3) v48Ctrl5.UCapMduleMde_D_Rq=mode;
-  else if(sys5==4) epasCtrl5.EMduleMde_D_Rq3=mode;
+  if(sys3==1)
+    ebbCtrl3.EMduleMde_D_Rq=mode;
+  else if(sys3==2)
+    embCtrl3.EMduleMde_D_Rq2=mode;
+  else if(sys3==3)
+    v48Ctrl3.UCapMduleMde_D_Rq=mode;
+  else if(sys3==4)
+    epasCtrl3.EMduleMde_D_Rq3=mode;
 
-  if(sys6==1) ebbCtrl6.EMduleMde_D_Rq=mode;
-  else if(sys6==2) embCtrl6.EMduleMde_D_Rq2=mode;
-  else if(sys6==3) v48Ctrl6.UCapMduleMde_D_Rq=mode;
-  else if(sys6==4) epasCtrl6.EMduleMde_D_Rq3=mode;
+
+  if(sys4==1)
+    ebbCtrl4.EMduleMde_D_Rq=mode;
+  else if(sys4==2)
+    embCtrl4.EMduleMde_D_Rq2=mode;
+  else if(sys4==3)
+    v48Ctrl4.UCapMduleMde_D_Rq=mode;
+  else if(sys4==4)
+    epasCtrl4.EMduleMde_D_Rq3=mode;
+
+
+  if(sys5==1)
+    ebbCtrl5.EMduleMde_D_Rq=mode;
+  else if(sys5==2)
+    embCtrl5.EMduleMde_D_Rq2=mode;
+  else if(sys5==3)
+    v48Ctrl5.UCapMduleMde_D_Rq=mode;
+  else if(sys5==4)
+    epasCtrl5.EMduleMde_D_Rq3=mode;
+
+
+  if(sys6==1)
+    ebbCtrl6.EMduleMde_D_Rq=mode;
+  else if(sys6==2)
+    embCtrl6.EMduleMde_D_Rq2=mode;
+  else if(sys6==3)
+    v48Ctrl6.UCapMduleMde_D_Rq=mode;
+  else if(sys6==4)
+    epasCtrl6.EMduleMde_D_Rq3=mode;
 }
 
 
 /* ============================================================
    ISOLATION
-   48V SKIPS ISOLATION
+   0 = OPEN
+   1 = CLOSE
+
+   48V EPAS HAS NO ISOLATION COMMAND
    ============================================================ */
 
 void setIsolation(int value)
 {
-  if(sys1==1) ebbCtrl1.IsolSwtch_B_Cmd=value;
-  else if(sys1==2) embCtrl1.IsolSwtch_B_Cmd2=value;
-  else if(sys1==4) epasCtrl1.IsolSwtch_B_Cmd3=value;
+  if(sys1==1)
+    ebbCtrl1.IsolSwtch_B_Cmd=value;
+  else if(sys1==2)
+    embCtrl1.IsolSwtch_B_Cmd2=value;
+  else if(sys1==4)
+    epasCtrl1.IsolSwtch_B_Cmd3=value;
 
-  if(sys2==1) ebbCtrl2.IsolSwtch_B_Cmd=value;
-  else if(sys2==2) embCtrl2.IsolSwtch_B_Cmd2=value;
-  else if(sys2==4) epasCtrl2.IsolSwtch_B_Cmd3=value;
 
-  if(sys3==1) ebbCtrl3.IsolSwtch_B_Cmd=value;
-  else if(sys3==2) embCtrl3.IsolSwtch_B_Cmd2=value;
-  else if(sys3==4) epasCtrl3.IsolSwtch_B_Cmd3=value;
+  if(sys2==1)
+    ebbCtrl2.IsolSwtch_B_Cmd=value;
+  else if(sys2==2)
+    embCtrl2.IsolSwtch_B_Cmd2=value;
+  else if(sys2==4)
+    epasCtrl2.IsolSwtch_B_Cmd3=value;
 
-  if(sys4==1) ebbCtrl4.IsolSwtch_B_Cmd=value;
-  else if(sys4==2) embCtrl4.IsolSwtch_B_Cmd2=value;
-  else if(sys4==4) epasCtrl4.IsolSwtch_B_Cmd3=value;
 
-  if(sys5==1) ebbCtrl5.IsolSwtch_B_Cmd=value;
-  else if(sys5==2) embCtrl5.IsolSwtch_B_Cmd2=value;
-  else if(sys5==4) epasCtrl5.IsolSwtch_B_Cmd3=value;
+  if(sys3==1)
+    ebbCtrl3.IsolSwtch_B_Cmd=value;
+  else if(sys3==2)
+    embCtrl3.IsolSwtch_B_Cmd2=value;
+  else if(sys3==4)
+    epasCtrl3.IsolSwtch_B_Cmd3=value;
 
-  if(sys6==1) ebbCtrl6.IsolSwtch_B_Cmd=value;
-  else if(sys6==2) embCtrl6.IsolSwtch_B_Cmd2=value;
-  else if(sys6==4) epasCtrl6.IsolSwtch_B_Cmd3=value;
+
+  if(sys4==1)
+    ebbCtrl4.IsolSwtch_B_Cmd=value;
+  else if(sys4==2)
+    embCtrl4.IsolSwtch_B_Cmd2=value;
+  else if(sys4==4)
+    epasCtrl4.IsolSwtch_B_Cmd3=value;
+
+
+  if(sys5==1)
+    ebbCtrl5.IsolSwtch_B_Cmd=value;
+  else if(sys5==2)
+    embCtrl5.IsolSwtch_B_Cmd2=value;
+  else if(sys5==4)
+    epasCtrl5.IsolSwtch_B_Cmd3=value;
+
+
+  if(sys6==1)
+    ebbCtrl6.IsolSwtch_B_Cmd=value;
+  else if(sys6==2)
+    embCtrl6.IsolSwtch_B_Cmd2=value;
+  else if(sys6==4)
+    epasCtrl6.IsolSwtch_B_Cmd3=value;
 }
 
 
 /* ============================================================
-   100 MS - CTRL + INFO
+   100 ms
+   CONTROL + INFO
    ============================================================ */
 
 void send100()
 {
-  if(sys1==1) { output(ebbCtrl1); output(ebbInfo1); }
-  else if(sys1==2) { output(embCtrl1); output(embInfo1); }
-  else if(sys1==3) { output(v48Ctrl1); output(v48Info1); }
-  else if(sys1==4) { output(epasCtrl1); output(epasInfo1); }
+  if(sys1==1)
+  {
+    output(ebbCtrl1);
+    output(ebbInfo1);
+  }
+  else if(sys1==2)
+  {
+    output(embCtrl1);
+    output(embInfo1);
+  }
+  else if(sys1==3)
+  {
+    output(v48Ctrl1);
+    output(v48Info1);
+  }
+  else if(sys1==4)
+  {
+    output(epasCtrl1);
+    output(epasInfo1);
+  }
 
-  if(sys2==1) { output(ebbCtrl2); output(ebbInfo2); }
-  else if(sys2==2) { output(embCtrl2); output(embInfo2); }
-  else if(sys2==3) { output(v48Ctrl2); output(v48Info2); }
-  else if(sys2==4) { output(epasCtrl2); output(epasInfo2); }
 
-  if(sys3==1) { output(ebbCtrl3); output(ebbInfo3); }
-  else if(sys3==2) { output(embCtrl3); output(embInfo3); }
-  else if(sys3==3) { output(v48Ctrl3); output(v48Info3); }
-  else if(sys3==4) { output(epasCtrl3); output(epasInfo3); }
+  if(sys2==1)
+  {
+    output(ebbCtrl2);
+    output(ebbInfo2);
+  }
+  else if(sys2==2)
+  {
+    output(embCtrl2);
+    output(embInfo2);
+  }
+  else if(sys2==3)
+  {
+    output(v48Ctrl2);
+    output(v48Info2);
+  }
+  else if(sys2==4)
+  {
+    output(epasCtrl2);
+    output(epasInfo2);
+  }
 
-  if(sys4==1) { output(ebbCtrl4); output(ebbInfo4); }
-  else if(sys4==2) { output(embCtrl4); output(embInfo4); }
-  else if(sys4==3) { output(v48Ctrl4); output(v48Info4); }
-  else if(sys4==4) { output(epasCtrl4); output(epasInfo4); }
 
-  if(sys5==1) { output(ebbCtrl5); output(ebbInfo5); }
-  else if(sys5==2) { output(embCtrl5); output(embInfo5); }
-  else if(sys5==3) { output(v48Ctrl5); output(v48Info5); }
-  else if(sys5==4) { output(epasCtrl5); output(epasInfo5); }
+  if(sys3==1)
+  {
+    output(ebbCtrl3);
+    output(ebbInfo3);
+  }
+  else if(sys3==2)
+  {
+    output(embCtrl3);
+    output(embInfo3);
+  }
+  else if(sys3==3)
+  {
+    output(v48Ctrl3);
+    output(v48Info3);
+  }
+  else if(sys3==4)
+  {
+    output(epasCtrl3);
+    output(epasInfo3);
+  }
 
-  if(sys6==1) { output(ebbCtrl6); output(ebbInfo6); }
-  else if(sys6==2) { output(embCtrl6); output(embInfo6); }
-  else if(sys6==3) { output(v48Ctrl6); output(v48Info6); }
-  else if(sys6==4) { output(epasCtrl6); output(epasInfo6); }
+
+  if(sys4==1)
+  {
+    output(ebbCtrl4);
+    output(ebbInfo4);
+  }
+  else if(sys4==2)
+  {
+    output(embCtrl4);
+    output(embInfo4);
+  }
+  else if(sys4==3)
+  {
+    output(v48Ctrl4);
+    output(v48Info4);
+  }
+  else if(sys4==4)
+  {
+    output(epasCtrl4);
+    output(epasInfo4);
+  }
+
+
+  if(sys5==1)
+  {
+    output(ebbCtrl5);
+    output(ebbInfo5);
+  }
+  else if(sys5==2)
+  {
+    output(embCtrl5);
+    output(embInfo5);
+  }
+  else if(sys5==3)
+  {
+    output(v48Ctrl5);
+    output(v48Info5);
+  }
+  else if(sys5==4)
+  {
+    output(epasCtrl5);
+    output(epasInfo5);
+  }
+
+
+  if(sys6==1)
+  {
+    output(ebbCtrl6);
+    output(ebbInfo6);
+  }
+  else if(sys6==2)
+  {
+    output(embCtrl6);
+    output(embInfo6);
+  }
+  else if(sys6==3)
+  {
+    output(v48Ctrl6);
+    output(v48Info6);
+  }
+  else if(sys6==4)
+  {
+    output(epasCtrl6);
+    output(epasInfo6);
+  }
 }
 
 
 /* ============================================================
-   500 MS - BODY INFO
+   500 ms
+   BODY INFO
    ============================================================ */
 
 void send500()
 {
-  if(sys1!=0) output(body1);
-  if(sys2!=0) output(body2);
-  if(sys3!=0) output(body3);
-  if(sys4!=0) output(body4);
-  if(sys5!=0) output(body5);
-  if(sys6!=0) output(body6);
+  if(sys1!=0)
+    output(body1);
+
+  if(sys2!=0)
+    output(body2);
+
+  if(sys3!=0)
+    output(body3);
+
+  if(sys4!=0)
+    output(body4);
+
+  if(sys5!=0)
+    output(body5);
+
+  if(sys6!=0)
+    output(body6);
 }
 
 
 /* ============================================================
-   1000 MS - NETWORK MANAGEMENT
+   1000 ms
+   NETWORK MANAGEMENT
    ============================================================ */
 
 void send1000()
 {
-  if(sys1!=0) output(bcm1);
-  if(sys2!=0) output(bcm2);
-  if(sys3!=0) output(bcm3);
-  if(sys4!=0) output(bcm4);
-  if(sys5!=0) output(bcm5);
-  if(sys6!=0) output(bcm6);
+  /* ---------- BCM ---------- */
+
+  if(sys1!=0)
+    output(bcm1);
+
+  if(sys2!=0)
+    output(bcm2);
+
+  if(sys3!=0)
+    output(bcm3);
+
+  if(sys4!=0)
+    output(bcm4);
+
+  if(sys5!=0)
+    output(bcm5);
+
+  if(sys6!=0)
+    output(bcm6);
 
 
-  /* EBB */
+  /* ---------- EBB ---------- */
 
-  if(sys1==1) { output(dcdcf1); output(dcdcg1); }
-  if(sys2==1) { output(dcdcf2); output(dcdcg2); }
-  if(sys3==1) { output(dcdcf3); output(dcdcg3); }
-  if(sys4==1) { output(dcdcf4); output(dcdcg4); }
-  if(sys5==1) { output(dcdcf5); output(dcdcg5); }
-  if(sys6==1) { output(dcdcf6); output(dcdcg6); }
+  if(sys1==1)
+  {
+    output(dcdcf1);
+    output(dcdcg1);
+  }
+
+  if(sys2==1)
+  {
+    output(dcdcf2);
+    output(dcdcg2);
+  }
+
+  if(sys3==1)
+  {
+    output(dcdcf3);
+    output(dcdcg3);
+  }
+
+  if(sys4==1)
+  {
+    output(dcdcf4);
+    output(dcdcg4);
+  }
+
+  if(sys5==1)
+  {
+    output(dcdcf5);
+    output(dcdcg5);
+  }
+
+  if(sys6==1)
+  {
+    output(dcdcf6);
+    output(dcdcg6);
+  }
 
 
-  /* EMB */
+  /* ---------- EMB ---------- */
 
-  if(sys1==2) { output(dcdce1); output(dcdcf1); }
-  if(sys2==2) { output(dcdce2); output(dcdcf2); }
-  if(sys3==2) { output(dcdce3); output(dcdcf3); }
-  if(sys4==2) { output(dcdce4); output(dcdcf4); }
-  if(sys5==2) { output(dcdce5); output(dcdcf5); }
-  if(sys6==2) { output(dcdce6); output(dcdcf6); }
+  if(sys1==2)
+  {
+    output(dcdce1);
+    output(dcdcf1);
+  }
+
+  if(sys2==2)
+  {
+    output(dcdce2);
+    output(dcdcf2);
+  }
+
+  if(sys3==2)
+  {
+    output(dcdce3);
+    output(dcdcf3);
+  }
+
+  if(sys4==2)
+  {
+    output(dcdce4);
+    output(dcdcf4);
+  }
+
+  if(sys5==2)
+  {
+    output(dcdce5);
+    output(dcdcf5);
+  }
+
+  if(sys6==2)
+  {
+    output(dcdce6);
+    output(dcdcf6);
+  }
 
 
-  /* 48V - WORKING SETUP */
+  /* ---------- 48V EPAS ---------- */
 
-  if(sys1==3) { output(dcdce1); output(dcdcg1); }
-  if(sys2==3) { output(dcdce2); output(dcdcg2); }
-  if(sys3==3) { output(dcdce3); output(dcdcg3); }
-  if(sys4==3) { output(dcdce4); output(dcdcg4); }
-  if(sys5==3) { output(dcdce5); output(dcdcg5); }
-  if(sys6==3) { output(dcdce6); output(dcdcg6); }
+  if(sys1==3)
+  {
+    output(dcdce1);
+    output(dcdcg1);
+  }
+
+  if(sys2==3)
+  {
+    output(dcdce2);
+    output(dcdcg2);
+  }
+
+  if(sys3==3)
+  {
+    output(dcdce3);
+    output(dcdcg3);
+  }
+
+  if(sys4==3)
+  {
+    output(dcdce4);
+    output(dcdcg4);
+  }
+
+  if(sys5==3)
+  {
+    output(dcdce5);
+    output(dcdcg5);
+  }
+
+  if(sys6==3)
+  {
+    output(dcdce6);
+    output(dcdcg6);
+  }
 
 
-  /* 12V EPAS */
+  /* ---------- 12V EPAS ---------- */
 
-  if(sys1==4) output(dcdcg1);
-  if(sys2==4) output(dcdcg2);
-  if(sys3==4) output(dcdcg3);
-  if(sys4==4) output(dcdcg4);
-  if(sys5==4) output(dcdcg5);
-  if(sys6==4) output(dcdcg6);
+  if(sys1==4)
+    output(dcdcg1);
+
+  if(sys2==4)
+    output(dcdcg2);
+
+  if(sys3==4)
+    output(dcdcg3);
+
+  if(sys4==4)
+    output(dcdcg4);
+
+  if(sys5==4)
+    output(dcdcg5);
+
+  if(sys6==4)
+    output(dcdcg6);
 }
 
 
 /* ============================================================
    START
+   OFF 2 SECONDS
    ============================================================ */
 
 on start
@@ -653,19 +955,20 @@ on start
   setTimer(t500,500);
   setTimer(t1000,1000);
 
-  write("CYCLE 1 - OFF - 1 SEC");
+  write("START - OFF - 2 SEC");
 
-  setTimer(seqTimer,1000);
+  setTimer(seqTimer,2000);
 }
 
 
 /* ============================================================
-   PERIODIC
+   PERIODIC TRANSMISSION
    ============================================================ */
 
 on timer t100
 {
   send100();
+
   setTimer(t100,100);
 }
 
@@ -673,6 +976,7 @@ on timer t100
 on timer t500
 {
   send500();
+
   setTimer(t500,500);
 }
 
@@ -680,185 +984,231 @@ on timer t500
 on timer t1000
 {
   send1000();
+
   setTimer(t1000,1000);
 }
 
 
 /* ============================================================
-   QUICK TEST - 2 CYCLES
+   16 HOUR TEST
 
-   CYCLE 1:
-   OFF 1s
-   STANDBY 1s
-   FLOAT 1s
-   ISOLATION OPEN 1s
-   ISOLATION CLOSE 1s
-   FLOAT 10s
+   START:
+   OFF       2 SEC
+   STANDBY   2 SEC
 
-   CYCLE 2:
-   OFF 1s
-   STANDBY 1s
-   FLOAT 1s
-   ISOLATION OPEN 1s
-   ISOLATION CLOSE 1s
-   FLOAT 10s
-   OFF
+   EACH CYCLE:
+   FLOAT
+   ISOLATION OPEN 1 SEC
+   ISOLATION CLOSE
+   FLOAT 3 HOURS
+   STANDBY 1 HOUR
 
-   48V stays FLOAT during isolation steps because it has
-   no isolation command.
+   TOTAL = 4 CYCLES
+
+   48V:
+   FLOAT MODE CHANGES NORMALLY
+   ISOLATION COMMAND IS SKIPPED
    ============================================================ */
 
 on timer seqTimer
 {
-  /* ================= CYCLE 1 ================= */
+  /* =========================================================
+     STARTUP
+     OFF 2 SEC HAS FINISHED
+     ========================================================= */
 
   if(step==0)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 1 - STANDBY - 1 SEC");
+    write("STARTUP - STANDBY - 2 SEC");
 
     step=1;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,2000);
   }
 
+
+  /* =========================================================
+     CYCLE 1
+     ========================================================= */
 
   else if(step==1)
   {
     setMode(3);
-    setIsolation(1);
+    setIsolation(0);
 
-    write("CYCLE 1 - FLOAT - 1 SEC");
+    write("CYCLE 1 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=2;
+
     setTimer(seqTimer,1000);
   }
 
 
   else if(step==2)
   {
-    setIsolation(0);
+    setIsolation(1);
 
-    write("CYCLE 1 - ISOLATION OPEN - 1 SEC");
+    write("CYCLE 1 - ISOLATION CLOSE - FLOAT 3 HOURS");
 
     step=3;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,10800000);
   }
 
 
   else if(step==3)
   {
+    setMode(1);
     setIsolation(1);
 
-    write("CYCLE 1 - ISOLATION CLOSE - 1 SEC");
+    write("CYCLE 1 - STANDBY - 1 HOUR");
 
     step=4;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,3600000);
   }
 
 
+  /* =========================================================
+     CYCLE 2
+     ========================================================= */
+
   else if(step==4)
   {
-    write("CYCLE 1 - FLOAT - 10 SEC");
+    setMode(3);
+    setIsolation(0);
+
+    write("CYCLE 2 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=5;
-    setTimer(seqTimer,10000);
+
+    setTimer(seqTimer,1000);
   }
 
 
   else if(step==5)
   {
-    /* START CYCLE 2 WITH OFF */
-
-    setMode(0);
     setIsolation(1);
 
-    write("CYCLE 2 - OFF - 1 SEC");
+    write("CYCLE 2 - ISOLATION CLOSE - FLOAT 3 HOURS");
 
     step=6;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,10800000);
   }
 
-
-  /* ================= CYCLE 2 ================= */
 
   else if(step==6)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 2 - STANDBY - 1 SEC");
+    write("CYCLE 2 - STANDBY - 1 HOUR");
 
     step=7;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,3600000);
   }
 
+
+  /* =========================================================
+     CYCLE 3
+     ========================================================= */
 
   else if(step==7)
   {
     setMode(3);
-    setIsolation(1);
+    setIsolation(0);
 
-    write("CYCLE 2 - FLOAT - 1 SEC");
+    write("CYCLE 3 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=8;
+
     setTimer(seqTimer,1000);
   }
 
 
   else if(step==8)
   {
-    setIsolation(0);
+    setIsolation(1);
 
-    write("CYCLE 2 - ISOLATION OPEN - 1 SEC");
+    write("CYCLE 3 - ISOLATION CLOSE - FLOAT 3 HOURS");
 
     step=9;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,10800000);
   }
 
 
   else if(step==9)
   {
+    setMode(1);
     setIsolation(1);
 
-    write("CYCLE 2 - ISOLATION CLOSE - 1 SEC");
+    write("CYCLE 3 - STANDBY - 1 HOUR");
 
     step=10;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,3600000);
   }
 
 
+  /* =========================================================
+     CYCLE 4
+     ========================================================= */
+
   else if(step==10)
   {
-    write("CYCLE 2 - FLOAT - 10 SEC");
+    setMode(3);
+    setIsolation(0);
+
+    write("CYCLE 4 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=11;
-    setTimer(seqTimer,10000);
+
+    setTimer(seqTimer,1000);
   }
 
 
   else if(step==11)
   {
-    setMode(0);
     setIsolation(1);
 
-    send100();
-
-    write("FINAL OFF - 1 SEC");
+    write("CYCLE 4 - ISOLATION CLOSE - FLOAT 3 HOURS");
 
     step=12;
-    setTimer(seqTimer,1000);
+
+    setTimer(seqTimer,10800000);
   }
 
 
   else if(step==12)
   {
+    setMode(1);
+    setIsolation(1);
+
+    write("CYCLE 4 - STANDBY - 1 HOUR");
+
+    step=13;
+
+    setTimer(seqTimer,3600000);
+  }
+
+
+  /* =========================================================
+     COMPLETE
+     ========================================================= */
+
+  else if(step==13)
+  {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
 
-    write("2 CYCLES COMPLETE");
+    write("16 HOUR TEST COMPLETE - MEASUREMENT STOP");
 
     stop();
   }
