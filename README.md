@@ -1,4 +1,5 @@
 
+
 /*@!Encoding:1252*/
 
 variables
@@ -161,12 +162,12 @@ variables
 
 
 /* ============================================================
-   INITIALIZE STATIC VALUES
+   INITIALIZE
    ============================================================ */
 
 void initMessages()
 {
-  /* ---------- BCM ---------- */
+  /* ================= BCM ================= */
 
   bcm1.byte(0)=129; bcm1.byte(1)=0;
   bcm1.byte(2)=255; bcm1.byte(3)=255;
@@ -199,7 +200,7 @@ void initMessages()
   bcm6.byte(6)=255; bcm6.byte(7)=255;
 
 
-  /* ---------- DCDCE ---------- */
+  /* ================= DCDCE ================= */
 
   dcdce1.byte(0)=0; dcdce1.byte(1)=129;
   dcdce1.byte(2)=255; dcdce1.byte(3)=255;
@@ -232,7 +233,7 @@ void initMessages()
   dcdce6.byte(6)=255; dcdce6.byte(7)=255;
 
 
-  /* ---------- DCDCF ---------- */
+  /* ================= DCDCF ================= */
 
   dcdcf1.byte(0)=0; dcdcf1.byte(1)=129;
   dcdcf1.byte(2)=255; dcdcf1.byte(3)=255;
@@ -265,7 +266,7 @@ void initMessages()
   dcdcf6.byte(6)=255; dcdcf6.byte(7)=255;
 
 
-  /* ---------- DCDCG ---------- */
+  /* ================= DCDCG ================= */
 
   dcdcg1.byte(0)=0; dcdcg1.byte(1)=129;
   dcdcg1.byte(2)=255; dcdcg1.byte(3)=255;
@@ -298,7 +299,7 @@ void initMessages()
   dcdcg6.byte(6)=255; dcdcg6.byte(7)=255;
 
 
-  /* ---------- CTRL defaults ---------- */
+  /* ================= CTRL DEFAULTS ================= */
 
   ebbCtrl1.byte(0)=30; ebbCtrl1.byte(1)=168;
   ebbCtrl1.byte(2)=0; ebbCtrl1.byte(3)=13;
@@ -315,11 +316,17 @@ void initMessages()
   epasCtrl1.byte(4)=52; epasCtrl1.byte(5)=192;
   epasCtrl1.byte(6)=0; epasCtrl1.byte(7)=0;
 
-  /* WORKING 48V CTRL */
-  v48Ctrl1.byte(0)=254; v48Ctrl1.byte(1)=254;
-  v48Ctrl1.byte(2)=254; v48Ctrl1.byte(3)=30;
-  v48Ctrl1.byte(4)=0; v48Ctrl1.byte(5)=0;
-  v48Ctrl1.byte(6)=0; v48Ctrl1.byte(7)=0;
+
+  /* 48V - KEEP WORKING VALUES */
+
+  v48Ctrl1.byte(0)=254;
+  v48Ctrl1.byte(1)=254;
+  v48Ctrl1.byte(2)=254;
+  v48Ctrl1.byte(3)=30;
+  v48Ctrl1.byte(4)=0;
+  v48Ctrl1.byte(5)=0;
+  v48Ctrl1.byte(6)=0;
+  v48Ctrl1.byte(7)=0;
 
 
   ebbCtrl2 = ebbCtrl1;
@@ -347,7 +354,7 @@ void initMessages()
   v48Ctrl6 = v48Ctrl1;
 
 
-  /* ---------- INFO defaults ---------- */
+  /* ================= INFO DEFAULTS ================= */
 
   ebbInfo1.byte(0)=0; ebbInfo1.byte(1)=0;
   ebbInfo1.byte(2)=0; ebbInfo1.byte(3)=0;
@@ -365,8 +372,7 @@ void initMessages()
   epasInfo1.byte(6)=162; epasInfo1.byte(7)=128;
 
 
-  /* ---------- WORKING 48V INFO ---------- */
-  /* Aux raw 8 = physical 4.0 */
+  /* 48V INFO - KEEP RAW 8 */
 
   v48Info1.byte(0)=8;
   v48Info1.byte(1)=254;
@@ -404,87 +410,44 @@ void initMessages()
 
 
   /* =========================================================
-     WORKING 48V BODY INFO
-     ONLY applied to channels selected as sys = 3
-
-     Ignition_Status = 4 = RUN
+     BODY INFO - ALL ACTIVE SYSTEMS
+     Parklamp = ON
+     Ignition = RUN
      ========================================================= */
 
-  if(sys1==3)
+  if(sys1!=0)
   {
-    body1.byte(0)=4;
-    body1.byte(1)=0;
-    body1.byte(2)=0;
-    body1.byte(3)=12;
-    body1.byte(4)=230;
-    body1.byte(5)=0;
-    body1.byte(6)=0;
-    body1.byte(7)=0;
+    body1.Parklamp_Status=1;
     body1.Ignition_Status=4;
   }
 
-  if(sys2==3)
+  if(sys2!=0)
   {
-    body2.byte(0)=4;
-    body2.byte(1)=0;
-    body2.byte(2)=0;
-    body2.byte(3)=12;
-    body2.byte(4)=230;
-    body2.byte(5)=0;
-    body2.byte(6)=0;
-    body2.byte(7)=0;
+    body2.Parklamp_Status=1;
     body2.Ignition_Status=4;
   }
 
-  if(sys3==3)
+  if(sys3!=0)
   {
-    body3.byte(0)=4;
-    body3.byte(1)=0;
-    body3.byte(2)=0;
-    body3.byte(3)=12;
-    body3.byte(4)=230;
-    body3.byte(5)=0;
-    body3.byte(6)=0;
-    body3.byte(7)=0;
+    body3.Parklamp_Status=1;
     body3.Ignition_Status=4;
   }
 
-  if(sys4==3)
+  if(sys4!=0)
   {
-    body4.byte(0)=4;
-    body4.byte(1)=0;
-    body4.byte(2)=0;
-    body4.byte(3)=12;
-    body4.byte(4)=230;
-    body4.byte(5)=0;
-    body4.byte(6)=0;
-    body4.byte(7)=0;
+    body4.Parklamp_Status=1;
     body4.Ignition_Status=4;
   }
 
-  if(sys5==3)
+  if(sys5!=0)
   {
-    body5.byte(0)=4;
-    body5.byte(1)=0;
-    body5.byte(2)=0;
-    body5.byte(3)=12;
-    body5.byte(4)=230;
-    body5.byte(5)=0;
-    body5.byte(6)=0;
-    body5.byte(7)=0;
+    body5.Parklamp_Status=1;
     body5.Ignition_Status=4;
   }
 
-  if(sys6==3)
+  if(sys6!=0)
   {
-    body6.byte(0)=4;
-    body6.byte(1)=0;
-    body6.byte(2)=0;
-    body6.byte(3)=12;
-    body6.byte(4)=230;
-    body6.byte(5)=0;
-    body6.byte(6)=0;
-    body6.byte(7)=0;
+    body6.Parklamp_Status=1;
     body6.Ignition_Status=4;
   }
 }
@@ -492,9 +455,6 @@ void initMessages()
 
 /* ============================================================
    MODE
-   0 = OFF
-   1 = STANDBY
-   3 = FLOAT
    ============================================================ */
 
 void setMode(int mode)
@@ -533,10 +493,7 @@ void setMode(int mode)
 
 /* ============================================================
    ISOLATION
-   0 = OPEN
-   1 = CLOSE
-
-   48V does NOTHING here
+   48V SKIPS ISOLATION
    ============================================================ */
 
 void setIsolation(int value)
@@ -568,8 +525,7 @@ void setIsolation(int value)
 
 
 /* ============================================================
-   100 ms
-   CTRL + INFO
+   100 MS - CTRL + INFO
    ============================================================ */
 
 void send100()
@@ -607,7 +563,7 @@ void send100()
 
 
 /* ============================================================
-   500 ms BODY INFO
+   500 MS - BODY INFO
    ============================================================ */
 
 void send500()
@@ -622,13 +578,11 @@ void send500()
 
 
 /* ============================================================
-   1000 ms NETWORK MANAGEMENT
+   1000 MS - NETWORK MANAGEMENT
    ============================================================ */
 
 void send1000()
 {
-  /* BCM */
-
   if(sys1!=0) output(bcm1);
   if(sys2!=0) output(bcm2);
   if(sys3!=0) output(bcm3);
@@ -637,7 +591,7 @@ void send1000()
   if(sys6!=0) output(bcm6);
 
 
-  /* EBB = DCDCF + DCDCG */
+  /* EBB */
 
   if(sys1==1) { output(dcdcf1); output(dcdcg1); }
   if(sys2==1) { output(dcdcf2); output(dcdcg2); }
@@ -647,7 +601,7 @@ void send1000()
   if(sys6==1) { output(dcdcf6); output(dcdcg6); }
 
 
-  /* EMB = DCDCE + DCDCF */
+  /* EMB */
 
   if(sys1==2) { output(dcdce1); output(dcdcf1); }
   if(sys2==2) { output(dcdce2); output(dcdcf2); }
@@ -657,10 +611,7 @@ void send1000()
   if(sys6==2) { output(dcdce6); output(dcdcf6); }
 
 
-  /* =========================================================
-     48V WORKING SETUP
-     DCDCE + DCDCG
-     ========================================================= */
+  /* 48V - WORKING SETUP */
 
   if(sys1==3) { output(dcdce1); output(dcdcg1); }
   if(sys2==3) { output(dcdce2); output(dcdcg2); }
@@ -670,7 +621,7 @@ void send1000()
   if(sys6==3) { output(dcdce6); output(dcdcg6); }
 
 
-  /* 12V EPAS = DCDCG */
+  /* 12V EPAS */
 
   if(sys1==4) output(dcdcg1);
   if(sys2==4) output(dcdcg2);
@@ -694,8 +645,6 @@ on start
   setMode(0);
   setIsolation(1);
 
-  /* Transmit immediately */
-
   send100();
   send500();
   send1000();
@@ -704,14 +653,14 @@ on start
   setTimer(t500,500);
   setTimer(t1000,1000);
 
-  write("OFF - 1 SEC");
+  write("CYCLE 1 - OFF - 1 SEC");
 
   setTimer(seqTimer,1000);
 }
 
 
 /* ============================================================
-   PERIODIC TRANSMISSION
+   PERIODIC
    ============================================================ */
 
 on timer t100
@@ -736,28 +685,39 @@ on timer t1000
 
 
 /* ============================================================
-   TEST SEQUENCE - ONE TIME
+   QUICK TEST - 2 CYCLES
 
-   OFF        1 SEC
-   STANDBY    1 SEC
-   FLOAT      1 SEC
-   ISOL OPEN  1 SEC
-   ISOL CLOSE 1 SEC
-   FLOAT      2 MIN
-   STANDBY    1 SEC
+   CYCLE 1:
+   OFF 1s
+   STANDBY 1s
+   FLOAT 1s
+   ISOLATION OPEN 1s
+   ISOLATION CLOSE 1s
+   FLOAT 10s
+
+   CYCLE 2:
+   OFF 1s
+   STANDBY 1s
+   FLOAT 1s
+   ISOLATION OPEN 1s
+   ISOLATION CLOSE 1s
+   FLOAT 10s
    OFF
 
-   48V ignores isolation commands automatically.
+   48V stays FLOAT during isolation steps because it has
+   no isolation command.
    ============================================================ */
 
 on timer seqTimer
 {
+  /* ================= CYCLE 1 ================= */
+
   if(step==0)
   {
     setMode(1);
     setIsolation(1);
 
-    write("STANDBY - 1 SEC");
+    write("CYCLE 1 - STANDBY - 1 SEC");
 
     step=1;
     setTimer(seqTimer,1000);
@@ -769,7 +729,7 @@ on timer seqTimer
     setMode(3);
     setIsolation(1);
 
-    write("FLOAT - 1 SEC");
+    write("CYCLE 1 - FLOAT - 1 SEC");
 
     step=2;
     setTimer(seqTimer,1000);
@@ -778,12 +738,9 @@ on timer seqTimer
 
   else if(step==2)
   {
-    /* Mode remains FLOAT.
-       48V ignores this isolation command. */
-
     setIsolation(0);
 
-    write("ISOLATION OPEN - 1 SEC");
+    write("CYCLE 1 - ISOLATION OPEN - 1 SEC");
 
     step=3;
     setTimer(seqTimer,1000);
@@ -794,7 +751,7 @@ on timer seqTimer
   {
     setIsolation(1);
 
-    write("ISOLATION CLOSE - 1 SEC");
+    write("CYCLE 1 - ISOLATION CLOSE - 1 SEC");
 
     step=4;
     setTimer(seqTimer,1000);
@@ -803,37 +760,35 @@ on timer seqTimer
 
   else if(step==4)
   {
-    /* Mode remains FLOAT */
-
-    write("FLOAT - 2 MIN");
+    write("CYCLE 1 - FLOAT - 10 SEC");
 
     step=5;
-
-    /* 120000 ms = 2 minutes */
-    setTimer(seqTimer,120000);
+    setTimer(seqTimer,10000);
   }
 
 
   else if(step==5)
   {
-    setMode(1);
+    /* START CYCLE 2 WITH OFF */
+
+    setMode(0);
     setIsolation(1);
 
-    write("STANDBY - 1 SEC");
+    write("CYCLE 2 - OFF - 1 SEC");
 
     step=6;
     setTimer(seqTimer,1000);
   }
 
 
+  /* ================= CYCLE 2 ================= */
+
   else if(step==6)
   {
-    setMode(0);
+    setMode(1);
     setIsolation(1);
 
-    send100();
-
-    write("OFF - 1 SEC");
+    write("CYCLE 2 - STANDBY - 1 SEC");
 
     step=7;
     setTimer(seqTimer,1000);
@@ -842,11 +797,68 @@ on timer seqTimer
 
   else if(step==7)
   {
+    setMode(3);
+    setIsolation(1);
+
+    write("CYCLE 2 - FLOAT - 1 SEC");
+
+    step=8;
+    setTimer(seqTimer,1000);
+  }
+
+
+  else if(step==8)
+  {
+    setIsolation(0);
+
+    write("CYCLE 2 - ISOLATION OPEN - 1 SEC");
+
+    step=9;
+    setTimer(seqTimer,1000);
+  }
+
+
+  else if(step==9)
+  {
+    setIsolation(1);
+
+    write("CYCLE 2 - ISOLATION CLOSE - 1 SEC");
+
+    step=10;
+    setTimer(seqTimer,1000);
+  }
+
+
+  else if(step==10)
+  {
+    write("CYCLE 2 - FLOAT - 10 SEC");
+
+    step=11;
+    setTimer(seqTimer,10000);
+  }
+
+
+  else if(step==11)
+  {
+    setMode(0);
+    setIsolation(1);
+
+    send100();
+
+    write("FINAL OFF - 1 SEC");
+
+    step=12;
+    setTimer(seqTimer,1000);
+  }
+
+
+  else if(step==12)
+  {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
 
-    write("TEST COMPLETE");
+    write("2 CYCLES COMPLETE");
 
     stop();
   }
