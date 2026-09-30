@@ -12,12 +12,12 @@ variables
      4 = 12V EPAS
      ========================================================= */
 
-  int sys1 = 4;
-  int sys2 = 4;
-  int sys3 = 2;
-  int sys4 = 1;
-  int sys5 = 3;
-  int sys6 = 1;
+  int sys1 = 4;     // CAN1 EPAS
+  int sys2 = 4;     // CAN2 EPAS
+  int sys3 = 2;     // CAN3 EMB
+  int sys4 = 1;     // CAN4 EBB
+  int sys5 = 3;     // CAN5 48V EPAS
+  int sys6 = 1;     // CAN6 EBB
 
   msTimer t100;
   msTimer t500;
@@ -166,7 +166,7 @@ variables
 
 void initMessages()
 {
-  /* ---------- BCM ---------- */
+  /* ================= BCM ================= */
 
   bcm1.BCM_AutoSarNMNodeId = 129;
   bcm1.BCM_AutoSarNMControl = 0;
@@ -223,7 +223,7 @@ void initMessages()
   bcm6.BCM_AutoSarNMReserved4 = 255;
 
 
-  /* ---------- NM CAN1 ---------- */
+  /* ================= NM CAN1 ================= */
 
   dcdce1.DCDCE_AutoSarNMControl=0;
   dcdce1.DCDCE_AutoSarNMNodeId=129;
@@ -253,7 +253,7 @@ void initMessages()
   dcdcg1.DCDCG_AutoSarNMReserved4=255;
 
 
-  /* ---------- NM CAN2-CAN6 ---------- */
+  /* ================= NM CAN2-CAN6 ================= */
 
   dcdce2.byte(0)=0; dcdce2.byte(1)=129;
   dcdce2.byte(2)=255; dcdce2.byte(3)=255;
@@ -333,28 +333,46 @@ void initMessages()
   dcdcg6.byte(6)=255; dcdcg6.byte(7)=255;
 
 
-  /* ---------- CONTROL DEFAULTS ---------- */
+  /* ================= CONTROL DEFAULTS ================= */
 
-  ebbCtrl1.byte(0)=30; ebbCtrl1.byte(1)=168;
-  ebbCtrl1.byte(2)=0; ebbCtrl1.byte(3)=13;
-  ebbCtrl1.byte(4)=52; ebbCtrl1.byte(5)=192;
-  ebbCtrl1.byte(6)=0; ebbCtrl1.byte(7)=0;
+  ebbCtrl1.byte(0)=30;
+  ebbCtrl1.byte(1)=168;
+  ebbCtrl1.byte(2)=0;
+  ebbCtrl1.byte(3)=13;
+  ebbCtrl1.byte(4)=52;
+  ebbCtrl1.byte(5)=192;
+  ebbCtrl1.byte(6)=0;
+  ebbCtrl1.byte(7)=0;
 
-  embCtrl1.byte(0)=30; embCtrl1.byte(1)=168;
-  embCtrl1.byte(2)=0; embCtrl1.byte(3)=13;
-  embCtrl1.byte(4)=52; embCtrl1.byte(5)=192;
-  embCtrl1.byte(6)=0; embCtrl1.byte(7)=0;
+  embCtrl1.byte(0)=30;
+  embCtrl1.byte(1)=168;
+  embCtrl1.byte(2)=0;
+  embCtrl1.byte(3)=13;
+  embCtrl1.byte(4)=52;
+  embCtrl1.byte(5)=192;
+  embCtrl1.byte(6)=0;
+  embCtrl1.byte(7)=0;
 
-  epasCtrl1.byte(0)=30; epasCtrl1.byte(1)=168;
-  epasCtrl1.byte(2)=0; epasCtrl1.byte(3)=13;
-  epasCtrl1.byte(4)=52; epasCtrl1.byte(5)=192;
-  epasCtrl1.byte(6)=0; epasCtrl1.byte(7)=0;
+  epasCtrl1.byte(0)=30;
+  epasCtrl1.byte(1)=168;
+  epasCtrl1.byte(2)=0;
+  epasCtrl1.byte(3)=13;
+  epasCtrl1.byte(4)=52;
+  epasCtrl1.byte(5)=192;
+  epasCtrl1.byte(6)=0;
+  epasCtrl1.byte(7)=0;
 
-  v48Ctrl1.byte(0)=254; v48Ctrl1.byte(1)=254;
-  v48Ctrl1.byte(2)=254; v48Ctrl1.byte(3)=30;
-  v48Ctrl1.byte(4)=0; v48Ctrl1.byte(5)=0;
-  v48Ctrl1.byte(6)=0; v48Ctrl1.byte(7)=0;
+  v48Ctrl1.byte(0)=254;
+  v48Ctrl1.byte(1)=254;
+  v48Ctrl1.byte(2)=254;
+  v48Ctrl1.byte(3)=30;
+  v48Ctrl1.byte(4)=0;
+  v48Ctrl1.byte(5)=0;
+  v48Ctrl1.byte(6)=0;
+  v48Ctrl1.byte(7)=0;
 
+
+  /* Copy control defaults CAN2-CAN6 */
 
   ebbCtrl2 = ebbCtrl1;
   ebbCtrl3 = ebbCtrl1;
@@ -381,29 +399,50 @@ void initMessages()
   v48Ctrl6 = v48Ctrl1;
 
 
-  /* ---------- INFO DEFAULTS ---------- */
+  /* ================= INFO DEFAULTS ================= */
 
-  ebbInfo1.byte(0)=0; ebbInfo1.byte(1)=0;
-  ebbInfo1.byte(2)=0; ebbInfo1.byte(3)=0;
-  ebbInfo1.byte(4)=0; ebbInfo1.byte(5)=0;
-  ebbInfo1.byte(6)=162; ebbInfo1.byte(7)=128;
+  ebbInfo1.byte(0)=0;
+  ebbInfo1.byte(1)=0;
+  ebbInfo1.byte(2)=0;
+  ebbInfo1.byte(3)=0;
+  ebbInfo1.byte(4)=0;
+  ebbInfo1.byte(5)=0;
+  ebbInfo1.byte(6)=162;
+  ebbInfo1.byte(7)=128;
 
-  embInfo1.byte(0)=0; embInfo1.byte(1)=0;
-  embInfo1.byte(2)=0; embInfo1.byte(3)=0;
-  embInfo1.byte(4)=0; embInfo1.byte(5)=0;
-  embInfo1.byte(6)=162; embInfo1.byte(7)=128;
+  embInfo1.byte(0)=0;
+  embInfo1.byte(1)=0;
+  embInfo1.byte(2)=0;
+  embInfo1.byte(3)=0;
+  embInfo1.byte(4)=0;
+  embInfo1.byte(5)=0;
+  embInfo1.byte(6)=162;
+  embInfo1.byte(7)=128;
 
-  epasInfo1.byte(0)=0; epasInfo1.byte(1)=0;
-  epasInfo1.byte(2)=0; epasInfo1.byte(3)=0;
-  epasInfo1.byte(4)=0; epasInfo1.byte(5)=0;
-  epasInfo1.byte(6)=162; epasInfo1.byte(7)=128;
+  epasInfo1.byte(0)=0;
+  epasInfo1.byte(1)=0;
+  epasInfo1.byte(2)=0;
+  epasInfo1.byte(3)=0;
+  epasInfo1.byte(4)=0;
+  epasInfo1.byte(5)=0;
+  epasInfo1.byte(6)=162;
+  epasInfo1.byte(7)=128;
 
-  /* IMPORTANT: 48V BYTE 0 STAYS 8 */
-  v48Info1.byte(0)=8; v48Info1.byte(1)=254;
-  v48Info1.byte(2)=254; v48Info1.byte(3)=0;
-  v48Info1.byte(4)=0; v48Info1.byte(5)=0;
-  v48Info1.byte(6)=0; v48Info1.byte(7)=0;
 
+  /* IMPORTANT:
+     48V RAW BYTE 0 MUST STAY 8 */
+
+  v48Info1.byte(0)=8;
+  v48Info1.byte(1)=254;
+  v48Info1.byte(2)=254;
+  v48Info1.byte(3)=0;
+  v48Info1.byte(4)=0;
+  v48Info1.byte(5)=0;
+  v48Info1.byte(6)=0;
+  v48Info1.byte(7)=0;
+
+
+  /* Copy info defaults CAN2-CAN6 */
 
   ebbInfo2 = ebbInfo1;
   ebbInfo3 = ebbInfo1;
@@ -430,7 +469,11 @@ void initMessages()
   v48Info6 = v48Info1;
 
 
-  /* ---------- BODY INFO ---------- */
+  /* ================= BODY INFO =================
+     APPLY TO EVERY ACTIVE CHANNEL
+     PARKLAMP = ON
+     IGNITION = RUN
+     ================================================= */
 
   if(sys1!=0)
   {
@@ -471,7 +514,8 @@ void initMessages()
 
 
 /* ============================================================
-   MODE
+   MODE CONTROL
+
    0 = OFF
    1 = STANDBY
    3 = FLOAT
@@ -479,6 +523,8 @@ void initMessages()
 
 void setMode(int mode)
 {
+  /* CAN1 */
+
   if(sys1==1)
     ebbCtrl1.EMduleMde_D_Rq=mode;
   else if(sys1==2)
@@ -488,6 +534,8 @@ void setMode(int mode)
   else if(sys1==4)
     epasCtrl1.EMduleMde_D_Rq3=mode;
 
+
+  /* CAN2 */
 
   if(sys2==1)
     ebbCtrl2.EMduleMde_D_Rq=mode;
@@ -499,6 +547,8 @@ void setMode(int mode)
     epasCtrl2.EMduleMde_D_Rq3=mode;
 
 
+  /* CAN3 */
+
   if(sys3==1)
     ebbCtrl3.EMduleMde_D_Rq=mode;
   else if(sys3==2)
@@ -508,6 +558,8 @@ void setMode(int mode)
   else if(sys3==4)
     epasCtrl3.EMduleMde_D_Rq3=mode;
 
+
+  /* CAN4 */
 
   if(sys4==1)
     ebbCtrl4.EMduleMde_D_Rq=mode;
@@ -519,6 +571,8 @@ void setMode(int mode)
     epasCtrl4.EMduleMde_D_Rq3=mode;
 
 
+  /* CAN5 */
+
   if(sys5==1)
     ebbCtrl5.EMduleMde_D_Rq=mode;
   else if(sys5==2)
@@ -528,6 +582,8 @@ void setMode(int mode)
   else if(sys5==4)
     epasCtrl5.EMduleMde_D_Rq3=mode;
 
+
+  /* CAN6 */
 
   if(sys6==1)
     ebbCtrl6.EMduleMde_D_Rq=mode;
@@ -541,15 +597,19 @@ void setMode(int mode)
 
 
 /* ============================================================
-   ISOLATION
+   ISOLATION CONTROL
+
    0 = OPEN
    1 = CLOSE
 
-   48V EPAS HAS NO ISOLATION COMMAND
+   48V EPAS:
+   NO ISOLATION COMMAND
    ============================================================ */
 
 void setIsolation(int value)
 {
+  /* CAN1 */
+
   if(sys1==1)
     ebbCtrl1.IsolSwtch_B_Cmd=value;
   else if(sys1==2)
@@ -557,6 +617,8 @@ void setIsolation(int value)
   else if(sys1==4)
     epasCtrl1.IsolSwtch_B_Cmd3=value;
 
+
+  /* CAN2 */
 
   if(sys2==1)
     ebbCtrl2.IsolSwtch_B_Cmd=value;
@@ -566,6 +628,8 @@ void setIsolation(int value)
     epasCtrl2.IsolSwtch_B_Cmd3=value;
 
 
+  /* CAN3 */
+
   if(sys3==1)
     ebbCtrl3.IsolSwtch_B_Cmd=value;
   else if(sys3==2)
@@ -573,6 +637,8 @@ void setIsolation(int value)
   else if(sys3==4)
     epasCtrl3.IsolSwtch_B_Cmd3=value;
 
+
+  /* CAN4 */
 
   if(sys4==1)
     ebbCtrl4.IsolSwtch_B_Cmd=value;
@@ -582,6 +648,8 @@ void setIsolation(int value)
     epasCtrl4.IsolSwtch_B_Cmd3=value;
 
 
+  /* CAN5 */
+
   if(sys5==1)
     ebbCtrl5.IsolSwtch_B_Cmd=value;
   else if(sys5==2)
@@ -589,6 +657,8 @@ void setIsolation(int value)
   else if(sys5==4)
     epasCtrl5.IsolSwtch_B_Cmd3=value;
 
+
+  /* CAN6 */
 
   if(sys6==1)
     ebbCtrl6.IsolSwtch_B_Cmd=value;
@@ -600,12 +670,15 @@ void setIsolation(int value)
 
 
 /* ============================================================
-   100 ms
-   CONTROL + INFO
+   100 ms TRANSMISSION
+
+   CTRL + INFO
    ============================================================ */
 
 void send100()
 {
+  /* CAN1 */
+
   if(sys1==1)
   {
     output(ebbCtrl1);
@@ -627,6 +700,8 @@ void send100()
     output(epasInfo1);
   }
 
+
+  /* CAN2 */
 
   if(sys2==1)
   {
@@ -650,6 +725,8 @@ void send100()
   }
 
 
+  /* CAN3 */
+
   if(sys3==1)
   {
     output(ebbCtrl3);
@@ -671,6 +748,8 @@ void send100()
     output(epasInfo3);
   }
 
+
+  /* CAN4 */
 
   if(sys4==1)
   {
@@ -694,6 +773,8 @@ void send100()
   }
 
 
+  /* CAN5 */
+
   if(sys5==1)
   {
     output(ebbCtrl5);
@@ -715,6 +796,8 @@ void send100()
     output(epasInfo5);
   }
 
+
+  /* CAN6 */
 
   if(sys6==1)
   {
@@ -740,7 +823,8 @@ void send100()
 
 
 /* ============================================================
-   500 ms
+   500 ms TRANSMISSION
+
    BODY INFO
    ============================================================ */
 
@@ -767,13 +851,14 @@ void send500()
 
 
 /* ============================================================
-   1000 ms
+   1000 ms TRANSMISSION
+
    NETWORK MANAGEMENT
    ============================================================ */
 
 void send1000()
 {
-  /* ---------- BCM ---------- */
+  /* ================= BCM ================= */
 
   if(sys1!=0)
     output(bcm1);
@@ -794,7 +879,9 @@ void send1000()
     output(bcm6);
 
 
-  /* ---------- EBB ---------- */
+  /* ================= EBB =================
+     DCDCF + DCDCG
+     ======================================= */
 
   if(sys1==1)
   {
@@ -833,7 +920,9 @@ void send1000()
   }
 
 
-  /* ---------- EMB ---------- */
+  /* ================= EMB =================
+     DCDCE + DCDCF
+     ======================================= */
 
   if(sys1==2)
   {
@@ -872,7 +961,9 @@ void send1000()
   }
 
 
-  /* ---------- 48V EPAS ---------- */
+  /* ================= 48V EPAS =================
+     DCDCE + DCDCG
+     ============================================ */
 
   if(sys1==3)
   {
@@ -911,7 +1002,9 @@ void send1000()
   }
 
 
-  /* ---------- 12V EPAS ---------- */
+  /* ================= 12V EPAS =================
+     DCDCG
+     ============================================ */
 
   if(sys1==4)
     output(dcdcg1);
@@ -935,7 +1028,12 @@ void send1000()
 
 /* ============================================================
    START
-   OFF 2 SECONDS
+
+   STARTUP ONLY ONCE:
+
+   OFF       2 SEC
+   STANDBY   2 SEC
+   THEN DAY 1 FLOAT
    ============================================================ */
 
 on start
@@ -947,9 +1045,13 @@ on start
   setMode(0);
   setIsolation(1);
 
+  /* Send immediately */
+
   send100();
   send500();
   send1000();
+
+  /* Start periodic messages */
 
   setTimer(t100,100);
   setTimer(t500,500);
@@ -962,7 +1064,7 @@ on start
 
 
 /* ============================================================
-   PERIODIC TRANSMISSION
+   PERIODIC 100 ms
    ============================================================ */
 
 on timer t100
@@ -973,6 +1075,10 @@ on timer t100
 }
 
 
+/* ============================================================
+   PERIODIC 500 ms
+   ============================================================ */
+
 on timer t500
 {
   send500();
@@ -980,6 +1086,10 @@ on timer t500
   setTimer(t500,500);
 }
 
+
+/* ============================================================
+   PERIODIC 1000 ms
+   ============================================================ */
 
 on timer t1000
 {
@@ -990,31 +1100,66 @@ on timer t1000
 
 
 /* ============================================================
-   16 HOUR TEST
+   FIVE DAY TEST
+   ============================================================
 
-   START:
+   STARTUP ONLY ONCE:
+
    OFF       2 SEC
    STANDBY   2 SEC
 
-   EACH CYCLE:
+   DAY 1:
    FLOAT
    ISOLATION OPEN 1 SEC
    ISOLATION CLOSE
-   FLOAT 3 HOURS
-   STANDBY 1 HOUR
+   FLOAT 18 HOURS
+   STANDBY 6 HOURS
 
-   TOTAL = 4 CYCLES
+   DAY 2:
+   FLOAT
+   ISOLATION OPEN 1 SEC
+   ISOLATION CLOSE
+   FLOAT 18 HOURS
+   STANDBY 6 HOURS
 
-   48V:
-   FLOAT MODE CHANGES NORMALLY
-   ISOLATION COMMAND IS SKIPPED
+   DAY 3:
+   FLOAT
+   ISOLATION OPEN 1 SEC
+   ISOLATION CLOSE
+   FLOAT 18 HOURS
+   STANDBY 6 HOURS
+
+   DAY 4:
+   FLOAT
+   ISOLATION OPEN 1 SEC
+   ISOLATION CLOSE
+   FLOAT 18 HOURS
+   STANDBY 6 HOURS
+
+   DAY 5:
+   FLOAT
+   ISOLATION OPEN 1 SEC
+   ISOLATION CLOSE
+   FLOAT 18 HOURS
+   STANDBY 6 HOURS
+
+   THEN MEASUREMENT STOP
+
+   18 HOURS = 64,800,000 ms
+   6 HOURS  = 21,600,000 ms
+
+   48V EPAS:
+   MODE CHANGES FLOAT/STANDBY
+   ISOLATION IS SKIPPED
    ============================================================ */
 
 on timer seqTimer
 {
   /* =========================================================
      STARTUP
-     OFF 2 SEC HAS FINISHED
+
+     OFF 2 SEC FINISHED
+     GO TO STANDBY FOR 2 SEC
      ========================================================= */
 
   if(step==0)
@@ -1031,7 +1176,9 @@ on timer seqTimer
 
 
   /* =========================================================
-     CYCLE 1
+     DAY 1
+     ENTER FLOAT
+     OPEN ISOLATION FOR 1 SEC
      ========================================================= */
 
   else if(step==1)
@@ -1039,7 +1186,7 @@ on timer seqTimer
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 1 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("DAY 1 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=2;
 
@@ -1047,33 +1194,39 @@ on timer seqTimer
   }
 
 
+  /* DAY 1 - CLOSE ISOLATION + FLOAT 18 HOURS */
+
   else if(step==2)
   {
     setIsolation(1);
 
-    write("CYCLE 1 - ISOLATION CLOSE - FLOAT 3 HOURS");
+    write("DAY 1 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=3;
 
-    setTimer(seqTimer,10800000);
+    setTimer(seqTimer,64800000);
   }
 
+
+  /* DAY 1 - STANDBY 6 HOURS */
 
   else if(step==3)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 1 - STANDBY - 1 HOUR");
+    write("DAY 1 - STANDBY - 6 HOURS");
 
     step=4;
 
-    setTimer(seqTimer,3600000);
+    setTimer(seqTimer,21600000);
   }
 
 
   /* =========================================================
-     CYCLE 2
+     DAY 2
+     ENTER FLOAT
+     OPEN ISOLATION FOR 1 SEC
      ========================================================= */
 
   else if(step==4)
@@ -1081,7 +1234,7 @@ on timer seqTimer
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 2 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("DAY 2 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=5;
 
@@ -1089,33 +1242,39 @@ on timer seqTimer
   }
 
 
+  /* DAY 2 - CLOSE ISOLATION + FLOAT 18 HOURS */
+
   else if(step==5)
   {
     setIsolation(1);
 
-    write("CYCLE 2 - ISOLATION CLOSE - FLOAT 3 HOURS");
+    write("DAY 2 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=6;
 
-    setTimer(seqTimer,10800000);
+    setTimer(seqTimer,64800000);
   }
 
+
+  /* DAY 2 - STANDBY 6 HOURS */
 
   else if(step==6)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 2 - STANDBY - 1 HOUR");
+    write("DAY 2 - STANDBY - 6 HOURS");
 
     step=7;
 
-    setTimer(seqTimer,3600000);
+    setTimer(seqTimer,21600000);
   }
 
 
   /* =========================================================
-     CYCLE 3
+     DAY 3
+     ENTER FLOAT
+     OPEN ISOLATION FOR 1 SEC
      ========================================================= */
 
   else if(step==7)
@@ -1123,7 +1282,7 @@ on timer seqTimer
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 3 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("DAY 3 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=8;
 
@@ -1131,33 +1290,39 @@ on timer seqTimer
   }
 
 
+  /* DAY 3 - CLOSE ISOLATION + FLOAT 18 HOURS */
+
   else if(step==8)
   {
     setIsolation(1);
 
-    write("CYCLE 3 - ISOLATION CLOSE - FLOAT 3 HOURS");
+    write("DAY 3 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=9;
 
-    setTimer(seqTimer,10800000);
+    setTimer(seqTimer,64800000);
   }
 
+
+  /* DAY 3 - STANDBY 6 HOURS */
 
   else if(step==9)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 3 - STANDBY - 1 HOUR");
+    write("DAY 3 - STANDBY - 6 HOURS");
 
     step=10;
 
-    setTimer(seqTimer,3600000);
+    setTimer(seqTimer,21600000);
   }
 
 
   /* =========================================================
-     CYCLE 4
+     DAY 4
+     ENTER FLOAT
+     OPEN ISOLATION FOR 1 SEC
      ========================================================= */
 
   else if(step==10)
@@ -1165,7 +1330,7 @@ on timer seqTimer
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 4 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("DAY 4 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=11;
 
@@ -1173,42 +1338,97 @@ on timer seqTimer
   }
 
 
+  /* DAY 4 - CLOSE ISOLATION + FLOAT 18 HOURS */
+
   else if(step==11)
   {
     setIsolation(1);
 
-    write("CYCLE 4 - ISOLATION CLOSE - FLOAT 3 HOURS");
+    write("DAY 4 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=12;
 
-    setTimer(seqTimer,10800000);
+    setTimer(seqTimer,64800000);
   }
 
+
+  /* DAY 4 - STANDBY 6 HOURS */
 
   else if(step==12)
   {
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 4 - STANDBY - 1 HOUR");
+    write("DAY 4 - STANDBY - 6 HOURS");
 
     step=13;
 
-    setTimer(seqTimer,3600000);
+    setTimer(seqTimer,21600000);
+  }
+
+
+  /* =========================================================
+     DAY 5
+     ENTER FLOAT
+     OPEN ISOLATION FOR 1 SEC
+     ========================================================= */
+
+  else if(step==13)
+  {
+    setMode(3);
+    setIsolation(0);
+
+    write("DAY 5 - FLOAT - ISOLATION OPEN - 1 SEC");
+
+    step=14;
+
+    setTimer(seqTimer,1000);
+  }
+
+
+  /* DAY 5 - CLOSE ISOLATION + FLOAT 18 HOURS */
+
+  else if(step==14)
+  {
+    setIsolation(1);
+
+    write("DAY 5 - ISOLATION CLOSE - FLOAT 18 HOURS");
+
+    step=15;
+
+    setTimer(seqTimer,64800000);
+  }
+
+
+  /* DAY 5 - FINAL STANDBY 6 HOURS */
+
+  else if(step==15)
+  {
+    setMode(1);
+    setIsolation(1);
+
+    write("DAY 5 - STANDBY - 6 HOURS");
+
+    step=16;
+
+    setTimer(seqTimer,21600000);
   }
 
 
   /* =========================================================
      COMPLETE
+
+     5 x (18 HOURS FLOAT + 6 HOURS STANDBY)
+     = 120 HOURS
      ========================================================= */
 
-  else if(step==13)
+  else if(step==16)
   {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
 
-    write("16 HOUR TEST COMPLETE - MEASUREMENT STOP");
+    write("5 DAY TEST COMPLETE - 120 HOURS - MEASUREMENT STOP");
 
     stop();
   }
