@@ -13,7 +13,8 @@ variables
      4 = 12V EPAS
   */
 
-  int sys1 = 4;
+  int sys1 = 1;  // CAN1 EBB
+  int sys2 = 1;  // CAN2 EBB
 
   msTimer t100;
   msTimer t500;
@@ -21,95 +22,96 @@ variables
   msTimer seqTimer;
 
   int step = 0;
-  int cycle = 0;
 
-  /* CAN1 - BCM6_BCM_CANFD DATABASE */
+  /* SAME DATABASE - SEPARATE MESSAGE OBJECTS */
 
   message BCM6_BCM_CANFD::BCM_AutoSar_Network_Mgmt bcm1;
   message BCM6_BCM_CANFD::BodyInfo_3 body1;
-
   message BCM6_BCM_CANFD::DCDCE_AutoSar_Network_Mgmt dcdce1;
   message BCM6_BCM_CANFD::DCDCF_AutoSar_Network_Mgmt dcdcf1;
   message BCM6_BCM_CANFD::DCDCG_AutoSar_Network_Mgmt dcdcg1;
 
   message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_1 ebbCtrl1;
   message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_1 ebbInfo1;
-
   message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_2 embCtrl1;
   message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_2 embInfo1;
-
   message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_3 v48Ctrl1;
   message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_3 v48Info1;
-
   message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_4 epasCtrl1;
   message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_4 epasInfo1;
+
+  message BCM6_BCM_CANFD::BCM_AutoSar_Network_Mgmt bcm2;
+  message BCM6_BCM_CANFD::BodyInfo_3 body2;
+  message BCM6_BCM_CANFD::DCDCE_AutoSar_Network_Mgmt dcdce2;
+  message BCM6_BCM_CANFD::DCDCF_AutoSar_Network_Mgmt dcdcf2;
+  message BCM6_BCM_CANFD::DCDCG_AutoSar_Network_Mgmt dcdcg2;
+
+  message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_1 ebbCtrl2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_1 ebbInfo2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_2 embCtrl2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_2 embInfo2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_3 v48Ctrl2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_3 v48Info2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyCtrl_4 epasCtrl2;
+  message BCM6_BCM_CANFD::EnergyMgmtBodyInfo_4 epasInfo2;
 }
 
 
-/* INITIALIZE ALL REQUIRED MESSAGES */
+/* INITIALIZE MESSAGES */
 
 void initMessages()
 {
   int i;
 
-  /* FORCE ALL MESSAGES TO CAN1 */
+  /* PHYSICAL CHANNEL ROUTING */
 
-  bcm1.CAN = 1;
-  body1.CAN = 1;
+  bcm1.CAN=1;
+  body1.CAN=1;
+  dcdce1.CAN=1;
+  dcdcf1.CAN=1;
+  dcdcg1.CAN=1;
+  ebbCtrl1.CAN=1;
+  ebbInfo1.CAN=1;
+  embCtrl1.CAN=1;
+  embInfo1.CAN=1;
+  v48Ctrl1.CAN=1;
+  v48Info1.CAN=1;
+  epasCtrl1.CAN=1;
+  epasInfo1.CAN=1;
 
-  dcdce1.CAN = 1;
-  dcdcf1.CAN = 1;
-  dcdcg1.CAN = 1;
+  bcm2.CAN=2;
+  body2.CAN=2;
+  dcdce2.CAN=2;
+  dcdcf2.CAN=2;
+  dcdcg2.CAN=2;
+  ebbCtrl2.CAN=2;
+  ebbInfo2.CAN=2;
+  embCtrl2.CAN=2;
+  embInfo2.CAN=2;
+  v48Ctrl2.CAN=2;
+  v48Info2.CAN=2;
+  epasCtrl2.CAN=2;
+  epasInfo2.CAN=2;
 
-  ebbCtrl1.CAN = 1;
-  ebbInfo1.CAN = 1;
-
-  embCtrl1.CAN = 1;
-  embInfo1.CAN = 1;
-
-  v48Ctrl1.CAN = 1;
-  v48Info1.CAN = 1;
-
-  epasCtrl1.CAN = 1;
-  epasInfo1.CAN = 1;
-
-  /* BCM NETWORK MANAGEMENT */
+  /* NETWORK MANAGEMENT PAYLOADS */
 
   bcm1.byte(0)=129;
   bcm1.byte(1)=0;
 
-  for(i=2;i<8;i++)
-  {
-    bcm1.byte(i)=255;
-  }
-
-  /* DCDCE NETWORK MANAGEMENT */
-
   dcdce1.byte(0)=0;
   dcdce1.byte(1)=129;
 
-  for(i=2;i<8;i++)
-  {
-    dcdce1.byte(i)=255;
-  }
-
-  /* DCDCF NETWORK MANAGEMENT */
-
   dcdcf1.byte(0)=0;
   dcdcf1.byte(1)=129;
-
-  for(i=2;i<8;i++)
-  {
-    dcdcf1.byte(i)=255;
-  }
-
-  /* DCDCG NETWORK MANAGEMENT */
 
   dcdcg1.byte(0)=0;
   dcdcg1.byte(1)=129;
 
   for(i=2;i<8;i++)
   {
+    bcm1.byte(i)=255;
+    dcdce1.byte(i)=255;
+    dcdcf1.byte(i)=255;
     dcdcg1.byte(i)=255;
   }
 
@@ -127,145 +129,133 @@ void initMessages()
   body1.Parklamp_Status=1;
   body1.Ignition_Status=4;
 
-  /* EBB CONTROL DEFAULTS */
+  /* CONTROL DEFAULTS */
+
+  for(i=0;i<8;i++)
+  {
+    ebbCtrl1.byte(i)=0;
+    embCtrl1.byte(i)=0;
+    epasCtrl1.byte(i)=0;
+    v48Ctrl1.byte(i)=0;
+  }
 
   ebbCtrl1.byte(0)=30;
   ebbCtrl1.byte(1)=168;
-  ebbCtrl1.byte(2)=0;
   ebbCtrl1.byte(3)=13;
   ebbCtrl1.byte(4)=52;
   ebbCtrl1.byte(5)=192;
-  ebbCtrl1.byte(6)=0;
-  ebbCtrl1.byte(7)=0;
-
-  /* EMB CONTROL DEFAULTS */
 
   embCtrl1.byte(0)=30;
   embCtrl1.byte(1)=168;
-  embCtrl1.byte(2)=0;
   embCtrl1.byte(3)=13;
   embCtrl1.byte(4)=52;
   embCtrl1.byte(5)=192;
-  embCtrl1.byte(6)=0;
-  embCtrl1.byte(7)=0;
-
-  /* 12V EPAS CONTROL DEFAULTS */
 
   epasCtrl1.byte(0)=30;
   epasCtrl1.byte(1)=168;
-  epasCtrl1.byte(2)=0;
   epasCtrl1.byte(3)=13;
   epasCtrl1.byte(4)=52;
   epasCtrl1.byte(5)=192;
-  epasCtrl1.byte(6)=0;
-  epasCtrl1.byte(7)=0;
-
-  /* 48V EPAS CONTROL DEFAULTS */
 
   v48Ctrl1.byte(0)=254;
   v48Ctrl1.byte(1)=254;
   v48Ctrl1.byte(2)=254;
   v48Ctrl1.byte(3)=30;
-  v48Ctrl1.byte(4)=0;
-  v48Ctrl1.byte(5)=0;
-  v48Ctrl1.byte(6)=0;
-  v48Ctrl1.byte(7)=0;
 
-  /* EBB INFORMATION */
+  /* INFO DEFAULTS */
 
   for(i=0;i<8;i++)
   {
     ebbInfo1.byte(i)=0;
+    embInfo1.byte(i)=0;
+    epasInfo1.byte(i)=0;
+    v48Info1.byte(i)=0;
   }
 
   ebbInfo1.byte(6)=162;
   ebbInfo1.byte(7)=128;
 
-  /* EMB INFORMATION */
-
-  for(i=0;i<8;i++)
-  {
-    embInfo1.byte(i)=0;
-  }
-
   embInfo1.byte(6)=162;
   embInfo1.byte(7)=128;
-
-  /* 12V EPAS INFORMATION */
-
-  for(i=0;i<8;i++)
-  {
-    epasInfo1.byte(i)=0;
-  }
 
   epasInfo1.byte(6)=162;
   epasInfo1.byte(7)=128;
 
-  /* 48V EPAS INFORMATION
-     BYTE 0 MUST REMAIN 8 */
-
   v48Info1.byte(0)=8;
   v48Info1.byte(1)=254;
   v48Info1.byte(2)=254;
-  v48Info1.byte(3)=0;
-  v48Info1.byte(4)=0;
-  v48Info1.byte(5)=0;
-  v48Info1.byte(6)=0;
-  v48Info1.byte(7)=0;
+
+  /* COPY INITIALIZED PAYLOADS TO CAN2 */
+
+  bcm2=bcm1;
+  body2=body1;
+
+  dcdce2=dcdce1;
+  dcdcf2=dcdcf1;
+  dcdcg2=dcdcg1;
+
+  ebbCtrl2=ebbCtrl1;
+  ebbInfo2=ebbInfo1;
+
+  embCtrl2=embCtrl1;
+  embInfo2=embInfo1;
+
+  v48Ctrl2=v48Ctrl1;
+  v48Info2=v48Info1;
+
+  epasCtrl2=epasCtrl1;
+  epasInfo2=epasInfo1;
+
+  /* REAPPLY CAN2 ROUTING AFTER COPYING */
+
+  bcm2.CAN=2;
+  body2.CAN=2;
+  dcdce2.CAN=2;
+  dcdcf2.CAN=2;
+  dcdcg2.CAN=2;
+
+  ebbCtrl2.CAN=2;
+  ebbInfo2.CAN=2;
+  embCtrl2.CAN=2;
+  embInfo2.CAN=2;
+  v48Ctrl2.CAN=2;
+  v48Info2.CAN=2;
+  epasCtrl2.CAN=2;
+  epasInfo2.CAN=2;
 }
 
 
-/* SET MODE
-   0 = OFF
-   1 = STANDBY
-   3 = FLOAT
-*/
+/* SET MODE ON BOTH CHANNELS */
 
 void setMode(int mode)
 {
-  if(sys1==1)
-  {
-    ebbCtrl1.EMduleMde_D_Rq=mode;
-  }
-  else if(sys1==2)
-  {
-    embCtrl1.EMduleMde_D_Rq2=mode;
-  }
-  else if(sys1==3)
-  {
-    v48Ctrl1.UCapMduleMde_D_Rq=mode;
-  }
-  else if(sys1==4)
-  {
-    epasCtrl1.EMduleMde_D_Rq3=mode;
-  }
+  if(sys1==1) ebbCtrl1.EMduleMde_D_Rq=mode;
+  else if(sys1==2) embCtrl1.EMduleMde_D_Rq2=mode;
+  else if(sys1==3) v48Ctrl1.UCapMduleMde_D_Rq=mode;
+  else if(sys1==4) epasCtrl1.EMduleMde_D_Rq3=mode;
+
+  if(sys2==1) ebbCtrl2.EMduleMde_D_Rq=mode;
+  else if(sys2==2) embCtrl2.EMduleMde_D_Rq2=mode;
+  else if(sys2==3) v48Ctrl2.UCapMduleMde_D_Rq=mode;
+  else if(sys2==4) epasCtrl2.EMduleMde_D_Rq3=mode;
 }
 
 
-/* ISOLATION
-   0 = OPEN
-   1 = CLOSE
-   48V EPAS HAS NO ISOLATION
-*/
+/* ISOLATION ON BOTH CHANNELS */
 
 void setIsolation(int value)
 {
-  if(sys1==1)
-  {
-    ebbCtrl1.IsolSwtch_B_Cmd=value;
-  }
-  else if(sys1==2)
-  {
-    embCtrl1.IsolSwtch_B_Cmd2=value;
-  }
-  else if(sys1==4)
-  {
-    epasCtrl1.IsolSwtch_B_Cmd3=value;
-  }
+  if(sys1==1) ebbCtrl1.IsolSwtch_B_Cmd=value;
+  else if(sys1==2) embCtrl1.IsolSwtch_B_Cmd2=value;
+  else if(sys1==4) epasCtrl1.IsolSwtch_B_Cmd3=value;
+
+  if(sys2==1) ebbCtrl2.IsolSwtch_B_Cmd=value;
+  else if(sys2==2) embCtrl2.IsolSwtch_B_Cmd2=value;
+  else if(sys2==4) epasCtrl2.IsolSwtch_B_Cmd3=value;
 }
 
 
-/* SEND CONTROL AND INFO EVERY 100 MS */
+/* CONTROL + INFO EVERY 100 MS */
 
 void send100()
 {
@@ -289,28 +279,44 @@ void send100()
     output(epasCtrl1);
     output(epasInfo1);
   }
+
+  if(sys2==1)
+  {
+    output(ebbCtrl2);
+    output(ebbInfo2);
+  }
+  else if(sys2==2)
+  {
+    output(embCtrl2);
+    output(embInfo2);
+  }
+  else if(sys2==3)
+  {
+    output(v48Ctrl2);
+    output(v48Info2);
+  }
+  else if(sys2==4)
+  {
+    output(epasCtrl2);
+    output(epasInfo2);
+  }
 }
 
 
-/* SEND BODY INFO EVERY 500 MS */
+/* BODY INFO EVERY 500 MS */
 
 void send500()
 {
-  if(sys1!=0)
-  {
-    output(body1);
-  }
+  if(sys1!=0) output(body1);
+  if(sys2!=0) output(body2);
 }
 
 
-/* SEND NETWORK MANAGEMENT EVERY 1000 MS */
+/* NETWORK MANAGEMENT EVERY 1000 MS */
 
 void send1000()
 {
-  if(sys1!=0)
-  {
-    output(bcm1);
-  }
+  if(sys1!=0) output(bcm1);
 
   if(sys1==1)
   {
@@ -331,23 +337,45 @@ void send1000()
   {
     output(dcdcg1);
   }
+
+  if(sys2!=0) output(bcm2);
+
+  if(sys2==1)
+  {
+    output(dcdcf2);
+    output(dcdcg2);
+  }
+  else if(sys2==2)
+  {
+    output(dcdce2);
+    output(dcdcf2);
+  }
+  else if(sys2==3)
+  {
+    output(dcdce2);
+    output(dcdcg2);
+  }
+  else if(sys2==4)
+  {
+    output(dcdcg2);
+  }
 }
 
 
-/* START MEASUREMENT */
+/* START */
 
 on start
 {
-  if(sys1<1 || sys1>4)
+  if(sys1<0 || sys1>4 || sys2<0 || sys2>4 ||
+     (sys1==0 && sys2==0))
   {
-    write("ERROR: SELECT SYSTEM 1 TO 4");
+    write("ERROR: INVALID SYSTEM SELECTION");
     return;
   }
 
   initMessages();
 
   step=0;
-  cycle=0;
 
   setMode(0);
   setIsolation(1);
@@ -360,11 +388,12 @@ on start
   setTimer(t500,500);
   setTimer(t1000,1000);
 
-  write("CAN1 FIVE-DAY MASTER STARTED");
-  write("SYSTEM SELECTED: %d",sys1);
-  write("STARTUP OFF - 2 SECONDS");
+  write("TWO-CHANNEL TEST STARTED");
+  write("CAN1 SYSTEM: %d",sys1);
+  write("CAN2 SYSTEM: %d",sys2);
+  write("OFF - 1 SECOND");
 
-  setTimer(seqTimer,2000);
+  setTimer(seqTimer,1000);
 }
 
 
@@ -389,121 +418,91 @@ on timer t1000
 }
 
 
-/* FIVE-DAY MASTER SEQUENCE */
+/* TWO-MINUTE TEST SEQUENCE */
 
 on timer seqTimer
 {
-  /* OFF -> STANDBY */
-
   if(step==0)
   {
     setMode(1);
     setIsolation(1);
 
-    write("STARTUP STANDBY - 2 SECONDS");
+    write("BOTH CHANNELS: STANDBY - 1 SECOND");
 
     step=1;
-    setTimer(seqTimer,2000);
+    setTimer(seqTimer,1000);
   }
-
-  /* FIRST FLOAT CYCLE */
 
   else if(step==1)
   {
-    cycle=1;
-
     setMode(3);
+    setIsolation(1);
 
-    if(sys1!=3)
-    {
-      setIsolation(0);
-      write("DAY %d: ISOLATION OPEN",cycle);
-    }
-
-    write("DAY %d: FLOAT START",cycle);
+    write("BOTH CHANNELS: FLOAT - 1 SECOND");
 
     step=2;
     setTimer(seqTimer,1000);
   }
 
-  /* CLOSE ISOLATION AND HOLD FLOAT */
-
   else if(step==2)
   {
-    if(sys1!=3)
-    {
-      setIsolation(1);
-      write("DAY %d: ISOLATION CLOSED",cycle);
-    }
+    setIsolation(0);
 
-    write("DAY %d: FLOAT HOLD",cycle);
+    write("BOTH CHANNELS: ISOLATION OPEN - 1 SECOND");
 
     step=3;
-
-    /* 18 HOURS MINUS 1 SECOND */
-    setTimer(seqTimer,64799000);
+    setTimer(seqTimer,1000);
   }
 
-  /* FLOAT -> STANDBY */
-
   else if(step==3)
+  {
+    setIsolation(1);
+
+    write("BOTH CHANNELS: ISOLATION CLOSED");
+
+    step=4;
+    setTimer(seqTimer,1000);
+  }
+
+  else if(step==4)
+  {
+    write("BOTH CHANNELS: FLOAT HOLD - 2 MINUTES");
+
+    step=5;
+    setTimer(seqTimer,120000);
+  }
+
+  else if(step==5)
   {
     setMode(1);
     setIsolation(1);
 
-    write("DAY %d: FLOAT COMPLETE",cycle);
-    write("DAY %d: STANDBY - 6 HOURS",cycle);
+    write("BOTH CHANNELS: STANDBY - 1 SECOND");
 
-    step=4;
-    setTimer(seqTimer,21600000);
+    step=6;
+    setTimer(seqTimer,1000);
   }
 
-  /* NEXT DAY OR COMPLETE */
-
-  else if(step==4)
+  else if(step==6)
   {
-    if(cycle>=5)
-    {
-      setMode(0);
-      setIsolation(1);
-      send100();
+    setMode(0);
+    setIsolation(1);
 
-      write("FIVE CYCLES COMPLETE");
-      write("120 HOURS FINISHED");
-      write("FINAL OFF - 2 SECONDS");
+    send100();
 
-      step=5;
-      setTimer(seqTimer,2000);
-    }
-    else
-    {
-      cycle++;
+    write("BOTH CHANNELS: OFF - 1 SECOND");
 
-      setMode(3);
-
-      if(sys1!=3)
-      {
-        setIsolation(0);
-        write("DAY %d: ISOLATION OPEN",cycle);
-      }
-
-      write("DAY %d: FLOAT START",cycle);
-
-      step=2;
-      setTimer(seqTimer,1000);
-    }
+    step=7;
+    setTimer(seqTimer,1000);
   }
 
-  /* STOP MEASUREMENT */
-
-  else if(step==5)
+  else if(step==7)
   {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
 
-    write("FIVE-DAY TEST COMPLETE");
-    write("STOP MEASUREMENT");
+    write("TWO-CHANNEL TWO-MINUTE TEST COMPLETE");
 
     stop();
   }
