@@ -21,6 +21,7 @@ variables
   msTimer seqTimer;
 
   int step = 0;
+  int cycle = 0;
 
   /* CAN1 - BCM6_BCM_CANFD DATABASE */
 
@@ -50,6 +51,27 @@ variables
 void initMessages()
 {
   int i;
+
+  /* FORCE ALL MESSAGES TO CAN1 */
+
+  bcm1.CAN = 1;
+  body1.CAN = 1;
+
+  dcdce1.CAN = 1;
+  dcdcf1.CAN = 1;
+  dcdcg1.CAN = 1;
+
+  ebbCtrl1.CAN = 1;
+  ebbInfo1.CAN = 1;
+
+  embCtrl1.CAN = 1;
+  embInfo1.CAN = 1;
+
+  v48Ctrl1.CAN = 1;
+  v48Info1.CAN = 1;
+
+  epasCtrl1.CAN = 1;
+  epasInfo1.CAN = 1;
 
   /* BCM NETWORK MANAGEMENT */
 
@@ -101,8 +123,6 @@ void initMessages()
   body1.byte(0)=4;
   body1.byte(3)=12;
   body1.byte(4)=230;
-
-  /* IGNITION RUN AND PARKLAMP ON */
 
   body1.Parklamp_Status=1;
   body1.Ignition_Status=4;
@@ -207,17 +227,14 @@ void setMode(int mode)
   {
     ebbCtrl1.EMduleMde_D_Rq=mode;
   }
-
   else if(sys1==2)
   {
     embCtrl1.EMduleMde_D_Rq2=mode;
   }
-
   else if(sys1==3)
   {
     v48Ctrl1.UCapMduleMde_D_Rq=mode;
   }
-
   else if(sys1==4)
   {
     epasCtrl1.EMduleMde_D_Rq3=mode;
@@ -237,12 +254,10 @@ void setIsolation(int value)
   {
     ebbCtrl1.IsolSwtch_B_Cmd=value;
   }
-
   else if(sys1==2)
   {
     embCtrl1.IsolSwtch_B_Cmd2=value;
   }
-
   else if(sys1==4)
   {
     epasCtrl1.IsolSwtch_B_Cmd3=value;
@@ -259,19 +274,16 @@ void send100()
     output(ebbCtrl1);
     output(ebbInfo1);
   }
-
   else if(sys1==2)
   {
     output(embCtrl1);
     output(embInfo1);
   }
-
   else if(sys1==3)
   {
     output(v48Ctrl1);
     output(v48Info1);
   }
-
   else if(sys1==4)
   {
     output(epasCtrl1);
@@ -302,32 +314,21 @@ void send1000()
 
   if(sys1==1)
   {
-    /* EBB */
-
     output(dcdcf1);
     output(dcdcg1);
   }
-
   else if(sys1==2)
   {
-    /* EMB */
-
     output(dcdce1);
     output(dcdcf1);
   }
-
   else if(sys1==3)
   {
-    /* 48V EPAS */
-
     output(dcdce1);
     output(dcdcg1);
   }
-
   else if(sys1==4)
   {
-    /* 12V EPAS */
-
     output(dcdcg1);
   }
 }
@@ -346,6 +347,7 @@ on start
   initMessages();
 
   step=0;
+  cycle=0;
 
   setMode(0);
   setIsolation(1);
@@ -358,11 +360,11 @@ on start
   setTimer(t500,500);
   setTimer(t1000,1000);
 
-  write("CAN1 MASTER STARTED");
+  write("CAN1 FIVE-DAY MASTER STARTED");
   write("SYSTEM SELECTED: %d",sys1);
-  write("OFF - 1 SECOND");
+  write("STARTUP OFF - 2 SECONDS");
 
-  setTimer(seqTimer,1000);
+  setTimer(seqTimer,2000);
 }
 
 
@@ -387,91 +389,121 @@ on timer t1000
 }
 
 
-/* COMPLETE TWO-MINUTE TEST */
+/* FIVE-DAY MASTER SEQUENCE */
 
 on timer seqTimer
 {
+  /* OFF -> STANDBY */
+
   if(step==0)
   {
     setMode(1);
     setIsolation(1);
 
-    write("STANDBY - 1 SECOND");
+    write("STARTUP STANDBY - 2 SECONDS");
 
     step=1;
-    setTimer(seqTimer,1000);
+    setTimer(seqTimer,2000);
   }
+
+  /* FIRST FLOAT CYCLE */
 
   else if(step==1)
   {
-    setMode(3);
-    setIsolation(1);
+    cycle=1;
 
-    write("FLOAT - 1 SECOND");
+    setMode(3);
+
+    if(sys1!=3)
+    {
+      setIsolation(0);
+      write("DAY %d: ISOLATION OPEN",cycle);
+    }
+
+    write("DAY %d: FLOAT START",cycle);
 
     step=2;
     setTimer(seqTimer,1000);
   }
 
+  /* CLOSE ISOLATION AND HOLD FLOAT */
+
   else if(step==2)
   {
-    setIsolation(0);
+    if(sys1!=3)
+    {
+      setIsolation(1);
+      write("DAY %d: ISOLATION CLOSED",cycle);
+    }
 
-    write("ISOLATION OPEN - 1 SECOND");
+    write("DAY %d: FLOAT HOLD",cycle);
 
     step=3;
-    setTimer(seqTimer,1000);
+
+    /* 18 HOURS MINUS 1 SECOND */
+    setTimer(seqTimer,64799000);
   }
+
+  /* FLOAT -> STANDBY */
 
   else if(step==3)
-  {
-    setIsolation(1);
-
-    write("ISOLATION CLOSED");
-
-    step=4;
-    setTimer(seqTimer,1000);
-  }
-
-  else if(step==4)
-  {
-    write("FLOAT HOLD - 2 MINUTES");
-
-    step=5;
-    setTimer(seqTimer,120000);
-  }
-
-  else if(step==5)
   {
     setMode(1);
     setIsolation(1);
 
-    write("STANDBY - 1 SECOND");
+    write("DAY %d: FLOAT COMPLETE",cycle);
+    write("DAY %d: STANDBY - 6 HOURS",cycle);
 
-    step=6;
-    setTimer(seqTimer,1000);
+    step=4;
+    setTimer(seqTimer,21600000);
   }
 
-  else if(step==6)
+  /* NEXT DAY OR COMPLETE */
+
+  else if(step==4)
   {
-    setMode(0);
-    setIsolation(1);
+    if(cycle>=5)
+    {
+      setMode(0);
+      setIsolation(1);
+      send100();
 
-    send100();
+      write("FIVE CYCLES COMPLETE");
+      write("120 HOURS FINISHED");
+      write("FINAL OFF - 2 SECONDS");
 
-    write("OFF - 1 SECOND");
+      step=5;
+      setTimer(seqTimer,2000);
+    }
+    else
+    {
+      cycle++;
 
-    step=7;
-    setTimer(seqTimer,1000);
+      setMode(3);
+
+      if(sys1!=3)
+      {
+        setIsolation(0);
+        write("DAY %d: ISOLATION OPEN",cycle);
+      }
+
+      write("DAY %d: FLOAT START",cycle);
+
+      step=2;
+      setTimer(seqTimer,1000);
+    }
   }
 
-  else if(step==7)
+  /* STOP MEASUREMENT */
+
+  else if(step==5)
   {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
 
-    write("TWO-MINUTE TEST COMPLETE");
+    write("FIVE-DAY TEST COMPLETE");
+    write("STOP MEASUREMENT");
 
     stop();
   }
