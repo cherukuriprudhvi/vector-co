@@ -1,6 +1,6 @@
 
-
 /*@!Encoding:1252*/
+
 variables
 {
   /* =========================================================
@@ -12,151 +12,164 @@ variables
      4 = 12V EPAS
      ========================================================= */
 
-  int sys1 = 1;     // EPAS
-  int sys2 = 4;     // EPAS
-  int sys3 = 3;     // EMB
-  int sys4 = 2;     // EPAS
-  int sys5 = 3;     // 48V EPAS
-  int sys6 = 1;     // EBB
+  int sys1 = 0;
+  int sys2 = 0;
+  int sys3 = 0;
+  int sys4 = 0;
+  int sys5 = 0;
+  int sys6 = 0;
+
+  int testRunning = 0;
+  int step = 0;
 
   msTimer t100;
   msTimer t500;
   msTimer t1000;
   msTimer seqTimer;
 
-  int step = 0;
+
+  /* =========================================================
+     CAN 1
+     ========================================================= */
+
+  message CAN1.BCM_AutoSar_Network_Mgmt bcm1;
+  message CAN1.BodyInfo_3 body1;
+
+  message CAN1.DCDCE_AutoSar_Network_Mgmt dcdce1;
+  message CAN1.DCDCF_AutoSar_Network_Mgmt dcdcf1;
+  message CAN1.DCDCG_AutoSar_Network_Mgmt dcdcg1;
+
+  message CAN1.EnergyMgmtBodyCtrl_1 ebbCtrl1;
+  message CAN1.EnergyMgmtBodyInfo_1 ebbInfo1;
+
+  message CAN1.EnergyMgmtBodyCtrl_2 embCtrl1;
+  message CAN1.EnergyMgmtBodyInfo_2 embInfo1;
+
+  message CAN1.EnergyMgmtBodyCtrl_3 v48Ctrl1;
+  message CAN1.EnergyMgmtBodyInfo_3 v48Info1;
+
+  message CAN1.EnergyMgmtBodyCtrl_4 epasCtrl1;
+  message CAN1.EnergyMgmtBodyInfo_4 epasInfo1;
 
 
-  /* ================= CAN 1 ================= */
+  /* =========================================================
+     CAN 2
+     ========================================================= */
 
-  message DBC1::BCM_AutoSar_Network_Mgmt bcm1;
-  message DBC1::BodyInfo_3 body1;
+  message CAN2.BCM_AutoSar_Network_Mgmt bcm2;
+  message CAN2.BodyInfo_3 body2;
 
-  message DBC1::DCDCE_AutoSar_Network_Mgmt dcdce1;
-  message DBC1::DCDCF_AutoSar_Network_Mgmt dcdcf1;
-  message DBC1::DCDCG_AutoSar_Network_Mgmt dcdcg1;
+  message CAN2.DCDCE_AutoSar_Network_Mgmt dcdce2;
+  message CAN2.DCDCF_AutoSar_Network_Mgmt dcdcf2;
+  message CAN2.DCDCG_AutoSar_Network_Mgmt dcdcg2;
 
-  message DBC1::EnergyMgmtBodyCtrl_1 ebbCtrl1;
-  message DBC1::EnergyMgmtBodyInfo_1 ebbInfo1;
+  message CAN2.EnergyMgmtBodyCtrl_1 ebbCtrl2;
+  message CAN2.EnergyMgmtBodyInfo_1 ebbInfo2;
 
-  message DBC1::EnergyMgmtBodyCtrl_2 embCtrl1;
-  message DBC1::EnergyMgmtBodyInfo_2 embInfo1;
+  message CAN2.EnergyMgmtBodyCtrl_2 embCtrl2;
+  message CAN2.EnergyMgmtBodyInfo_2 embInfo2;
 
-  message DBC1::EnergyMgmtBodyCtrl_3 v48Ctrl1;
-  message DBC1::EnergyMgmtBodyInfo_3 v48Info1;
+  message CAN2.EnergyMgmtBodyCtrl_3 v48Ctrl2;
+  message CAN2.EnergyMgmtBodyInfo_3 v48Info2;
 
-  message DBC1::EnergyMgmtBodyCtrl_4 epasCtrl1;
-  message DBC1::EnergyMgmtBodyInfo_4 epasInfo1;
-
-
-  /* ================= CAN 2 ================= */
-
-  message DBC2::BCM_AutoSar_Network_Mgmt bcm2;
-  message DBC2::BodyInfo_3 body2;
-
-  message DBC2::DCDCE_AutoSar_Network_Mgmt dcdce2;
-  message DBC2::DCDCF_AutoSar_Network_Mgmt dcdcf2;
-  message DBC2::DCDCG_AutoSar_Network_Mgmt dcdcg2;
-
-  message DBC2::EnergyMgmtBodyCtrl_1 ebbCtrl2;
-  message DBC2::EnergyMgmtBodyInfo_1 ebbInfo2;
-
-  message DBC2::EnergyMgmtBodyCtrl_2 embCtrl2;
-  message DBC2::EnergyMgmtBodyInfo_2 embInfo2;
-
-  message DBC2::EnergyMgmtBodyCtrl_3 v48Ctrl2;
-  message DBC2::EnergyMgmtBodyInfo_3 v48Info2;
-
-  message DBC2::EnergyMgmtBodyCtrl_4 epasCtrl2;
-  message DBC2::EnergyMgmtBodyInfo_4 epasInfo2;
+  message CAN2.EnergyMgmtBodyCtrl_4 epasCtrl2;
+  message CAN2.EnergyMgmtBodyInfo_4 epasInfo2;
 
 
-  /* ================= CAN 3 ================= */
+  /* =========================================================
+     CAN 3
+     ========================================================= */
 
-  message DBC3::BCM_AutoSar_Network_Mgmt bcm3;
-  message DBC3::BodyInfo_3 body3;
+  message CAN3.BCM_AutoSar_Network_Mgmt bcm3;
+  message CAN3.BodyInfo_3 body3;
 
-  message DBC3::DCDCE_AutoSar_Network_Mgmt dcdce3;
-  message DBC3::DCDCF_AutoSar_Network_Mgmt dcdcf3;
-  message DBC3::DCDCG_AutoSar_Network_Mgmt dcdcg3;
+  message CAN3.DCDCE_AutoSar_Network_Mgmt dcdce3;
+  message CAN3.DCDCF_AutoSar_Network_Mgmt dcdcf3;
+  message CAN3.DCDCG_AutoSar_Network_Mgmt dcdcg3;
 
-  message DBC3::EnergyMgmtBodyCtrl_1 ebbCtrl3;
-  message DBC3::EnergyMgmtBodyInfo_1 ebbInfo3;
+  message CAN3.EnergyMgmtBodyCtrl_1 ebbCtrl3;
+  message CAN3.EnergyMgmtBodyInfo_1 ebbInfo3;
 
-  message DBC3::EnergyMgmtBodyCtrl_2 embCtrl3;
-  message DBC3::EnergyMgmtBodyInfo_2 embInfo3;
+  message CAN3.EnergyMgmtBodyCtrl_2 embCtrl3;
+  message CAN3.EnergyMgmtBodyInfo_2 embInfo3;
 
-  message DBC3::EnergyMgmtBodyCtrl_3 v48Ctrl3;
-  message DBC3::EnergyMgmtBodyInfo_3 v48Info3;
+  message CAN3.EnergyMgmtBodyCtrl_3 v48Ctrl3;
+  message CAN3.EnergyMgmtBodyInfo_3 v48Info3;
 
-  message DBC3::EnergyMgmtBodyCtrl_4 epasCtrl3;
-  message DBC3::EnergyMgmtBodyInfo_4 epasInfo3;
-
-
-  /* ================= CAN 4 ================= */
-
-  message DBC4::BCM_AutoSar_Network_Mgmt bcm4;
-  message DBC4::BodyInfo_3 body4;
-
-  message DBC4::DCDCE_AutoSar_Network_Mgmt dcdce4;
-  message DBC4::DCDCF_AutoSar_Network_Mgmt dcdcf4;
-  message DBC4::DCDCG_AutoSar_Network_Mgmt dcdcg4;
-
-  message DBC4::EnergyMgmtBodyCtrl_1 ebbCtrl4;
-  message DBC4::EnergyMgmtBodyInfo_1 ebbInfo4;
-
-  message DBC4::EnergyMgmtBodyCtrl_2 embCtrl4;
-  message DBC4::EnergyMgmtBodyInfo_2 embInfo4;
-
-  message DBC4::EnergyMgmtBodyCtrl_3 v48Ctrl4;
-  message DBC4::EnergyMgmtBodyInfo_3 v48Info4;
-
-  message DBC4::EnergyMgmtBodyCtrl_4 epasCtrl4;
-  message DBC4::EnergyMgmtBodyInfo_4 epasInfo4;
+  message CAN3.EnergyMgmtBodyCtrl_4 epasCtrl3;
+  message CAN3.EnergyMgmtBodyInfo_4 epasInfo3;
 
 
-  /* ================= CAN 5 ================= */
+  /* =========================================================
+     CAN 4
+     ========================================================= */
 
-  message DBC5::BCM_AutoSar_Network_Mgmt bcm5;
-  message DBC5::BodyInfo_3 body5;
+  message CAN4.BCM_AutoSar_Network_Mgmt bcm4;
+  message CAN4.BodyInfo_3 body4;
 
-  message DBC5::DCDCE_AutoSar_Network_Mgmt dcdce5;
-  message DBC5::DCDCF_AutoSar_Network_Mgmt dcdcf5;
-  message DBC5::DCDCG_AutoSar_Network_Mgmt dcdcg5;
+  message CAN4.DCDCE_AutoSar_Network_Mgmt dcdce4;
+  message CAN4.DCDCF_AutoSar_Network_Mgmt dcdcf4;
+  message CAN4.DCDCG_AutoSar_Network_Mgmt dcdcg4;
 
-  message DBC5::EnergyMgmtBodyCtrl_1 ebbCtrl5;
-  message DBC5::EnergyMgmtBodyInfo_1 ebbInfo5;
+  message CAN4.EnergyMgmtBodyCtrl_1 ebbCtrl4;
+  message CAN4.EnergyMgmtBodyInfo_1 ebbInfo4;
 
-  message DBC5::EnergyMgmtBodyCtrl_2 embCtrl5;
-  message DBC5::EnergyMgmtBodyInfo_2 embInfo5;
+  message CAN4.EnergyMgmtBodyCtrl_2 embCtrl4;
+  message CAN4.EnergyMgmtBodyInfo_2 embInfo4;
 
-  message DBC5::EnergyMgmtBodyCtrl_3 v48Ctrl5;
-  message DBC5::EnergyMgmtBodyInfo_3 v48Info5;
+  message CAN4.EnergyMgmtBodyCtrl_3 v48Ctrl4;
+  message CAN4.EnergyMgmtBodyInfo_3 v48Info4;
 
-  message DBC5::EnergyMgmtBodyCtrl_4 epasCtrl5;
-  message DBC5::EnergyMgmtBodyInfo_4 epasInfo5;
+  message CAN4.EnergyMgmtBodyCtrl_4 epasCtrl4;
+  message CAN4.EnergyMgmtBodyInfo_4 epasInfo4;
 
 
-  /* ================= CAN 6 ================= */
+  /* =========================================================
+     CAN 5
+     ========================================================= */
 
-  message DBC6::BCM_AutoSar_Network_Mgmt bcm6;
-  message DBC6::BodyInfo_3 body6;
+  message CAN5.BCM_AutoSar_Network_Mgmt bcm5;
+  message CAN5.BodyInfo_3 body5;
 
-  message DBC6::DCDCE_AutoSar_Network_Mgmt dcdce6;
-  message DBC6::DCDCF_AutoSar_Network_Mgmt dcdcf6;
-  message DBC6::DCDCG_AutoSar_Network_Mgmt dcdcg6;
+  message CAN5.DCDCE_AutoSar_Network_Mgmt dcdce5;
+  message CAN5.DCDCF_AutoSar_Network_Mgmt dcdcf5;
+  message CAN5.DCDCG_AutoSar_Network_Mgmt dcdcg5;
 
-  message DBC6::EnergyMgmtBodyCtrl_1 ebbCtrl6;
-  message DBC6::EnergyMgmtBodyInfo_1 ebbInfo6;
+  message CAN5.EnergyMgmtBodyCtrl_1 ebbCtrl5;
+  message CAN5.EnergyMgmtBodyInfo_1 ebbInfo5;
 
-  message DBC6::EnergyMgmtBodyCtrl_2 embCtrl6;
-  message DBC6::EnergyMgmtBodyInfo_2 embInfo6;
+  message CAN5.EnergyMgmtBodyCtrl_2 embCtrl5;
+  message CAN5.EnergyMgmtBodyInfo_2 embInfo5;
 
-  message DBC6::EnergyMgmtBodyCtrl_3 v48Ctrl6;
-  message DBC6::EnergyMgmtBodyInfo_3 v48Info6;
+  message CAN5.EnergyMgmtBodyCtrl_3 v48Ctrl5;
+  message CAN5.EnergyMgmtBodyInfo_3 v48Info5;
 
-  message DBC6::EnergyMgmtBodyCtrl_4 epasCtrl6;
-  message DBC6::EnergyMgmtBodyInfo_4 epasInfo6;
+  message CAN5.EnergyMgmtBodyCtrl_4 epasCtrl5;
+  message CAN5.EnergyMgmtBodyInfo_4 epasInfo5;
+
+
+  /* =========================================================
+     CAN 6
+     ========================================================= */
+
+  message CAN6.BCM_AutoSar_Network_Mgmt bcm6;
+  message CAN6.BodyInfo_3 body6;
+
+  message CAN6.DCDCE_AutoSar_Network_Mgmt dcdce6;
+  message CAN6.DCDCF_AutoSar_Network_Mgmt dcdcf6;
+  message CAN6.DCDCG_AutoSar_Network_Mgmt dcdcg6;
+
+  message CAN6.EnergyMgmtBodyCtrl_1 ebbCtrl6;
+  message CAN6.EnergyMgmtBodyInfo_1 ebbInfo6;
+
+  message CAN6.EnergyMgmtBodyCtrl_2 embCtrl6;
+  message CAN6.EnergyMgmtBodyInfo_2 embInfo6;
+
+  message CAN6.EnergyMgmtBodyCtrl_3 v48Ctrl6;
+  message CAN6.EnergyMgmtBodyInfo_3 v48Info6;
+
+  message CAN6.EnergyMgmtBodyCtrl_4 epasCtrl6;
+  message CAN6.EnergyMgmtBodyInfo_4 epasInfo6;
 }
 
 
@@ -372,31 +385,110 @@ void initMessages()
   v48Ctrl1.byte(7)=0;
 
 
-  /* Copy control defaults CAN2-CAN6 */
+  /* ================= CONTROL CAN2-CAN6 ================= */
 
-  ebbCtrl2 = ebbCtrl1;
-  ebbCtrl3 = ebbCtrl1;
-  ebbCtrl4 = ebbCtrl1;
-  ebbCtrl5 = ebbCtrl1;
-  ebbCtrl6 = ebbCtrl1;
+  ebbCtrl2.byte(0)=30; ebbCtrl2.byte(1)=168;
+  ebbCtrl2.byte(2)=0;  ebbCtrl2.byte(3)=13;
+  ebbCtrl2.byte(4)=52; ebbCtrl2.byte(5)=192;
+  ebbCtrl2.byte(6)=0;  ebbCtrl2.byte(7)=0;
 
-  embCtrl2 = embCtrl1;
-  embCtrl3 = embCtrl1;
-  embCtrl4 = embCtrl1;
-  embCtrl5 = embCtrl1;
-  embCtrl6 = embCtrl1;
+  ebbCtrl3.byte(0)=30; ebbCtrl3.byte(1)=168;
+  ebbCtrl3.byte(2)=0;  ebbCtrl3.byte(3)=13;
+  ebbCtrl3.byte(4)=52; ebbCtrl3.byte(5)=192;
+  ebbCtrl3.byte(6)=0;  ebbCtrl3.byte(7)=0;
 
-  epasCtrl2 = epasCtrl1;
-  epasCtrl3 = epasCtrl1;
-  epasCtrl4 = epasCtrl1;
-  epasCtrl5 = epasCtrl1;
-  epasCtrl6 = epasCtrl1;
+  ebbCtrl4.byte(0)=30; ebbCtrl4.byte(1)=168;
+  ebbCtrl4.byte(2)=0;  ebbCtrl4.byte(3)=13;
+  ebbCtrl4.byte(4)=52; ebbCtrl4.byte(5)=192;
+  ebbCtrl4.byte(6)=0;  ebbCtrl4.byte(7)=0;
 
-  v48Ctrl2 = v48Ctrl1;
-  v48Ctrl3 = v48Ctrl1;
-  v48Ctrl4 = v48Ctrl1;
-  v48Ctrl5 = v48Ctrl1;
-  v48Ctrl6 = v48Ctrl1;
+  ebbCtrl5.byte(0)=30; ebbCtrl5.byte(1)=168;
+  ebbCtrl5.byte(2)=0;  ebbCtrl5.byte(3)=13;
+  ebbCtrl5.byte(4)=52; ebbCtrl5.byte(5)=192;
+  ebbCtrl5.byte(6)=0;  ebbCtrl5.byte(7)=0;
+
+  ebbCtrl6.byte(0)=30; ebbCtrl6.byte(1)=168;
+  ebbCtrl6.byte(2)=0;  ebbCtrl6.byte(3)=13;
+  ebbCtrl6.byte(4)=52; ebbCtrl6.byte(5)=192;
+  ebbCtrl6.byte(6)=0;  ebbCtrl6.byte(7)=0;
+
+
+  embCtrl2.byte(0)=30; embCtrl2.byte(1)=168;
+  embCtrl2.byte(2)=0;  embCtrl2.byte(3)=13;
+  embCtrl2.byte(4)=52; embCtrl2.byte(5)=192;
+  embCtrl2.byte(6)=0;  embCtrl2.byte(7)=0;
+
+  embCtrl3.byte(0)=30; embCtrl3.byte(1)=168;
+  embCtrl3.byte(2)=0;  embCtrl3.byte(3)=13;
+  embCtrl3.byte(4)=52; embCtrl3.byte(5)=192;
+  embCtrl3.byte(6)=0;  embCtrl3.byte(7)=0;
+
+  embCtrl4.byte(0)=30; embCtrl4.byte(1)=168;
+  embCtrl4.byte(2)=0;  embCtrl4.byte(3)=13;
+  embCtrl4.byte(4)=52; embCtrl4.byte(5)=192;
+  embCtrl4.byte(6)=0;  embCtrl4.byte(7)=0;
+
+  embCtrl5.byte(0)=30; embCtrl5.byte(1)=168;
+  embCtrl5.byte(2)=0;  embCtrl5.byte(3)=13;
+  embCtrl5.byte(4)=52; embCtrl5.byte(5)=192;
+  embCtrl5.byte(6)=0;  embCtrl5.byte(7)=0;
+
+  embCtrl6.byte(0)=30; embCtrl6.byte(1)=168;
+  embCtrl6.byte(2)=0;  embCtrl6.byte(3)=13;
+  embCtrl6.byte(4)=52; embCtrl6.byte(5)=192;
+  embCtrl6.byte(6)=0;  embCtrl6.byte(7)=0;
+
+
+  epasCtrl2.byte(0)=30; epasCtrl2.byte(1)=168;
+  epasCtrl2.byte(2)=0;  epasCtrl2.byte(3)=13;
+  epasCtrl2.byte(4)=52; epasCtrl2.byte(5)=192;
+  epasCtrl2.byte(6)=0;  epasCtrl2.byte(7)=0;
+
+  epasCtrl3.byte(0)=30; epasCtrl3.byte(1)=168;
+  epasCtrl3.byte(2)=0;  epasCtrl3.byte(3)=13;
+  epasCtrl3.byte(4)=52; epasCtrl3.byte(5)=192;
+  epasCtrl3.byte(6)=0;  epasCtrl3.byte(7)=0;
+
+  epasCtrl4.byte(0)=30; epasCtrl4.byte(1)=168;
+  epasCtrl4.byte(2)=0;  epasCtrl4.byte(3)=13;
+  epasCtrl4.byte(4)=52; epasCtrl4.byte(5)=192;
+  epasCtrl4.byte(6)=0;  epasCtrl4.byte(7)=0;
+
+  epasCtrl5.byte(0)=30; epasCtrl5.byte(1)=168;
+  epasCtrl5.byte(2)=0;  epasCtrl5.byte(3)=13;
+  epasCtrl5.byte(4)=52; epasCtrl5.byte(5)=192;
+  epasCtrl5.byte(6)=0;  epasCtrl5.byte(7)=0;
+
+  epasCtrl6.byte(0)=30; epasCtrl6.byte(1)=168;
+  epasCtrl6.byte(2)=0;  epasCtrl6.byte(3)=13;
+  epasCtrl6.byte(4)=52; epasCtrl6.byte(5)=192;
+  epasCtrl6.byte(6)=0;  epasCtrl6.byte(7)=0;
+
+
+  v48Ctrl2.byte(0)=254; v48Ctrl2.byte(1)=254;
+  v48Ctrl2.byte(2)=254; v48Ctrl2.byte(3)=30;
+  v48Ctrl2.byte(4)=0; v48Ctrl2.byte(5)=0;
+  v48Ctrl2.byte(6)=0; v48Ctrl2.byte(7)=0;
+
+  v48Ctrl3.byte(0)=254; v48Ctrl3.byte(1)=254;
+  v48Ctrl3.byte(2)=254; v48Ctrl3.byte(3)=30;
+  v48Ctrl3.byte(4)=0; v48Ctrl3.byte(5)=0;
+  v48Ctrl3.byte(6)=0; v48Ctrl3.byte(7)=0;
+
+  v48Ctrl4.byte(0)=254; v48Ctrl4.byte(1)=254;
+  v48Ctrl4.byte(2)=254; v48Ctrl4.byte(3)=30;
+  v48Ctrl4.byte(4)=0; v48Ctrl4.byte(5)=0;
+  v48Ctrl4.byte(6)=0; v48Ctrl4.byte(7)=0;
+
+  v48Ctrl5.byte(0)=254; v48Ctrl5.byte(1)=254;
+  v48Ctrl5.byte(2)=254; v48Ctrl5.byte(3)=30;
+  v48Ctrl5.byte(4)=0; v48Ctrl5.byte(5)=0;
+  v48Ctrl5.byte(6)=0; v48Ctrl5.byte(7)=0;
+
+  v48Ctrl6.byte(0)=254; v48Ctrl6.byte(1)=254;
+  v48Ctrl6.byte(2)=254; v48Ctrl6.byte(3)=30;
+  v48Ctrl6.byte(4)=0; v48Ctrl6.byte(5)=0;
+  v48Ctrl6.byte(6)=0; v48Ctrl6.byte(7)=0;
 
 
   /* ================= INFO DEFAULTS ================= */
@@ -428,10 +520,6 @@ void initMessages()
   epasInfo1.byte(6)=162;
   epasInfo1.byte(7)=128;
 
-
-  /* IMPORTANT:
-     48V RAW BYTE 0 MUST STAY 8 */
-
   v48Info1.byte(0)=8;
   v48Info1.byte(1)=254;
   v48Info1.byte(2)=254;
@@ -442,38 +530,113 @@ void initMessages()
   v48Info1.byte(7)=0;
 
 
-  /* Copy info defaults CAN2-CAN6 */
+  /* INFO CAN2-CAN6 */
 
-  ebbInfo2 = ebbInfo1;
-  ebbInfo3 = ebbInfo1;
-  ebbInfo4 = ebbInfo1;
-  ebbInfo5 = ebbInfo1;
-  ebbInfo6 = ebbInfo1;
+  ebbInfo2.byte(0)=0; ebbInfo2.byte(1)=0;
+  ebbInfo2.byte(2)=0; ebbInfo2.byte(3)=0;
+  ebbInfo2.byte(4)=0; ebbInfo2.byte(5)=0;
+  ebbInfo2.byte(6)=162; ebbInfo2.byte(7)=128;
 
-  embInfo2 = embInfo1;
-  embInfo3 = embInfo1;
-  embInfo4 = embInfo1;
-  embInfo5 = embInfo1;
-  embInfo6 = embInfo1;
+  ebbInfo3.byte(0)=0; ebbInfo3.byte(1)=0;
+  ebbInfo3.byte(2)=0; ebbInfo3.byte(3)=0;
+  ebbInfo3.byte(4)=0; ebbInfo3.byte(5)=0;
+  ebbInfo3.byte(6)=162; ebbInfo3.byte(7)=128;
 
-  epasInfo2 = epasInfo1;
-  epasInfo3 = epasInfo1;
-  epasInfo4 = epasInfo1;
-  epasInfo5 = epasInfo1;
-  epasInfo6 = epasInfo1;
+  ebbInfo4.byte(0)=0; ebbInfo4.byte(1)=0;
+  ebbInfo4.byte(2)=0; ebbInfo4.byte(3)=0;
+  ebbInfo4.byte(4)=0; ebbInfo4.byte(5)=0;
+  ebbInfo4.byte(6)=162; ebbInfo4.byte(7)=128;
 
-  v48Info2 = v48Info1;
-  v48Info3 = v48Info1;
-  v48Info4 = v48Info1;
-  v48Info5 = v48Info1;
-  v48Info6 = v48Info1;
+  ebbInfo5.byte(0)=0; ebbInfo5.byte(1)=0;
+  ebbInfo5.byte(2)=0; ebbInfo5.byte(3)=0;
+  ebbInfo5.byte(4)=0; ebbInfo5.byte(5)=0;
+  ebbInfo5.byte(6)=162; ebbInfo5.byte(7)=128;
+
+  ebbInfo6.byte(0)=0; ebbInfo6.byte(1)=0;
+  ebbInfo6.byte(2)=0; ebbInfo6.byte(3)=0;
+  ebbInfo6.byte(4)=0; ebbInfo6.byte(5)=0;
+  ebbInfo6.byte(6)=162; ebbInfo6.byte(7)=128;
 
 
-  /* ================= BODY INFO =================
-     APPLY TO EVERY ACTIVE CHANNEL
-     PARKLAMP = ON
-     IGNITION = RUN
-     ================================================= */
+  embInfo2.byte(0)=0; embInfo2.byte(1)=0;
+  embInfo2.byte(2)=0; embInfo2.byte(3)=0;
+  embInfo2.byte(4)=0; embInfo2.byte(5)=0;
+  embInfo2.byte(6)=162; embInfo2.byte(7)=128;
+
+  embInfo3.byte(0)=0; embInfo3.byte(1)=0;
+  embInfo3.byte(2)=0; embInfo3.byte(3)=0;
+  embInfo3.byte(4)=0; embInfo3.byte(5)=0;
+  embInfo3.byte(6)=162; embInfo3.byte(7)=128;
+
+  embInfo4.byte(0)=0; embInfo4.byte(1)=0;
+  embInfo4.byte(2)=0; embInfo4.byte(3)=0;
+  embInfo4.byte(4)=0; embInfo4.byte(5)=0;
+  embInfo4.byte(6)=162; embInfo4.byte(7)=128;
+
+  embInfo5.byte(0)=0; embInfo5.byte(1)=0;
+  embInfo5.byte(2)=0; embInfo5.byte(3)=0;
+  embInfo5.byte(4)=0; embInfo5.byte(5)=0;
+  embInfo5.byte(6)=162; embInfo5.byte(7)=128;
+
+  embInfo6.byte(0)=0; embInfo6.byte(1)=0;
+  embInfo6.byte(2)=0; embInfo6.byte(3)=0;
+  embInfo6.byte(4)=0; embInfo6.byte(5)=0;
+  embInfo6.byte(6)=162; embInfo6.byte(7)=128;
+
+
+  epasInfo2.byte(0)=0; epasInfo2.byte(1)=0;
+  epasInfo2.byte(2)=0; epasInfo2.byte(3)=0;
+  epasInfo2.byte(4)=0; epasInfo2.byte(5)=0;
+  epasInfo2.byte(6)=162; epasInfo2.byte(7)=128;
+
+  epasInfo3.byte(0)=0; epasInfo3.byte(1)=0;
+  epasInfo3.byte(2)=0; epasInfo3.byte(3)=0;
+  epasInfo3.byte(4)=0; epasInfo3.byte(5)=0;
+  epasInfo3.byte(6)=162; epasInfo3.byte(7)=128;
+
+  epasInfo4.byte(0)=0; epasInfo4.byte(1)=0;
+  epasInfo4.byte(2)=0; epasInfo4.byte(3)=0;
+  epasInfo4.byte(4)=0; epasInfo4.byte(5)=0;
+  epasInfo4.byte(6)=162; epasInfo4.byte(7)=128;
+
+  epasInfo5.byte(0)=0; epasInfo5.byte(1)=0;
+  epasInfo5.byte(2)=0; epasInfo5.byte(3)=0;
+  epasInfo5.byte(4)=0; epasInfo5.byte(5)=0;
+  epasInfo5.byte(6)=162; epasInfo5.byte(7)=128;
+
+  epasInfo6.byte(0)=0; epasInfo6.byte(1)=0;
+  epasInfo6.byte(2)=0; epasInfo6.byte(3)=0;
+  epasInfo6.byte(4)=0; epasInfo6.byte(5)=0;
+  epasInfo6.byte(6)=162; epasInfo6.byte(7)=128;
+
+
+  v48Info2.byte(0)=8; v48Info2.byte(1)=254;
+  v48Info2.byte(2)=254; v48Info2.byte(3)=0;
+  v48Info2.byte(4)=0; v48Info2.byte(5)=0;
+  v48Info2.byte(6)=0; v48Info2.byte(7)=0;
+
+  v48Info3.byte(0)=8; v48Info3.byte(1)=254;
+  v48Info3.byte(2)=254; v48Info3.byte(3)=0;
+  v48Info3.byte(4)=0; v48Info3.byte(5)=0;
+  v48Info3.byte(6)=0; v48Info3.byte(7)=0;
+
+  v48Info4.byte(0)=8; v48Info4.byte(1)=254;
+  v48Info4.byte(2)=254; v48Info4.byte(3)=0;
+  v48Info4.byte(4)=0; v48Info4.byte(5)=0;
+  v48Info4.byte(6)=0; v48Info4.byte(7)=0;
+
+  v48Info5.byte(0)=8; v48Info5.byte(1)=254;
+  v48Info5.byte(2)=254; v48Info5.byte(3)=0;
+  v48Info5.byte(4)=0; v48Info5.byte(5)=0;
+  v48Info5.byte(6)=0; v48Info5.byte(7)=0;
+
+  v48Info6.byte(0)=8; v48Info6.byte(1)=254;
+  v48Info6.byte(2)=254; v48Info6.byte(3)=0;
+  v48Info6.byte(4)=0; v48Info6.byte(5)=0;
+  v48Info6.byte(6)=0; v48Info6.byte(7)=0;
+
+
+  /* ================= BODY INFO ================= */
 
   if(sys1!=0)
   {
@@ -515,7 +678,6 @@ void initMessages()
 
 /* ============================================================
    MODE CONTROL
-
    0 = OFF
    1 = STANDBY
    3 = FLOAT
@@ -523,644 +685,353 @@ void initMessages()
 
 void setMode(int mode)
 {
-  /* CAN1 */
+  if(sys1==1) ebbCtrl1.EMduleMde_D_Rq=mode;
+  else if(sys1==2) embCtrl1.EMduleMde_D_Rq2=mode;
+  else if(sys1==3) v48Ctrl1.UCapMduleMde_D_Rq=mode;
+  else if(sys1==4) epasCtrl1.EMduleMde_D_Rq3=mode;
 
-  if(sys1==1)
-    ebbCtrl1.EMduleMde_D_Rq=mode;
-  else if(sys1==2)
-    embCtrl1.EMduleMde_D_Rq2=mode;
-  else if(sys1==3)
-    v48Ctrl1.UCapMduleMde_D_Rq=mode;
-  else if(sys1==4)
-    epasCtrl1.EMduleMde_D_Rq3=mode;
+  if(sys2==1) ebbCtrl2.EMduleMde_D_Rq=mode;
+  else if(sys2==2) embCtrl2.EMduleMde_D_Rq2=mode;
+  else if(sys2==3) v48Ctrl2.UCapMduleMde_D_Rq=mode;
+  else if(sys2==4) epasCtrl2.EMduleMde_D_Rq3=mode;
 
+  if(sys3==1) ebbCtrl3.EMduleMde_D_Rq=mode;
+  else if(sys3==2) embCtrl3.EMduleMde_D_Rq2=mode;
+  else if(sys3==3) v48Ctrl3.UCapMduleMde_D_Rq=mode;
+  else if(sys3==4) epasCtrl3.EMduleMde_D_Rq3=mode;
 
-  /* CAN2 */
+  if(sys4==1) ebbCtrl4.EMduleMde_D_Rq=mode;
+  else if(sys4==2) embCtrl4.EMduleMde_D_Rq2=mode;
+  else if(sys4==3) v48Ctrl4.UCapMduleMde_D_Rq=mode;
+  else if(sys4==4) epasCtrl4.EMduleMde_D_Rq3=mode;
 
-  if(sys2==1)
-    ebbCtrl2.EMduleMde_D_Rq=mode;
-  else if(sys2==2)
-    embCtrl2.EMduleMde_D_Rq2=mode;
-  else if(sys2==3)
-    v48Ctrl2.UCapMduleMde_D_Rq=mode;
-  else if(sys2==4)
-    epasCtrl2.EMduleMde_D_Rq3=mode;
+  if(sys5==1) ebbCtrl5.EMduleMde_D_Rq=mode;
+  else if(sys5==2) embCtrl5.EMduleMde_D_Rq2=mode;
+  else if(sys5==3) v48Ctrl5.UCapMduleMde_D_Rq=mode;
+  else if(sys5==4) epasCtrl5.EMduleMde_D_Rq3=mode;
 
-
-  /* CAN3 */
-
-  if(sys3==1)
-    ebbCtrl3.EMduleMde_D_Rq=mode;
-  else if(sys3==2)
-    embCtrl3.EMduleMde_D_Rq2=mode;
-  else if(sys3==3)
-    v48Ctrl3.UCapMduleMde_D_Rq=mode;
-  else if(sys3==4)
-    epasCtrl3.EMduleMde_D_Rq3=mode;
-
-
-  /* CAN4 */
-
-  if(sys4==1)
-    ebbCtrl4.EMduleMde_D_Rq=mode;
-  else if(sys4==2)
-    embCtrl4.EMduleMde_D_Rq2=mode;
-  else if(sys4==3)
-    v48Ctrl4.UCapMduleMde_D_Rq=mode;
-  else if(sys4==4)
-    epasCtrl4.EMduleMde_D_Rq3=mode;
-
-
-  /* CAN5 */
-
-  if(sys5==1)
-    ebbCtrl5.EMduleMde_D_Rq=mode;
-  else if(sys5==2)
-    embCtrl5.EMduleMde_D_Rq2=mode;
-  else if(sys5==3)
-    v48Ctrl5.UCapMduleMde_D_Rq=mode;
-  else if(sys5==4)
-    epasCtrl5.EMduleMde_D_Rq3=mode;
-
-
-  /* CAN6 */
-
-  if(sys6==1)
-    ebbCtrl6.EMduleMde_D_Rq=mode;
-  else if(sys6==2)
-    embCtrl6.EMduleMde_D_Rq2=mode;
-  else if(sys6==3)
-    v48Ctrl6.UCapMduleMde_D_Rq=mode;
-  else if(sys6==4)
-    epasCtrl6.EMduleMde_D_Rq3=mode;
+  if(sys6==1) ebbCtrl6.EMduleMde_D_Rq=mode;
+  else if(sys6==2) embCtrl6.EMduleMde_D_Rq2=mode;
+  else if(sys6==3) v48Ctrl6.UCapMduleMde_D_Rq=mode;
+  else if(sys6==4) epasCtrl6.EMduleMde_D_Rq3=mode;
 }
 
 
 /* ============================================================
    ISOLATION CONTROL
-
    0 = OPEN
    1 = CLOSE
 
-   48V EPAS:
-   NO ISOLATION COMMAND
+   48V EPAS = NO ISOLATION COMMAND
    ============================================================ */
 
 void setIsolation(int value)
 {
-  /* CAN1 */
+  if(sys1==1) ebbCtrl1.IsolSwtch_B_Cmd=value;
+  else if(sys1==2) embCtrl1.IsolSwtch_B_Cmd2=value;
+  else if(sys1==4) epasCtrl1.IsolSwtch_B_Cmd3=value;
 
-  if(sys1==1)
-    ebbCtrl1.IsolSwtch_B_Cmd=value;
-  else if(sys1==2)
-    embCtrl1.IsolSwtch_B_Cmd2=value;
-  else if(sys1==4)
-    epasCtrl1.IsolSwtch_B_Cmd3=value;
+  if(sys2==1) ebbCtrl2.IsolSwtch_B_Cmd=value;
+  else if(sys2==2) embCtrl2.IsolSwtch_B_Cmd2=value;
+  else if(sys2==4) epasCtrl2.IsolSwtch_B_Cmd3=value;
 
+  if(sys3==1) ebbCtrl3.IsolSwtch_B_Cmd=value;
+  else if(sys3==2) embCtrl3.IsolSwtch_B_Cmd2=value;
+  else if(sys3==4) epasCtrl3.IsolSwtch_B_Cmd3=value;
 
-  /* CAN2 */
+  if(sys4==1) ebbCtrl4.IsolSwtch_B_Cmd=value;
+  else if(sys4==2) embCtrl4.IsolSwtch_B_Cmd2=value;
+  else if(sys4==4) epasCtrl4.IsolSwtch_B_Cmd3=value;
 
-  if(sys2==1)
-    ebbCtrl2.IsolSwtch_B_Cmd=value;
-  else if(sys2==2)
-    embCtrl2.IsolSwtch_B_Cmd2=value;
-  else if(sys2==4)
-    epasCtrl2.IsolSwtch_B_Cmd3=value;
+  if(sys5==1) ebbCtrl5.IsolSwtch_B_Cmd=value;
+  else if(sys5==2) embCtrl5.IsolSwtch_B_Cmd2=value;
+  else if(sys5==4) epasCtrl5.IsolSwtch_B_Cmd3=value;
 
-
-  /* CAN3 */
-
-  if(sys3==1)
-    ebbCtrl3.IsolSwtch_B_Cmd=value;
-  else if(sys3==2)
-    embCtrl3.IsolSwtch_B_Cmd2=value;
-  else if(sys3==4)
-    epasCtrl3.IsolSwtch_B_Cmd3=value;
-
-
-  /* CAN4 */
-
-  if(sys4==1)
-    ebbCtrl4.IsolSwtch_B_Cmd=value;
-  else if(sys4==2)
-    embCtrl4.IsolSwtch_B_Cmd2=value;
-  else if(sys4==4)
-    epasCtrl4.IsolSwtch_B_Cmd3=value;
-
-
-  /* CAN5 */
-
-  if(sys5==1)
-    ebbCtrl5.IsolSwtch_B_Cmd=value;
-  else if(sys5==2)
-    embCtrl5.IsolSwtch_B_Cmd2=value;
-  else if(sys5==4)
-    epasCtrl5.IsolSwtch_B_Cmd3=value;
-
-
-  /* CAN6 */
-
-  if(sys6==1)
-    ebbCtrl6.IsolSwtch_B_Cmd=value;
-  else if(sys6==2)
-    embCtrl6.IsolSwtch_B_Cmd2=value;
-  else if(sys6==4)
-    epasCtrl6.IsolSwtch_B_Cmd3=value;
+  if(sys6==1) ebbCtrl6.IsolSwtch_B_Cmd=value;
+  else if(sys6==2) embCtrl6.IsolSwtch_B_Cmd2=value;
+  else if(sys6==4) epasCtrl6.IsolSwtch_B_Cmd3=value;
 }
 
 
 /* ============================================================
    100 ms TRANSMISSION
-
-   CTRL + INFO
    ============================================================ */
 
 void send100()
 {
-  /* CAN1 */
+  if(sys1==1) { output(ebbCtrl1); output(ebbInfo1); }
+  else if(sys1==2) { output(embCtrl1); output(embInfo1); }
+  else if(sys1==3) { output(v48Ctrl1); output(v48Info1); }
+  else if(sys1==4) { output(epasCtrl1); output(epasInfo1); }
 
-  if(sys1==1)
-  {
-    output(ebbCtrl1);
-    output(ebbInfo1);
-  }
-  else if(sys1==2)
-  {
-    output(embCtrl1);
-    output(embInfo1);
-  }
-  else if(sys1==3)
-  {
-    output(v48Ctrl1);
-    output(v48Info1);
-  }
-  else if(sys1==4)
-  {
-    output(epasCtrl1);
-    output(epasInfo1);
-  }
+  if(sys2==1) { output(ebbCtrl2); output(ebbInfo2); }
+  else if(sys2==2) { output(embCtrl2); output(embInfo2); }
+  else if(sys2==3) { output(v48Ctrl2); output(v48Info2); }
+  else if(sys2==4) { output(epasCtrl2); output(epasInfo2); }
 
+  if(sys3==1) { output(ebbCtrl3); output(ebbInfo3); }
+  else if(sys3==2) { output(embCtrl3); output(embInfo3); }
+  else if(sys3==3) { output(v48Ctrl3); output(v48Info3); }
+  else if(sys3==4) { output(epasCtrl3); output(epasInfo3); }
 
-  /* CAN2 */
+  if(sys4==1) { output(ebbCtrl4); output(ebbInfo4); }
+  else if(sys4==2) { output(embCtrl4); output(embInfo4); }
+  else if(sys4==3) { output(v48Ctrl4); output(v48Info4); }
+  else if(sys4==4) { output(epasCtrl4); output(epasInfo4); }
 
-  if(sys2==1)
-  {
-    output(ebbCtrl2);
-    output(ebbInfo2);
-  }
-  else if(sys2==2)
-  {
-    output(embCtrl2);
-    output(embInfo2);
-  }
-  else if(sys2==3)
-  {
-    output(v48Ctrl2);
-    output(v48Info2);
-  }
-  else if(sys2==4)
-  {
-    output(epasCtrl2);
-    output(epasInfo2);
-  }
+  if(sys5==1) { output(ebbCtrl5); output(ebbInfo5); }
+  else if(sys5==2) { output(embCtrl5); output(embInfo5); }
+  else if(sys5==3) { output(v48Ctrl5); output(v48Info5); }
+  else if(sys5==4) { output(epasCtrl5); output(epasInfo5); }
 
-
-  /* CAN3 */
-
-  if(sys3==1)
-  {
-    output(ebbCtrl3);
-    output(ebbInfo3);
-  }
-  else if(sys3==2)
-  {
-    output(embCtrl3);
-    output(embInfo3);
-  }
-  else if(sys3==3)
-  {
-    output(v48Ctrl3);
-    output(v48Info3);
-  }
-  else if(sys3==4)
-  {
-    output(epasCtrl3);
-    output(epasInfo3);
-  }
-
-
-  /* CAN4 */
-
-  if(sys4==1)
-  {
-    output(ebbCtrl4);
-    output(ebbInfo4);
-  }
-  else if(sys4==2)
-  {
-    output(embCtrl4);
-    output(embInfo4);
-  }
-  else if(sys4==3)
-  {
-    output(v48Ctrl4);
-    output(v48Info4);
-  }
-  else if(sys4==4)
-  {
-    output(epasCtrl4);
-    output(epasInfo4);
-  }
-
-
-  /* CAN5 */
-
-  if(sys5==1)
-  {
-    output(ebbCtrl5);
-    output(ebbInfo5);
-  }
-  else if(sys5==2)
-  {
-    output(embCtrl5);
-    output(embInfo5);
-  }
-  else if(sys5==3)
-  {
-    output(v48Ctrl5);
-    output(v48Info5);
-  }
-  else if(sys5==4)
-  {
-    output(epasCtrl5);
-    output(epasInfo5);
-  }
-
-
-  /* CAN6 */
-
-  if(sys6==1)
-  {
-    output(ebbCtrl6);
-    output(ebbInfo6);
-  }
-  else if(sys6==2)
-  {
-    output(embCtrl6);
-    output(embInfo6);
-  }
-  else if(sys6==3)
-  {
-    output(v48Ctrl6);
-    output(v48Info6);
-  }
-  else if(sys6==4)
-  {
-    output(epasCtrl6);
-    output(epasInfo6);
-  }
+  if(sys6==1) { output(ebbCtrl6); output(ebbInfo6); }
+  else if(sys6==2) { output(embCtrl6); output(embInfo6); }
+  else if(sys6==3) { output(v48Ctrl6); output(v48Info6); }
+  else if(sys6==4) { output(epasCtrl6); output(epasInfo6); }
 }
 
 
 /* ============================================================
    500 ms TRANSMISSION
-
-   BODY INFO
    ============================================================ */
 
 void send500()
 {
-  if(sys1!=0)
-    output(body1);
-
-  if(sys2!=0)
-    output(body2);
-
-  if(sys3!=0)
-    output(body3);
-
-  if(sys4!=0)
-    output(body4);
-
-  if(sys5!=0)
-    output(body5);
-
-  if(sys6!=0)
-    output(body6);
+  if(sys1!=0) output(body1);
+  if(sys2!=0) output(body2);
+  if(sys3!=0) output(body3);
+  if(sys4!=0) output(body4);
+  if(sys5!=0) output(body5);
+  if(sys6!=0) output(body6);
 }
 
 
 /* ============================================================
    1000 ms TRANSMISSION
-
-   NETWORK MANAGEMENT
    ============================================================ */
 
 void send1000()
 {
-  /* ================= BCM ================= */
+  /* BCM */
 
-  if(sys1!=0)
-    output(bcm1);
-
-  if(sys2!=0)
-    output(bcm2);
-
-  if(sys3!=0)
-    output(bcm3);
-
-  if(sys4!=0)
-    output(bcm4);
-
-  if(sys5!=0)
-    output(bcm5);
-
-  if(sys6!=0)
-    output(bcm6);
+  if(sys1!=0) output(bcm1);
+  if(sys2!=0) output(bcm2);
+  if(sys3!=0) output(bcm3);
+  if(sys4!=0) output(bcm4);
+  if(sys5!=0) output(bcm5);
+  if(sys6!=0) output(bcm6);
 
 
-  /* ================= EBB =================
-     DCDCF + DCDCG
-     ======================================= */
+  /* EBB = DCDCF + DCDCG */
 
-  if(sys1==1)
-  {
-    output(dcdcf1);
-    output(dcdcg1);
-  }
-
-  if(sys2==1)
-  {
-    output(dcdcf2);
-    output(dcdcg2);
-  }
-
-  if(sys3==1)
-  {
-    output(dcdcf3);
-    output(dcdcg3);
-  }
-
-  if(sys4==1)
-  {
-    output(dcdcf4);
-    output(dcdcg4);
-  }
-
-  if(sys5==1)
-  {
-    output(dcdcf5);
-    output(dcdcg5);
-  }
-
-  if(sys6==1)
-  {
-    output(dcdcf6);
-    output(dcdcg6);
-  }
+  if(sys1==1) { output(dcdcf1); output(dcdcg1); }
+  if(sys2==1) { output(dcdcf2); output(dcdcg2); }
+  if(sys3==1) { output(dcdcf3); output(dcdcg3); }
+  if(sys4==1) { output(dcdcf4); output(dcdcg4); }
+  if(sys5==1) { output(dcdcf5); output(dcdcg5); }
+  if(sys6==1) { output(dcdcf6); output(dcdcg6); }
 
 
-  /* ================= EMB =================
-     DCDCE + DCDCF
-     ======================================= */
+  /* EMB = DCDCE + DCDCF */
 
-  if(sys1==2)
-  {
-    output(dcdce1);
-    output(dcdcf1);
-  }
-
-  if(sys2==2)
-  {
-    output(dcdce2);
-    output(dcdcf2);
-  }
-
-  if(sys3==2)
-  {
-    output(dcdce3);
-    output(dcdcf3);
-  }
-
-  if(sys4==2)
-  {
-    output(dcdce4);
-    output(dcdcf4);
-  }
-
-  if(sys5==2)
-  {
-    output(dcdce5);
-    output(dcdcf5);
-  }
-
-  if(sys6==2)
-  {
-    output(dcdce6);
-    output(dcdcf6);
-  }
+  if(sys1==2) { output(dcdce1); output(dcdcf1); }
+  if(sys2==2) { output(dcdce2); output(dcdcf2); }
+  if(sys3==2) { output(dcdce3); output(dcdcf3); }
+  if(sys4==2) { output(dcdce4); output(dcdcf4); }
+  if(sys5==2) { output(dcdce5); output(dcdcf5); }
+  if(sys6==2) { output(dcdce6); output(dcdcf6); }
 
 
-  /* ================= 48V EPAS =================
-     DCDCE + DCDCG
-     ============================================ */
+  /* 48V EPAS = DCDCE + DCDCG */
 
-  if(sys1==3)
-  {
-    output(dcdce1);
-    output(dcdcg1);
-  }
-
-  if(sys2==3)
-  {
-    output(dcdce2);
-    output(dcdcg2);
-  }
-
-  if(sys3==3)
-  {
-    output(dcdce3);
-    output(dcdcg3);
-  }
-
-  if(sys4==3)
-  {
-    output(dcdce4);
-    output(dcdcg4);
-  }
-
-  if(sys5==3)
-  {
-    output(dcdce5);
-    output(dcdcg5);
-  }
-
-  if(sys6==3)
-  {
-    output(dcdce6);
-    output(dcdcg6);
-  }
+  if(sys1==3) { output(dcdce1); output(dcdcg1); }
+  if(sys2==3) { output(dcdce2); output(dcdcg2); }
+  if(sys3==3) { output(dcdce3); output(dcdcg3); }
+  if(sys4==3) { output(dcdce4); output(dcdcg4); }
+  if(sys5==3) { output(dcdce5); output(dcdcg5); }
+  if(sys6==3) { output(dcdce6); output(dcdcg6); }
 
 
-  /* ================= 12V EPAS =================
-     DCDCG
-     ============================================ */
+  /* 12V EPAS = DCDCG */
 
-  if(sys1==4)
-    output(dcdcg1);
-
-  if(sys2==4)
-    output(dcdcg2);
-
-  if(sys3==4)
-    output(dcdcg3);
-
-  if(sys4==4)
-    output(dcdcg4);
-
-  if(sys5==4)
-    output(dcdcg5);
-
-  if(sys6==4)
-    output(dcdcg6);
+  if(sys1==4) output(dcdcg1);
+  if(sys2==4) output(dcdcg2);
+  if(sys3==4) output(dcdcg3);
+  if(sys4==4) output(dcdcg4);
+  if(sys5==4) output(dcdcg5);
+  if(sys6==4) output(dcdcg6);
 }
 
 
 /* ============================================================
-   START
+   MEASUREMENT START
 
-   STARTUP ONLY ONCE:
-
-   OFF       2 SEC
-   STANDBY   2 SEC
-   THEN DAY 1 FLOAT
+   F9 ONLY STARTS MEASUREMENT.
+   TEST WAITS FOR PANEL START TEST.
    ============================================================ */
 
 on start
 {
-  initMessages();
+  sys1=0;
+  sys2=0;
+  sys3=0;
+  sys4=0;
+  sys5=0;
+  sys6=0;
 
   step=0;
+  testRunning=0;
 
-  setMode(0);
-  setIsolation(1);
+  @sysvar::MasterCtrl::StartTest = 0;
+  @sysvar::MasterCtrl::StopTest = 0;
 
-  /* Send immediately */
-
-  send100();
-  send500();
-  send1000();
-
-  /* Start periodic messages */
-
-  setTimer(t100,100);
-  setTimer(t500,500);
-  setTimer(t1000,1000);
-
-  write("START - OFF - 2 SEC");
-
-  setTimer(seqTimer,2000);
+  write("MEASUREMENT STARTED - WAITING FOR PANEL START TEST");
 }
 
 
 /* ============================================================
-   PERIODIC 100 ms
+   PANEL START TEST
+   ============================================================ */
+
+on sysvar MasterCtrl::StartTest
+{
+  if(@this == 1 && testRunning == 0)
+  {
+    sys1 = @sysvar::CH1::Module;
+    sys2 = @sysvar::CH2::Module;
+    sys3 = @sysvar::CH3::Module;
+    sys4 = @sysvar::CH4::Module;
+    sys5 = @sysvar::CH5::Module;
+    sys6 = @sysvar::CH6::Module;
+
+    if(sys1==0 && sys2==0 && sys3==0 &&
+       sys4==0 && sys5==0 && sys6==0)
+    {
+      write("START REJECTED - NO SYSTEM SELECTED");
+      @sysvar::MasterCtrl::StartTest = 0;
+      return;
+    }
+
+    cancelTimer(t100);
+    cancelTimer(t500);
+    cancelTimer(t1000);
+    cancelTimer(seqTimer);
+
+    testRunning=1;
+    step=0;
+
+    initMessages();
+
+    setMode(0);
+    setIsolation(1);
+
+    send100();
+    send500();
+    send1000();
+
+    setTimer(t100,100);
+    setTimer(t500,500);
+    setTimer(t1000,1000);
+
+    write("==========================================");
+    write("PANEL START TEST");
+    write("CAN1=%d CAN2=%d CAN3=%d",sys1,sys2,sys3);
+    write("CAN4=%d CAN5=%d CAN6=%d",sys4,sys5,sys6);
+    write("START - OFF - 2 SEC");
+    write("==========================================");
+
+    setTimer(seqTimer,2000);
+
+    @sysvar::MasterCtrl::StartTest = 0;
+  }
+}
+
+
+/* ============================================================
+   PANEL STOP TEST
+   ============================================================ */
+
+on sysvar MasterCtrl::StopTest
+{
+  if(@this == 1)
+  {
+    cancelTimer(t100);
+    cancelTimer(t500);
+    cancelTimer(t1000);
+    cancelTimer(seqTimer);
+
+    testRunning=0;
+    step=0;
+
+    write("==========================================");
+    write("TEST STOPPED FROM CONTROL PANEL");
+    write("==========================================");
+
+    @sysvar::MasterCtrl::StopTest = 0;
+  }
+}
+
+
+/* ============================================================
+   PERIODIC TIMERS
    ============================================================ */
 
 on timer t100
 {
-  send100();
-
-  setTimer(t100,100);
+  if(testRunning)
+  {
+    send100();
+    setTimer(t100,100);
+  }
 }
-
-
-/* ============================================================
-   PERIODIC 500 ms
-   ============================================================ */
 
 on timer t500
 {
-  send500();
-
-  setTimer(t500,500);
+  if(testRunning)
+  {
+    send500();
+    setTimer(t500,500);
+  }
 }
-
-
-/* ============================================================
-   PERIODIC 1000 ms
-   ============================================================ */
 
 on timer t1000
 {
-  send1000();
-
-  setTimer(t1000,1000);
+  if(testRunning)
+  {
+    send1000();
+    setTimer(t1000,1000);
+  }
 }
 
 
 /* ============================================================
    FIVE DAY TEST
-   ============================================================
 
-   STARTUP ONLY ONCE:
-
+   START:
    OFF       2 SEC
    STANDBY   2 SEC
 
-   DAY 1:
+   EACH DAY:
    FLOAT
    ISOLATION OPEN 1 SEC
    ISOLATION CLOSE
    FLOAT 18 HOURS
    STANDBY 6 HOURS
 
-   DAY 2:
-   FLOAT
-   ISOLATION OPEN 1 SEC
-   ISOLATION CLOSE
-   FLOAT 18 HOURS
-   STANDBY 6 HOURS
-
-   DAY 3:
-   FLOAT
-   ISOLATION OPEN 1 SEC
-   ISOLATION CLOSE
-   FLOAT 18 HOURS
-   STANDBY 6 HOURS
-
-   DAY 4:
-   FLOAT
-   ISOLATION OPEN 1 SEC
-   ISOLATION CLOSE
-   FLOAT 18 HOURS
-   STANDBY 6 HOURS
-
-   DAY 5:
-   FLOAT
-   ISOLATION OPEN 1 SEC
-   ISOLATION CLOSE
-   FLOAT 18 HOURS
-   STANDBY 6 HOURS
-
-   THEN MEASUREMENT STOP
-
-   18 HOURS = 64,800,000 ms
-   6 HOURS  = 21,600,000 ms
+   REPEAT 5 TIMES
 
    48V EPAS:
-   MODE CHANGES FLOAT/STANDBY
-   ISOLATION IS SKIPPED
+   MODE CHANGES NORMAL
+   ISOLATION COMMAND IS SKIPPED
    ============================================================ */
 
 on timer seqTimer
 {
-  /* =========================================================
-     STARTUP
+  if(!testRunning)
+    return;
 
-     OFF 2 SEC FINISHED
-     GO TO STANDBY FOR 2 SEC
-     ========================================================= */
+
+  /* STARTUP - STANDBY 2 SEC */
 
   if(step==0)
   {
@@ -1170,16 +1041,11 @@ on timer seqTimer
     write("STARTUP - STANDBY - 2 SEC");
 
     step=1;
-
     setTimer(seqTimer,2000);
   }
 
 
-  /* =========================================================
-     DAY 1
-     ENTER FLOAT
-     OPEN ISOLATION FOR 1 SEC
-     ========================================================= */
+  /* DAY 1 - FLOAT + ISO OPEN */
 
   else if(step==1)
   {
@@ -1189,12 +1055,8 @@ on timer seqTimer
     write("DAY 1 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=2;
-
     setTimer(seqTimer,1000);
   }
-
-
-  /* DAY 1 - CLOSE ISOLATION + FLOAT 18 HOURS */
 
   else if(step==2)
   {
@@ -1203,12 +1065,8 @@ on timer seqTimer
     write("DAY 1 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=3;
-
     setTimer(seqTimer,64800000);
   }
-
-
-  /* DAY 1 - STANDBY 6 HOURS */
 
   else if(step==3)
   {
@@ -1218,16 +1076,11 @@ on timer seqTimer
     write("DAY 1 - STANDBY - 6 HOURS");
 
     step=4;
-
     setTimer(seqTimer,21600000);
   }
 
 
-  /* =========================================================
-     DAY 2
-     ENTER FLOAT
-     OPEN ISOLATION FOR 1 SEC
-     ========================================================= */
+  /* DAY 2 */
 
   else if(step==4)
   {
@@ -1237,12 +1090,8 @@ on timer seqTimer
     write("DAY 2 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=5;
-
     setTimer(seqTimer,1000);
   }
-
-
-  /* DAY 2 - CLOSE ISOLATION + FLOAT 18 HOURS */
 
   else if(step==5)
   {
@@ -1251,12 +1100,8 @@ on timer seqTimer
     write("DAY 2 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=6;
-
     setTimer(seqTimer,64800000);
   }
-
-
-  /* DAY 2 - STANDBY 6 HOURS */
 
   else if(step==6)
   {
@@ -1266,16 +1111,11 @@ on timer seqTimer
     write("DAY 2 - STANDBY - 6 HOURS");
 
     step=7;
-
     setTimer(seqTimer,21600000);
   }
 
 
-  /* =========================================================
-     DAY 3
-     ENTER FLOAT
-     OPEN ISOLATION FOR 1 SEC
-     ========================================================= */
+  /* DAY 3 */
 
   else if(step==7)
   {
@@ -1285,12 +1125,8 @@ on timer seqTimer
     write("DAY 3 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=8;
-
     setTimer(seqTimer,1000);
   }
-
-
-  /* DAY 3 - CLOSE ISOLATION + FLOAT 18 HOURS */
 
   else if(step==8)
   {
@@ -1299,12 +1135,8 @@ on timer seqTimer
     write("DAY 3 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=9;
-
     setTimer(seqTimer,64800000);
   }
-
-
-  /* DAY 3 - STANDBY 6 HOURS */
 
   else if(step==9)
   {
@@ -1314,16 +1146,11 @@ on timer seqTimer
     write("DAY 3 - STANDBY - 6 HOURS");
 
     step=10;
-
     setTimer(seqTimer,21600000);
   }
 
 
-  /* =========================================================
-     DAY 4
-     ENTER FLOAT
-     OPEN ISOLATION FOR 1 SEC
-     ========================================================= */
+  /* DAY 4 */
 
   else if(step==10)
   {
@@ -1333,12 +1160,8 @@ on timer seqTimer
     write("DAY 4 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=11;
-
     setTimer(seqTimer,1000);
   }
-
-
-  /* DAY 4 - CLOSE ISOLATION + FLOAT 18 HOURS */
 
   else if(step==11)
   {
@@ -1347,12 +1170,8 @@ on timer seqTimer
     write("DAY 4 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=12;
-
     setTimer(seqTimer,64800000);
   }
-
-
-  /* DAY 4 - STANDBY 6 HOURS */
 
   else if(step==12)
   {
@@ -1362,16 +1181,11 @@ on timer seqTimer
     write("DAY 4 - STANDBY - 6 HOURS");
 
     step=13;
-
     setTimer(seqTimer,21600000);
   }
 
 
-  /* =========================================================
-     DAY 5
-     ENTER FLOAT
-     OPEN ISOLATION FOR 1 SEC
-     ========================================================= */
+  /* DAY 5 */
 
   else if(step==13)
   {
@@ -1381,12 +1195,8 @@ on timer seqTimer
     write("DAY 5 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=14;
-
     setTimer(seqTimer,1000);
   }
-
-
-  /* DAY 5 - CLOSE ISOLATION + FLOAT 18 HOURS */
 
   else if(step==14)
   {
@@ -1395,12 +1205,8 @@ on timer seqTimer
     write("DAY 5 - ISOLATION CLOSE - FLOAT 18 HOURS");
 
     step=15;
-
     setTimer(seqTimer,64800000);
   }
-
-
-  /* DAY 5 - FINAL STANDBY 6 HOURS */
 
   else if(step==15)
   {
@@ -1410,26 +1216,34 @@ on timer seqTimer
     write("DAY 5 - STANDBY - 6 HOURS");
 
     step=16;
-
     setTimer(seqTimer,21600000);
   }
 
 
-  /* =========================================================
-     COMPLETE
-
-     5 x (18 HOURS FLOAT + 6 HOURS STANDBY)
-     = 120 HOURS
-     ========================================================= */
+  /* TEST COMPLETE */
 
   else if(step==16)
   {
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
+    cancelTimer(seqTimer);
 
-    write("5 DAY TEST COMPLETE - 120 HOURS - MEASUREMENT STOP");
+    testRunning=0;
 
-    stop();
+    write("==========================================");
+    write("5 DAY TEST COMPLETE - 120 HOURS");
+    write("==========================================");
+
+    /*
+       IMPORTANT:
+       Do NOT call stop() here.
+
+       Measurement stays running.
+       This allows the Panel to remain available and avoids
+       tying the test lifecycle to CANalyzer Measurement Stop.
+
+       Logging stop will be integrated separately.
+    */
   }
 }
