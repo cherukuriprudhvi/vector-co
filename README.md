@@ -4,86 +4,35 @@
 /*@!Encoding:1252*/
 
 /*
-  HUMIDITY TEST - 2 CYCLE VALIDATION
+  HUMIDITY TEST - SHORT VALIDATION
   CANalyzer 16 SP8
 
-  OFF: 2 seconds
-  STANDBY: 2 seconds
-
-  EACH CYCLE:
-    FLOAT: 5 seconds
-    Isolation OPEN during first second
-    Isolation CLOSE after 1 second
-    STANDBY: 2 seconds
-
-  2 cycles total, approximately 18 seconds.
-
-  System selection:
+  SYSTEM SELECTION:
   0 = NONE
   1 = EBB
   2 = EMB
   3 = 48V EPAS
   4 = 12V EPAS
 
-  Required new system variables:
-  TestMonitor::Status
-  TestMonitor::Cycle
-  TestMonitor::CycleElapsedSec
-  TestMonitor::TotalElapsedSec
-  TestMonitor::RemainingSec
-  TestMonitor::ActiveChannels
-  TestMonitor::StartHour
-  TestMonitor::StartMinute
-  TestMonitor::StartSecond
+  STARTUP:
+  OFF       2 seconds
+  STANDBY   2 seconds
 
-  All above are signed 32-bit integers.
+  EACH CYCLE:
+  FLOAT     5 seconds
+    Isolation OPEN for first 1 second
+    Isolation CLOSE for remaining 4 seconds
+  STANDBY   2 seconds
 
-  Also create:
-  TestMonitor::OperatorName (String)
+  TOTAL: 2 CYCLES / 18 SECONDS
 
-  Existing variables:
-  CH1::Module through CH6::Module
+  48V EPAS: NO ISOLATION COMMAND
+
+  EXISTING PANEL VARIABLES ONLY:
+  CH1::Module ... CH6::Module
   MasterCtrl::StartTest
   MasterCtrl::StopTest
 */
-
-/* Common message initialization macros */
-
-#define INIT_BCM(m) \
-  m.BCM_AutoSarNMNodeId=129; \
-  m.BCM_AutoSarNMControl=0; \
-  m.BCM_AutoSarNMReserved1=255; \
-  m.BCM_AutoSarNMReserved2=255; \
-  m.BCM_GWOnBoardTester=255; \
-  m.BCM_GWNMProxy=255; \
-  m.BCM_AutoSarNMReserved3=255; \
-  m.BCM_AutoSarNMReserved4=255;
-
-#define INIT_RAW(m,a,b,c,d,e,f,g,h) \
-  m.byte(0)=a; \
-  m.byte(1)=b; \
-  m.byte(2)=c; \
-  m.byte(3)=d; \
-  m.byte(4)=e; \
-  m.byte(5)=f; \
-  m.byte(6)=g; \
-  m.byte(7)=h;
-
-#define INIT_CTRL(m) \
-  INIT_RAW(m,30,168,0,13,52,192,0,0)
-
-#define INIT_48CTRL(m) \
-  INIT_RAW(m,254,254,254,30,0,0,0,0)
-
-#define INIT_INFO(m) \
-  INIT_RAW(m,0,0,0,0,0,0,162,128)
-
-#define INIT_48INFO(m) \
-  INIT_RAW(m,8,254,254,0,0,0,0,0)
-
-#define INIT_NM(m) \
-  INIT_RAW(m,0,129,255,255,255,255,255,255)
-
 
 variables
 {
@@ -97,8 +46,6 @@ variables
   int testRunning=0;
   int step=0;
   int cycle=0;
-  int elapsed=0;
-  int cycleElapsed=0;
 
   msTimer t100;
   msTimer t500;
@@ -209,7 +156,96 @@ variables
 }
 
 
-/* INITIALIZE MESSAGES */
+/* MESSAGE INITIALIZATION */
+
+/*
+  Initialize using the same values as the
+  previous configuration.
+
+  Raw-byte values must be checked against
+  your DBC before hardware transmission.
+*/
+
+#define INIT_CTRL(m) \
+  m.byte(0)=30; \
+  m.byte(1)=168; \
+  m.byte(2)=0; \
+  m.byte(3)=13; \
+  m.byte(4)=52; \
+  m.byte(5)=192; \
+  m.byte(6)=0; \
+  m.byte(7)=0;
+
+#define INIT_INFO(m) \
+  m.byte(0)=0; \
+  m.byte(1)=0; \
+  m.byte(2)=0; \
+  m.byte(3)=0; \
+  m.byte(4)=0; \
+  m.byte(5)=0; \
+  m.byte(6)=162; \
+  m.byte(7)=128;
+
+#define INIT_48CTRL(m) \
+  m.byte(0)=254; \
+  m.byte(1)=254; \
+  m.byte(2)=254; \
+  m.byte(3)=30; \
+  m.byte(4)=0; \
+  m.byte(5)=0; \
+  m.byte(6)=0; \
+  m.byte(7)=0;
+
+#define INIT_48INFO(m) \
+  m.byte(0)=8; \
+  m.byte(1)=254; \
+  m.byte(2)=254; \
+  m.byte(3)=0; \
+  m.byte(4)=0; \
+  m.byte(5)=0; \
+  m.byte(6)=0; \
+  m.byte(7)=0;
+
+#define INIT_BCM(m) \
+  m.BCM_AutoSarNMNodeId=129; \
+  m.BCM_AutoSarNMControl=0; \
+  m.BCM_AutoSarNMReserved1=255; \
+  m.BCM_AutoSarNMReserved2=255; \
+  m.BCM_GWOnBoardTester=255; \
+  m.BCM_GWNMProxy=255; \
+  m.BCM_AutoSarNMReserved3=255; \
+  m.BCM_AutoSarNMReserved4=255;
+
+#define INIT_DCDCE(m) \
+  m.DCDCE_AutoSarNMControl=0; \
+  m.DCDCE_AutoSarNMNodeId=129; \
+  m.DCDCE_AutoSarNMReserved1=255; \
+  m.DCDCE_AutoSarNMReserved2=255; \
+  m.DCDCE_GWOnBoardTester=255; \
+  m.DCDCE_GWNMProxy=255; \
+  m.DCDCE_AutoSarNMReserved3=255; \
+  m.DCDCE_AutoSarNMReserved4=255;
+
+#define INIT_DCDCF(m) \
+  m.DCDCF_AutoSarNMControl=0; \
+  m.DCDCF_AutoSarNMNodeId=129; \
+  m.DCDCF_AutoSarNMReserved1=255; \
+  m.DCDCF_AutoSarNMReserved2=255; \
+  m.DCDCF_GWOnBoardTester=255; \
+  m.DCDCF_GWNMProxy=255; \
+  m.DCDCF_AutoSarNMReserved3=255; \
+  m.DCDCF_AutoSarNMReserved4=255;
+
+#define INIT_DCDCG(m) \
+  m.DCDCG_AutoSarNMControl=0; \
+  m.DCDCG_AutoSarNMNodeId=129; \
+  m.DCDCG_AutoSarNMReserved1=255; \
+  m.DCDCG_AutoSarNMReserved2=255; \
+  m.DCDCG_GWOnBoardTester=255; \
+  m.DCDCG_GWNMProxy=255; \
+  m.DCDCG_AutoSarNMReserved3=255; \
+  m.DCDCG_AutoSarNMReserved4=255;
+
 
 void initMessages()
 {
@@ -222,30 +258,30 @@ void initMessages()
   INIT_BCM(bcm5)
   INIT_BCM(bcm6)
 
-  /* Network management */
+  /* DCDC NM */
 
-  INIT_NM(dcdce1)
-  INIT_NM(dcdce2)
-  INIT_NM(dcdce3)
-  INIT_NM(dcdce4)
-  INIT_NM(dcdce5)
-  INIT_NM(dcdce6)
+  INIT_DCDCE(dcdce1)
+  INIT_DCDCE(dcdce2)
+  INIT_DCDCE(dcdce3)
+  INIT_DCDCE(dcdce4)
+  INIT_DCDCE(dcdce5)
+  INIT_DCDCE(dcdce6)
 
-  INIT_NM(dcdcf1)
-  INIT_NM(dcdcf2)
-  INIT_NM(dcdcf3)
-  INIT_NM(dcdcf4)
-  INIT_NM(dcdcf5)
-  INIT_NM(dcdcf6)
+  INIT_DCDCF(dcdcf1)
+  INIT_DCDCF(dcdcf2)
+  INIT_DCDCF(dcdcf3)
+  INIT_DCDCF(dcdcf4)
+  INIT_DCDCF(dcdcf5)
+  INIT_DCDCF(dcdcf6)
 
-  INIT_NM(dcdcg1)
-  INIT_NM(dcdcg2)
-  INIT_NM(dcdcg3)
-  INIT_NM(dcdcg4)
-  INIT_NM(dcdcg5)
-  INIT_NM(dcdcg6)
+  INIT_DCDCG(dcdcg1)
+  INIT_DCDCG(dcdcg2)
+  INIT_DCDCG(dcdcg3)
+  INIT_DCDCG(dcdcg4)
+  INIT_DCDCG(dcdcg5)
+  INIT_DCDCG(dcdcg6)
 
-  /* EBB control */
+  /* EBB */
 
   INIT_CTRL(ebbCtrl1)
   INIT_CTRL(ebbCtrl2)
@@ -254,7 +290,14 @@ void initMessages()
   INIT_CTRL(ebbCtrl5)
   INIT_CTRL(ebbCtrl6)
 
-  /* EMB control */
+  INIT_INFO(ebbInfo1)
+  INIT_INFO(ebbInfo2)
+  INIT_INFO(ebbInfo3)
+  INIT_INFO(ebbInfo4)
+  INIT_INFO(ebbInfo5)
+  INIT_INFO(ebbInfo6)
+
+  /* EMB */
 
   INIT_CTRL(embCtrl1)
   INIT_CTRL(embCtrl2)
@@ -263,16 +306,14 @@ void initMessages()
   INIT_CTRL(embCtrl5)
   INIT_CTRL(embCtrl6)
 
-  /* 12V EPAS control */
+  INIT_INFO(embInfo1)
+  INIT_INFO(embInfo2)
+  INIT_INFO(embInfo3)
+  INIT_INFO(embInfo4)
+  INIT_INFO(embInfo5)
+  INIT_INFO(embInfo6)
 
-  INIT_CTRL(epasCtrl1)
-  INIT_CTRL(epasCtrl2)
-  INIT_CTRL(epasCtrl3)
-  INIT_CTRL(epasCtrl4)
-  INIT_CTRL(epasCtrl5)
-  INIT_CTRL(epasCtrl6)
-
-  /* 48V EPAS control */
+  /* 48V EPAS */
 
   INIT_48CTRL(v48Ctrl1)
   INIT_48CTRL(v48Ctrl2)
@@ -281,25 +322,21 @@ void initMessages()
   INIT_48CTRL(v48Ctrl5)
   INIT_48CTRL(v48Ctrl6)
 
-  /* EBB information */
+  INIT_48INFO(v48Info1)
+  INIT_48INFO(v48Info2)
+  INIT_48INFO(v48Info3)
+  INIT_48INFO(v48Info4)
+  INIT_48INFO(v48Info5)
+  INIT_48INFO(v48Info6)
 
-  INIT_INFO(ebbInfo1)
-  INIT_INFO(ebbInfo2)
-  INIT_INFO(ebbInfo3)
-  INIT_INFO(ebbInfo4)
-  INIT_INFO(ebbInfo5)
-  INIT_INFO(ebbInfo6)
+  /* 12V EPAS */
 
-  /* EMB information */
-
-  INIT_INFO(embInfo1)
-  INIT_INFO(embInfo2)
-  INIT_INFO(embInfo3)
-  INIT_INFO(embInfo4)
-  INIT_INFO(embInfo5)
-  INIT_INFO(embInfo6)
-
-  /* 12V EPAS information */
+  INIT_CTRL(epasCtrl1)
+  INIT_CTRL(epasCtrl2)
+  INIT_CTRL(epasCtrl3)
+  INIT_CTRL(epasCtrl4)
+  INIT_CTRL(epasCtrl5)
+  INIT_CTRL(epasCtrl6)
 
   INIT_INFO(epasInfo1)
   INIT_INFO(epasInfo2)
@@ -308,16 +345,7 @@ void initMessages()
   INIT_INFO(epasInfo5)
   INIT_INFO(epasInfo6)
 
-  /* 48V EPAS information */
-
-  INIT_48INFO(v48Info1)
-  INIT_48INFO(v48Info2)
-  INIT_48INFO(v48Info3)
-  INIT_48INFO(v48Info4)
-  INIT_48INFO(v48Info5)
-  INIT_48INFO(v48Info6)
-
-  /* Body information */
+  /* BodyInfo_3 */
 
   if(sys1!=0)
   {
@@ -396,7 +424,7 @@ void setMode(int mode)
 /* ISOLATION CONTROL
    0 = OPEN
    1 = CLOSE
-   48V EPAS = NO ISOLATION COMMAND
+   SKIP 48V EPAS
 */
 
 void setIsolation(int value)
@@ -427,7 +455,7 @@ void setIsolation(int value)
 }
 
 
-/* TRANSMIT EVERY 100 MS */
+/* TRANSMIT CONTROL + INFO EVERY 100 MS */
 
 void send100()
 {
@@ -463,7 +491,7 @@ void send100()
 }
 
 
-/* TRANSMIT EVERY 500 MS */
+/* BODY INFO EVERY 500 MS */
 
 void send500()
 {
@@ -476,7 +504,7 @@ void send500()
 }
 
 
-/* TRANSMIT EVERY 1000 MS */
+/* NETWORK MANAGEMENT EVERY 1000 MS */
 
 void send1000()
 {
@@ -525,30 +553,11 @@ void send1000()
 }
 
 
-/* PANEL MONITORING */
+/* STOP TEST */
 
-void updateMonitor()
+void stopTest()
 {
-  @sysvar::TestMonitor::Cycle=cycle;
-  @sysvar::TestMonitor::CycleElapsedSec=cycleElapsed;
-  @sysvar::TestMonitor::TotalElapsedSec=elapsed;
-
-  if(elapsed<18)
-    @sysvar::TestMonitor::RemainingSec=18-elapsed;
-  else
-    @sysvar::TestMonitor::RemainingSec=0;
-}
-
-
-/* TEST COMPLETION OR STOP */
-
-void finishTest(int completed)
-{
-  /*
-    Command OFF and isolation CLOSE.
-    This is not proof that hardware reached
-    a safe state.
-  */
+  /* Command OFF and isolation CLOSE */
 
   setMode(0);
   setIsolation(1);
@@ -563,12 +572,7 @@ void finishTest(int completed)
   testRunning=0;
   step=0;
 
-  if(completed)
-    @sysvar::TestMonitor::Status=3;
-  else
-    @sysvar::TestMonitor::Status=2;
-
-  updateMonitor();
+  write("TEST STOPPED - OFF COMMANDED");
 }
 
 
@@ -585,32 +589,23 @@ on start
 
   testRunning=0;
   step=0;
-  elapsed=0;
   cycle=0;
-  cycleElapsed=0;
 
   @sysvar::MasterCtrl::StartTest=0;
   @sysvar::MasterCtrl::StopTest=0;
 
-  @sysvar::TestMonitor::Status=0;
-  @sysvar::TestMonitor::ActiveChannels=0;
-
-  @sysvar::TestMonitor::StartHour=0;
-  @sysvar::TestMonitor::StartMinute=0;
-  @sysvar::TestMonitor::StartSecond=0;
-
-  updateMonitor();
-
-  write("MEASUREMENT STARTED - WAITING FOR PANEL START");
+  write("======================================");
+  write("CANALYZER MEASUREMENT STARTED");
+  write("WAITING FOR PANEL START TEST");
+  write("======================================");
 }
 
 
-/* PANEL START TEST */
+/* PANEL START BUTTON */
 
 on sysvar MasterCtrl::StartTest
 {
   int active;
-  int localTime[9];
 
   if(@this==1 && testRunning==0)
   {
@@ -632,7 +627,7 @@ on sysvar MasterCtrl::StartTest
 
     if(active==0)
     {
-      write("START REJECTED - NO SYSTEM SELECTED");
+      write("NO SYSTEM SELECTED");
       @sysvar::MasterCtrl::StartTest=0;
       return;
     }
@@ -644,20 +639,7 @@ on sysvar MasterCtrl::StartTest
 
     testRunning=1;
     step=0;
-    elapsed=0;
     cycle=0;
-    cycleElapsed=0;
-
-    @sysvar::TestMonitor::Status=1;
-    @sysvar::TestMonitor::ActiveChannels=active;
-
-    getLocalTime(localTime);
-
-    @sysvar::TestMonitor::StartHour=localTime[2];
-    @sysvar::TestMonitor::StartMinute=localTime[1];
-    @sysvar::TestMonitor::StartSecond=localTime[0];
-
-    updateMonitor();
 
     initMessages();
 
@@ -673,8 +655,8 @@ on sysvar MasterCtrl::StartTest
     setTimer(t1000,1000);
 
     write("======================================");
-    write("SHORT HUMIDITY TEST STARTED");
-    write("OFF - 2 SECONDS");
+    write("HUMIDITY TEST STARTED");
+    write("INITIAL OFF - 2 SECONDS");
     write("======================================");
 
     write("CAN1=%d CAN2=%d CAN3=%d",
@@ -691,23 +673,23 @@ on sysvar MasterCtrl::StartTest
 }
 
 
-/* PANEL STOP TEST */
+/* PANEL STOP BUTTON */
 
 on sysvar MasterCtrl::StopTest
 {
   if(@this==1)
   {
     if(testRunning)
-      finishTest(0);
-
-    write("TEST STOP REQUESTED FROM PANEL");
+    {
+      stopTest();
+    }
 
     @sysvar::MasterCtrl::StopTest=0;
   }
 }
 
 
-/* PERIODIC TRANSMISSION */
+/* PERIODIC TIMERS */
 
 on timer t100
 {
@@ -732,20 +714,12 @@ on timer t1000
   if(testRunning)
   {
     send1000();
-
-    elapsed++;
-
-    if(cycle>0)
-      cycleElapsed++;
-
-    updateMonitor();
-
     setTimer(t1000,1000);
   }
 }
 
 
-/* TWO-CYCLE SEQUENCE */
+/* HUMIDITY TEST - 2 CYCLES */
 
 on timer seqTimer
 {
@@ -765,18 +739,17 @@ on timer seqTimer
     setTimer(seqTimer,2000);
   }
 
-  /* CYCLE 1 - FLOAT + ISOLATION OPEN */
+  /* CYCLE 1 - FLOAT */
 
   else if(step==1)
   {
     cycle=1;
-    cycleElapsed=0;
-    updateMonitor();
 
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 1 - FLOAT - ISOLATION OPEN");
+    write("CYCLE 1 - FLOAT");
+    write("ISOLATION OPEN - 1 SEC");
 
     step=2;
     setTimer(seqTimer,1000);
@@ -789,7 +762,7 @@ on timer seqTimer
     setIsolation(1);
 
     write("CYCLE 1 - ISOLATION CLOSE");
-    write("FLOAT CONTINUES FOR 4 SEC");
+    write("FLOAT CONTINUES - 4 SEC");
 
     step=3;
     setTimer(seqTimer,4000);
@@ -802,24 +775,24 @@ on timer seqTimer
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 1 - STANDBY - 2 SEC");
+    write("CYCLE 1 COMPLETE");
+    write("STANDBY - 2 SEC");
 
     step=4;
     setTimer(seqTimer,2000);
   }
 
-  /* CYCLE 2 - FLOAT + ISOLATION OPEN */
+  /* CYCLE 2 - FLOAT */
 
   else if(step==4)
   {
     cycle=2;
-    cycleElapsed=0;
-    updateMonitor();
 
     setMode(3);
     setIsolation(0);
 
-    write("CYCLE 2 - FLOAT - ISOLATION OPEN");
+    write("CYCLE 2 - FLOAT");
+    write("ISOLATION OPEN - 1 SEC");
 
     step=5;
     setTimer(seqTimer,1000);
@@ -832,7 +805,7 @@ on timer seqTimer
     setIsolation(1);
 
     write("CYCLE 2 - ISOLATION CLOSE");
-    write("FLOAT CONTINUES FOR 4 SEC");
+    write("FLOAT CONTINUES - 4 SEC");
 
     step=6;
     setTimer(seqTimer,4000);
@@ -845,24 +818,22 @@ on timer seqTimer
     setMode(1);
     setIsolation(1);
 
-    write("CYCLE 2 - STANDBY - 2 SEC");
+    write("CYCLE 2 COMPLETE");
+    write("STANDBY - 2 SEC");
 
     step=7;
     setTimer(seqTimer,2000);
   }
 
-  /* TEST COMPLETE */
+  /* FINISH */
 
   else if(step==7)
   {
-    elapsed=18;
-    cycleElapsed=7;
-
-    finishTest(1);
+    stopTest();
 
     write("======================================");
     write("2 CYCLE HUMIDITY TEST COMPLETE");
-    write("FINAL OFF COMMAND TRANSMITTED");
+    write("FINAL MODE - OFF COMMANDED");
     write("======================================");
   }
 }
