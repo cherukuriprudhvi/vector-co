@@ -1,4 +1,6 @@
 
+
+
 /*@!Encoding:1252*/
 
 variables
@@ -22,11 +24,15 @@ variables
   int testRunning = 0;
   int step = 0;
 
+  /* TEST MONITOR */
+  int elapsedSec = 0;
+  int cycleStartSec = 0;
+
   msTimer t100;
   msTimer t500;
   msTimer t1000;
   msTimer seqTimer;
-
+  msTimer monitorTimer;
 
   /* =========================================================
      CAN 1
@@ -51,7 +57,6 @@ variables
   message CAN1.EnergyMgmtBodyCtrl_4 epasCtrl1;
   message CAN1.EnergyMgmtBodyInfo_4 epasInfo1;
 
-
   /* =========================================================
      CAN 2
      ========================================================= */
@@ -74,7 +79,6 @@ variables
 
   message CAN2.EnergyMgmtBodyCtrl_4 epasCtrl2;
   message CAN2.EnergyMgmtBodyInfo_4 epasInfo2;
-
 
   /* =========================================================
      CAN 3
@@ -99,7 +103,6 @@ variables
   message CAN3.EnergyMgmtBodyCtrl_4 epasCtrl3;
   message CAN3.EnergyMgmtBodyInfo_4 epasInfo3;
 
-
   /* =========================================================
      CAN 4
      ========================================================= */
@@ -123,7 +126,6 @@ variables
   message CAN4.EnergyMgmtBodyCtrl_4 epasCtrl4;
   message CAN4.EnergyMgmtBodyInfo_4 epasInfo4;
 
-
   /* =========================================================
      CAN 5
      ========================================================= */
@@ -146,7 +148,6 @@ variables
 
   message CAN5.EnergyMgmtBodyCtrl_4 epasCtrl5;
   message CAN5.EnergyMgmtBodyInfo_4 epasInfo5;
-
 
   /* =========================================================
      CAN 6
@@ -235,7 +236,6 @@ void initMessages()
   bcm6.BCM_AutoSarNMReserved3 = 255;
   bcm6.BCM_AutoSarNMReserved4 = 255;
 
-
   /* ================= NM CAN1 ================= */
 
   dcdce1.DCDCE_AutoSarNMControl=0;
@@ -265,7 +265,6 @@ void initMessages()
   dcdcg1.DCDCG_AutoSarNMReserved3=255;
   dcdcg1.DCDCG_AutoSarNMReserved4=255;
 
-
   /* ================= NM CAN2-CAN6 ================= */
 
   dcdce2.byte(0)=0; dcdce2.byte(1)=129;
@@ -293,7 +292,6 @@ void initMessages()
   dcdce6.byte(4)=255; dcdce6.byte(5)=255;
   dcdce6.byte(6)=255; dcdce6.byte(7)=255;
 
-
   dcdcf2.byte(0)=0; dcdcf2.byte(1)=129;
   dcdcf2.byte(2)=255; dcdcf2.byte(3)=255;
   dcdcf2.byte(4)=255; dcdcf2.byte(5)=255;
@@ -319,7 +317,6 @@ void initMessages()
   dcdcf6.byte(4)=255; dcdcf6.byte(5)=255;
   dcdcf6.byte(6)=255; dcdcf6.byte(7)=255;
 
-
   dcdcg2.byte(0)=0; dcdcg2.byte(1)=129;
   dcdcg2.byte(2)=255; dcdcg2.byte(3)=255;
   dcdcg2.byte(4)=255; dcdcg2.byte(5)=255;
@@ -344,7 +341,6 @@ void initMessages()
   dcdcg6.byte(2)=255; dcdcg6.byte(3)=255;
   dcdcg6.byte(4)=255; dcdcg6.byte(5)=255;
   dcdcg6.byte(6)=255; dcdcg6.byte(7)=255;
-
 
   /* ================= CONTROL DEFAULTS ================= */
 
@@ -384,7 +380,6 @@ void initMessages()
   v48Ctrl1.byte(6)=0;
   v48Ctrl1.byte(7)=0;
 
-
   /* ================= CONTROL CAN2-CAN6 ================= */
 
   ebbCtrl2.byte(0)=30; ebbCtrl2.byte(1)=168;
@@ -412,7 +407,6 @@ void initMessages()
   ebbCtrl6.byte(4)=52; ebbCtrl6.byte(5)=192;
   ebbCtrl6.byte(6)=0;  ebbCtrl6.byte(7)=0;
 
-
   embCtrl2.byte(0)=30; embCtrl2.byte(1)=168;
   embCtrl2.byte(2)=0;  embCtrl2.byte(3)=13;
   embCtrl2.byte(4)=52; embCtrl2.byte(5)=192;
@@ -437,7 +431,6 @@ void initMessages()
   embCtrl6.byte(2)=0;  embCtrl6.byte(3)=13;
   embCtrl6.byte(4)=52; embCtrl6.byte(5)=192;
   embCtrl6.byte(6)=0;  embCtrl6.byte(7)=0;
-
 
   epasCtrl2.byte(0)=30; epasCtrl2.byte(1)=168;
   epasCtrl2.byte(2)=0;  epasCtrl2.byte(3)=13;
@@ -464,7 +457,6 @@ void initMessages()
   epasCtrl6.byte(4)=52; epasCtrl6.byte(5)=192;
   epasCtrl6.byte(6)=0;  epasCtrl6.byte(7)=0;
 
-
   v48Ctrl2.byte(0)=254; v48Ctrl2.byte(1)=254;
   v48Ctrl2.byte(2)=254; v48Ctrl2.byte(3)=30;
   v48Ctrl2.byte(4)=0; v48Ctrl2.byte(5)=0;
@@ -489,7 +481,6 @@ void initMessages()
   v48Ctrl6.byte(2)=254; v48Ctrl6.byte(3)=30;
   v48Ctrl6.byte(4)=0; v48Ctrl6.byte(5)=0;
   v48Ctrl6.byte(6)=0; v48Ctrl6.byte(7)=0;
-
 
   /* ================= INFO DEFAULTS ================= */
 
@@ -529,7 +520,6 @@ void initMessages()
   v48Info1.byte(6)=0;
   v48Info1.byte(7)=0;
 
-
   /* INFO CAN2-CAN6 */
 
   ebbInfo2.byte(0)=0; ebbInfo2.byte(1)=0;
@@ -557,7 +547,6 @@ void initMessages()
   ebbInfo6.byte(4)=0; ebbInfo6.byte(5)=0;
   ebbInfo6.byte(6)=162; ebbInfo6.byte(7)=128;
 
-
   embInfo2.byte(0)=0; embInfo2.byte(1)=0;
   embInfo2.byte(2)=0; embInfo2.byte(3)=0;
   embInfo2.byte(4)=0; embInfo2.byte(5)=0;
@@ -582,7 +571,6 @@ void initMessages()
   embInfo6.byte(2)=0; embInfo6.byte(3)=0;
   embInfo6.byte(4)=0; embInfo6.byte(5)=0;
   embInfo6.byte(6)=162; embInfo6.byte(7)=128;
-
 
   epasInfo2.byte(0)=0; epasInfo2.byte(1)=0;
   epasInfo2.byte(2)=0; epasInfo2.byte(3)=0;
@@ -609,7 +597,6 @@ void initMessages()
   epasInfo6.byte(4)=0; epasInfo6.byte(5)=0;
   epasInfo6.byte(6)=162; epasInfo6.byte(7)=128;
 
-
   v48Info2.byte(0)=8; v48Info2.byte(1)=254;
   v48Info2.byte(2)=254; v48Info2.byte(3)=0;
   v48Info2.byte(4)=0; v48Info2.byte(5)=0;
@@ -634,7 +621,6 @@ void initMessages()
   v48Info6.byte(2)=254; v48Info6.byte(3)=0;
   v48Info6.byte(4)=0; v48Info6.byte(5)=0;
   v48Info6.byte(6)=0; v48Info6.byte(7)=0;
-
 
   /* ================= BODY INFO ================= */
 
@@ -821,7 +807,6 @@ void send1000()
   if(sys5!=0) output(bcm5);
   if(sys6!=0) output(bcm6);
 
-
   /* EBB = DCDCF + DCDCG */
 
   if(sys1==1) { output(dcdcf1); output(dcdcg1); }
@@ -830,7 +815,6 @@ void send1000()
   if(sys4==1) { output(dcdcf4); output(dcdcg4); }
   if(sys5==1) { output(dcdcf5); output(dcdcg5); }
   if(sys6==1) { output(dcdcf6); output(dcdcg6); }
-
 
   /* EMB = DCDCE + DCDCF */
 
@@ -841,7 +825,6 @@ void send1000()
   if(sys5==2) { output(dcdce5); output(dcdcf5); }
   if(sys6==2) { output(dcdce6); output(dcdcf6); }
 
-
   /* 48V EPAS = DCDCE + DCDCG */
 
   if(sys1==3) { output(dcdce1); output(dcdcg1); }
@@ -851,7 +834,6 @@ void send1000()
   if(sys5==3) { output(dcdce5); output(dcdcg5); }
   if(sys6==3) { output(dcdce6); output(dcdcg6); }
 
-
   /* 12V EPAS = DCDCG */
 
   if(sys1==4) output(dcdcg1);
@@ -860,6 +842,53 @@ void send1000()
   if(sys4==4) output(dcdcg4);
   if(sys5==4) output(dcdcg5);
   if(sys6==4) output(dcdcg6);
+}
+
+
+/* ============================================================
+   PANEL MONITOR
+
+   CurrentCycle:
+      0 = Not started
+      1 = Cycle 1
+      2 = Cycle 2
+
+   TotalElapsedSec:
+      0 to 18
+
+   CycleElapsedSec:
+      0 to 7 per cycle
+
+   RemainingSec:
+      18 down to 0
+   ============================================================ */
+
+void updateMonitor()
+{
+  int remaining;
+  int cycleElapsed;
+
+  remaining = 18 - elapsedSec;
+
+  if(remaining < 0)
+    remaining = 0;
+
+  cycleElapsed = 0;
+
+  if(@sysvar::TestMonitor::CurrentCycle > 0)
+  {
+    cycleElapsed = elapsedSec - cycleStartSec;
+
+    if(cycleElapsed < 0)
+      cycleElapsed = 0;
+
+    if(cycleElapsed > 7)
+      cycleElapsed = 7;
+  }
+
+  @sysvar::TestMonitor::TotalElapsedSec = elapsedSec;
+  @sysvar::TestMonitor::RemainingSec = remaining;
+  @sysvar::TestMonitor::CycleElapsedSec = cycleElapsed;
 }
 
 
@@ -882,8 +911,20 @@ on start
   step=0;
   testRunning=0;
 
+  elapsedSec=0;
+  cycleStartSec=0;
+
+  cancelTimer(t100);
+  cancelTimer(t500);
+  cancelTimer(t1000);
+  cancelTimer(seqTimer);
+  cancelTimer(monitorTimer);
+
   @sysvar::MasterCtrl::StartTest = 0;
   @sysvar::MasterCtrl::StopTest = 0;
+
+  @sysvar::TestMonitor::CurrentCycle = 0;
+  updateMonitor();
 
   write("MEASUREMENT STARTED - WAITING FOR PANEL START TEST");
 }
@@ -916,9 +957,16 @@ on sysvar MasterCtrl::StartTest
     cancelTimer(t500);
     cancelTimer(t1000);
     cancelTimer(seqTimer);
+    cancelTimer(monitorTimer);
 
     testRunning=1;
     step=0;
+
+    elapsedSec=0;
+    cycleStartSec=0;
+
+    @sysvar::TestMonitor::CurrentCycle = 0;
+    updateMonitor();
 
     initMessages();
 
@@ -932,12 +980,14 @@ on sysvar MasterCtrl::StartTest
     setTimer(t100,100);
     setTimer(t500,500);
     setTimer(t1000,1000);
+    setTimer(monitorTimer,1000);
 
     write("==========================================");
-    write("PANEL START TEST");
+    write("PANEL START TEST - 2 CYCLE SHORT TEST");
     write("CAN1=%d CAN2=%d CAN3=%d",sys1,sys2,sys3);
     write("CAN4=%d CAN5=%d CAN6=%d",sys4,sys5,sys6);
     write("START - OFF - 2 SEC");
+    write("TOTAL DURATION - 18 SEC");
     write("==========================================");
 
     setTimer(seqTimer,2000);
@@ -949,19 +999,34 @@ on sysvar MasterCtrl::StartTest
 
 /* ============================================================
    PANEL STOP TEST
+
+   Send final OFF command before cancelling timers.
    ============================================================ */
 
 on sysvar MasterCtrl::StopTest
 {
   if(@this == 1)
   {
+    if(testRunning)
+    {
+      setMode(0);
+      setIsolation(1);
+
+      send100();
+
+      write("PANEL STOP - OFF COMMAND TRANSMITTED");
+    }
+
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
     cancelTimer(seqTimer);
+    cancelTimer(monitorTimer);
 
     testRunning=0;
     step=0;
+
+    updateMonitor();
 
     write("==========================================");
     write("TEST STOPPED FROM CONTROL PANEL");
@@ -973,7 +1038,7 @@ on sysvar MasterCtrl::StopTest
 
 
 /* ============================================================
-   PERIODIC TIMERS
+   PERIODIC TRANSMISSION TIMERS
    ============================================================ */
 
 on timer t100
@@ -1005,24 +1070,53 @@ on timer t1000
 
 
 /* ============================================================
-   FIVE DAY TEST
+   TEST MONITOR TIMER - 1 SECOND
 
-   START:
-   OFF       2 SEC
-   STANDBY   2 SEC
+   Independent from CAN transmission timers.
+   ============================================================ */
 
-   EACH DAY:
-   FLOAT
-   ISOLATION OPEN 1 SEC
-   ISOLATION CLOSE
-   FLOAT 18 HOURS
-   STANDBY 6 HOURS
+on timer monitorTimer
+{
+  if(testRunning)
+  {
+    elapsedSec++;
 
-   REPEAT 5 TIMES
+    if(elapsedSec > 18)
+      elapsedSec = 18;
+
+    updateMonitor();
+
+    setTimer(monitorTimer,1000);
+  }
+}
+
+
+/* ============================================================
+   TWO CYCLE SHORT TEST
+
+   INITIAL:
+     OFF       2 SEC
+     STANDBY   2 SEC
+
+   CYCLE 1:
+     FLOAT     5 SEC
+       ISOLATION OPEN  1 SEC
+       ISOLATION CLOSE 4 SEC
+     STANDBY   2 SEC
+
+   CYCLE 2:
+     FLOAT     5 SEC
+       ISOLATION OPEN  1 SEC
+       ISOLATION CLOSE 4 SEC
+     STANDBY   2 SEC
+
+   FINAL:
+     OFF
+
+   TOTAL: 18 SECONDS
 
    48V EPAS:
-   MODE CHANGES NORMAL
-   ISOLATION COMMAND IS SKIPPED
+     ISOLATION COMMAND SKIPPED
    ============================================================ */
 
 on timer seqTimer
@@ -1030,8 +1124,7 @@ on timer seqTimer
   if(!testRunning)
     return;
 
-
-  /* STARTUP - STANDBY 2 SEC */
+  /* INITIAL STANDBY */
 
   if(step==0)
   {
@@ -1044,206 +1137,120 @@ on timer seqTimer
     setTimer(seqTimer,2000);
   }
 
-
-  /* DAY 1 - FLOAT + ISO OPEN */
+  /* CYCLE 1 - FLOAT START */
 
   else if(step==1)
   {
+    @sysvar::TestMonitor::CurrentCycle = 1;
+    cycleStartSec = elapsedSec;
+    updateMonitor();
+
     setMode(3);
     setIsolation(0);
 
-    write("DAY 1 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("CYCLE 1 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=2;
     setTimer(seqTimer,1000);
   }
 
+  /* CYCLE 1 - ISOLATION CLOSE */
+
   else if(step==2)
   {
     setIsolation(1);
 
-    write("DAY 1 - ISOLATION CLOSE - FLOAT 18 HOURS");
+    write("CYCLE 1 - ISOLATION CLOSE");
+    write("CYCLE 1 - FLOAT CONTINUES - 4 SEC");
 
     step=3;
-    setTimer(seqTimer,64800000);
+    setTimer(seqTimer,4000);
   }
+
+  /* CYCLE 1 - STANDBY */
 
   else if(step==3)
   {
     setMode(1);
     setIsolation(1);
 
-    write("DAY 1 - STANDBY - 6 HOURS");
+    write("CYCLE 1 - STANDBY - 2 SEC");
 
     step=4;
-    setTimer(seqTimer,21600000);
+    setTimer(seqTimer,2000);
   }
 
-
-  /* DAY 2 */
+  /* CYCLE 2 - FLOAT START */
 
   else if(step==4)
   {
+    @sysvar::TestMonitor::CurrentCycle = 2;
+    cycleStartSec = elapsedSec;
+    updateMonitor();
+
     setMode(3);
     setIsolation(0);
 
-    write("DAY 2 - FLOAT - ISOLATION OPEN - 1 SEC");
+    write("CYCLE 2 - FLOAT - ISOLATION OPEN - 1 SEC");
 
     step=5;
     setTimer(seqTimer,1000);
   }
 
+  /* CYCLE 2 - ISOLATION CLOSE */
+
   else if(step==5)
   {
     setIsolation(1);
 
-    write("DAY 2 - ISOLATION CLOSE - FLOAT 18 HOURS");
+    write("CYCLE 2 - ISOLATION CLOSE");
+    write("CYCLE 2 - FLOAT CONTINUES - 4 SEC");
 
     step=6;
-    setTimer(seqTimer,64800000);
+    setTimer(seqTimer,4000);
   }
+
+  /* CYCLE 2 - STANDBY */
 
   else if(step==6)
   {
     setMode(1);
     setIsolation(1);
 
-    write("DAY 2 - STANDBY - 6 HOURS");
+    write("CYCLE 2 - STANDBY - 2 SEC");
 
     step=7;
-    setTimer(seqTimer,21600000);
+    setTimer(seqTimer,2000);
   }
-
-
-  /* DAY 3 */
-
-  else if(step==7)
-  {
-    setMode(3);
-    setIsolation(0);
-
-    write("DAY 3 - FLOAT - ISOLATION OPEN - 1 SEC");
-
-    step=8;
-    setTimer(seqTimer,1000);
-  }
-
-  else if(step==8)
-  {
-    setIsolation(1);
-
-    write("DAY 3 - ISOLATION CLOSE - FLOAT 18 HOURS");
-
-    step=9;
-    setTimer(seqTimer,64800000);
-  }
-
-  else if(step==9)
-  {
-    setMode(1);
-    setIsolation(1);
-
-    write("DAY 3 - STANDBY - 6 HOURS");
-
-    step=10;
-    setTimer(seqTimer,21600000);
-  }
-
-
-  /* DAY 4 */
-
-  else if(step==10)
-  {
-    setMode(3);
-    setIsolation(0);
-
-    write("DAY 4 - FLOAT - ISOLATION OPEN - 1 SEC");
-
-    step=11;
-    setTimer(seqTimer,1000);
-  }
-
-  else if(step==11)
-  {
-    setIsolation(1);
-
-    write("DAY 4 - ISOLATION CLOSE - FLOAT 18 HOURS");
-
-    step=12;
-    setTimer(seqTimer,64800000);
-  }
-
-  else if(step==12)
-  {
-    setMode(1);
-    setIsolation(1);
-
-    write("DAY 4 - STANDBY - 6 HOURS");
-
-    step=13;
-    setTimer(seqTimer,21600000);
-  }
-
-
-  /* DAY 5 */
-
-  else if(step==13)
-  {
-    setMode(3);
-    setIsolation(0);
-
-    write("DAY 5 - FLOAT - ISOLATION OPEN - 1 SEC");
-
-    step=14;
-    setTimer(seqTimer,1000);
-  }
-
-  else if(step==14)
-  {
-    setIsolation(1);
-
-    write("DAY 5 - ISOLATION CLOSE - FLOAT 18 HOURS");
-
-    step=15;
-    setTimer(seqTimer,64800000);
-  }
-
-  else if(step==15)
-  {
-    setMode(1);
-    setIsolation(1);
-
-    write("DAY 5 - STANDBY - 6 HOURS");
-
-    step=16;
-    setTimer(seqTimer,21600000);
-  }
-
 
   /* TEST COMPLETE */
 
-  else if(step==16)
+  else if(step==7)
   {
+    setMode(0);
+    setIsolation(1);
+
+    /* Transmit final OFF command */
+    send100();
+
     cancelTimer(t100);
     cancelTimer(t500);
     cancelTimer(t1000);
     cancelTimer(seqTimer);
+    cancelTimer(monitorTimer);
 
     testRunning=0;
+    step=0;
+
+    elapsedSec=18;
+    updateMonitor();
 
     write("==========================================");
-    write("5 DAY TEST COMPLETE - 120 HOURS");
+    write("2 CYCLE SHORT TEST COMPLETE");
+    write("TOTAL DURATION - 18 SECONDS");
+    write("FINAL OFF COMMAND TRANSMITTED");
+    write("MEASUREMENT REMAINS RUNNING");
     write("==========================================");
-
-    /*
-       IMPORTANT:
-       Do NOT call stop() here.
-
-       Measurement stays running.
-       This allows the Panel to remain available and avoids
-       tying the test lifecycle to CANalyzer Measurement Stop.
-
-       Logging stop will be integrated separately.
-    */
   }
 }
+
