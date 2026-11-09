@@ -1,30 +1,60 @@
 
 
 
+/* ============================================================
+   TWO CYCLE SHORT TEST
+
+   INITIAL:
+     OFF       2 SEC
+     STANDBY   2 SEC
+
+   CYCLE 1:
+     FLOAT     5 SEC
+       WAIT WITH ISOLATION CLOSED  1 SEC
+       ISOLATION OPEN             1 SEC
+       ISOLATION CLOSE            3 SEC
+     STANDBY   2 SEC
+
+   CYCLE 2:
+     FLOAT     5 SEC
+       WAIT WITH ISOLATION CLOSED  1 SEC
+       ISOLATION OPEN             1 SEC
+       ISOLATION CLOSE            3 SEC
+     STANDBY   2 SEC
+
+   FINAL:
+     OFF
+
+   TOTAL: 18 SECONDS
+
+   48V EPAS:
+     ISOLATION COMMAND SKIPPED
+   ============================================================ */
+
 on timer seqTimer
 {
   if(!testRunning)
     return;
 
-  /* INITIAL OFF -> STANDBY */
+  /* INITIAL STANDBY */
 
   if(step==0)
   {
     setMode(1);
     setIsolation(1);
 
-    write("INITIAL STANDBY - 2 SEC");
+    write("STARTUP - STANDBY - 2 SEC");
 
     step=1;
     setTimer(seqTimer,2000);
   }
 
-  /* CYCLE 1 - FLOAT START, ISOLATION CLOSED */
+  /* CYCLE 1 - FLOAT START */
 
   else if(step==1)
   {
-    @sysvar::TestMonitor::CurrentCycle=1;
-    cycleStartSec=elapsedSec;
+    @sysvar::TestMonitor::CurrentCycle = 1;
+    cycleStartSec = elapsedSec;
     updateMonitor();
 
     setMode(3);
@@ -55,7 +85,7 @@ on timer seqTimer
     setIsolation(1);
 
     write("CYCLE 1 - ISOLATION CLOSE");
-    write("FLOAT CONTINUES - 3 SEC");
+    write("CYCLE 1 - FLOAT CONTINUES - 3 SEC");
 
     step=4;
     setTimer(seqTimer,3000);
@@ -74,12 +104,12 @@ on timer seqTimer
     setTimer(seqTimer,2000);
   }
 
-  /* CYCLE 2 - FLOAT START, ISOLATION CLOSED */
+  /* CYCLE 2 - FLOAT START */
 
   else if(step==5)
   {
-    @sysvar::TestMonitor::CurrentCycle=2;
-    cycleStartSec=elapsedSec;
+    @sysvar::TestMonitor::CurrentCycle = 2;
+    cycleStartSec = elapsedSec;
     updateMonitor();
 
     setMode(3);
@@ -110,7 +140,7 @@ on timer seqTimer
     setIsolation(1);
 
     write("CYCLE 2 - ISOLATION CLOSE");
-    write("FLOAT CONTINUES - 3 SEC");
+    write("CYCLE 2 - FLOAT CONTINUES - 3 SEC");
 
     step=8;
     setTimer(seqTimer,3000);
@@ -129,13 +159,14 @@ on timer seqTimer
     setTimer(seqTimer,2000);
   }
 
-  /* FINAL OFF */
+  /* TEST COMPLETE */
 
   else if(step==9)
   {
     setMode(0);
     setIsolation(1);
 
+    /* Transmit final OFF command */
     send100();
 
     cancelTimer(t100);
@@ -150,10 +181,11 @@ on timer seqTimer
     elapsedSec=18;
     updateMonitor();
 
-    write("==================================");
-    write("2 CYCLES COMPLETED");
-    write("TOTAL TIME = 18 SECONDS");
-    write("FINAL OFF COMMAND SENT");
-    write("==================================");
+    write("==========================================");
+    write("2 CYCLE SHORT TEST COMPLETE");
+    write("TOTAL DURATION - 18 SECONDS");
+    write("FINAL OFF COMMAND TRANSMITTED");
+    write("MEASUREMENT REMAINS RUNNING");
+    write("==========================================");
   }
 }
