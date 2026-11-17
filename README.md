@@ -1,72 +1,131 @@
 
 
 
-void updateMonitor()
+on timer seqTimer
 {
-  long remaining;
-  long cycleElapsed;
-  long rh,rm,rs;
-  long th,tm,ts;
-  long ch,cm,cs;
+  if(!testRunning)
+    return;
 
-  char remainingText[32];
-  char totalText[32];
-  char cycleText[32];
-
-  /* TWO CYCLES - TOTAL 14 SECONDS */
-  remaining=14-elapsedSec;
-
-  if(remaining<0)
-    remaining=0;
-
-  cycleElapsed=0;
-
-  if(cycle>0)
+  /* MANUAL STOP */
+  if(step==10)
   {
-    cycleElapsed=elapsedSec-cycleStartSec;
+    setMode(0);
+    setIsolation(1);
+    send100();
 
-    if(cycleElapsed<0)
-      cycleElapsed=0;
+    write("MANUAL STOP - OFF");
 
-    if(cycleElapsed>6)
-      cycleElapsed=6;
+    testRunning=0;
+    finalStopPending=1;
+    step=0;
+
+    cancelTimer(t500);
+    cancelTimer(t1000);
+    cancelTimer(monitorTimer);
+
+    setTimer(stopTimer,500);
+    return;
   }
 
-  rh=remaining/3600;
-  rm=(remaining%3600)/60;
-  rs=remaining%60;
+  /* INITIAL OFF -> STANDBY */
+  if(step==0)
+  {
+    setMode(1);
+    setIsolation(1);
 
-  th=elapsedSec/3600;
-  tm=(elapsedSec%3600)/60;
-  ts=elapsedSec%60;
+    write("INITIAL STANDBY - 1 SECOND");
 
-  ch=cycleElapsed/3600;
-  cm=(cycleElapsed%3600)/60;
-  cs=cycleElapsed%60;
+    step=1;
+    setTimer(seqTimer,1000);
+  }
 
-  snprintf(remainingText,elcount(remainingText),
-           "%02d:%02d:%02d",rh,rm,rs);
+  /* INITIAL STANDBY -> FLOAT CYCLE 1 */
+  else if(step==1)
+  {
+    cycle=1;
+    cycleStartSec=elapsedSec;
 
-  snprintf(totalText,elcount(totalText),
-           "%02d:%02d:%02d",th,tm,ts);
+    setMode(3);
+    setIsolation(1);
 
-  snprintf(cycleText,elcount(cycleText),
-           "%02d:%02d:%02d",ch,cm,cs);
+    write("CYCLE 1 FLOAT START");
 
-  @sysvar::TestMonitor::CurrentCycle=cycle;
-  @sysvar::TestMonitor::TotalElapsedSec=elapsedSec;
-  @sysvar::TestMonitor::RemainingSec=remaining;
-  @sysvar::TestMonitor::CycleElapsedSec=cycleElapsed;
+    step=2;
+    setTimer(seqTimer,1000);
+  }
 
-  sysSetVariableString(
-    sysvar::TestMonitor::RemainingTime,
-    remainingText);
+  /* FLOAT - ISOLATION OPEN */
+  else if(step==2)
+  {
+    setIsolation(0);
 
-  sysSetVariableString(
-    sysvar::TestMonitor::TotalElapsedTime,
-    totalText);
+    write("CYCLE %d - ISOLATION OPEN",cycle);
 
-  sysSetVariableString(
-    sysvar::TestMonitor::CycleElapsedTime,
-    cycleText);
+    step=3;
+    setTimer(seqTimer,1000);
+  }
+
+  /* FLOAT - ISOLATION CLOSED */
+  else if(step==3)
+  {
+    setIsolation(1);
+
+    write("CYCLE %d - ISOLATION CLOSED",cycle);
+
+    step=4;
+    setTimer(seqTimer,3000);
+  }
+
+  /* FLOAT COMPLETE -> STANDBY */
+  else if(step==4)
+  {
+    setMode(1);
+    setIsolation(1);
+
+    write("CYCLE %d FLOAT COMPLETE",cycle);
+    write("STANDBY - 1 SECOND");
+
+    step=5;
+    setTimer(seqTimer,1000);
+  }
+
+  /* NEXT CYCLE OR FINAL OFF */
+  else if(step==5)
+  {
+    if(cycle<2)
+    {
+      cycle++;
+      cycleStartSec=elapsedSec;
+
+      setMode(3);
+      setIsolation(1);
+
+      write("CYCLE %d FLOAT START",cycle);
+
+      step=2;
+      setTimer(seqTimer,1000);
+    }
+    else
+    {
+      setMode(0);
+      setIsolation(1);
+      send100();
+
+      write("TWO CYCLES COMPLETE");
+      write("FINAL OFF - 500 MS");
+
+      elapsedSec=14;
+      updateMonitor();
+
+      testRunning=0;
+      finalStopPending=1;
+      step=0;
+
+      cancelTimer(t500);
+      cancelTimer(t1000);
+      cancelTimer(monitorTimer);
+
+      setTimer(stopTimer,500);
+    }
+  }
 }
